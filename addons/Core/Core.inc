@@ -208,7 +208,7 @@ class ComicPressAddonCore extends ComicPressAddon {
 		}
 
 		if (strpos($pagenow, "media-upload") === 0) {
-			wp_enqueue_script('cp-media', get_stylesheet_directory_uri() . '/js/MediaUpload.js', array('jquery'));
+			wp_enqueue_script('cp-media', get_stylesheet_directory_uri() . '/js/MediaUpload.js', array('prototype'));
 		}
 	}
   
