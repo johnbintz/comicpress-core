@@ -204,7 +204,7 @@ class ComicPressAddonCore extends ComicPressAddon {
 		
 		if ($plugin_page == 'comicpress/render_admin') {
 			wp_enqueue_style('cp-admin', get_stylesheet_directory_uri() . '/css/cp-admin.css');
-			wp_enqueue_script('cp-admin', get_stylesheet_directory_uri() . '/js/Storyline.js', array('jquery', 'jquery-ui-sortable'));
+			wp_enqueue_script('cp-admin', get_stylesheet_directory_uri() . '/js/Storyline.js', array('prototype', 'scriptaculous'));
 		}
 
 		if (strpos($pagenow, "media-upload") === 0) {
@@ -315,7 +315,7 @@ class ComicPressAddonCore extends ComicPressAddon {
 	function _render_admin_storyline_tree($node, $parent_id = "0") {
 	  foreach ($node as $category_id => $children) {
 			$category = get_category($category_id);
-			echo '<div class="cp-category-info category-' . $parent_id . '/' . $category_id . '">';
+			echo '<div id="category_' . $parent_id . '/' . $category_id . '" class="cp-category-info">';
 				echo '<span>' . $category->name . '</span>';
 				if (is_array($children)) {
 					echo '<div class="cp-children">';
