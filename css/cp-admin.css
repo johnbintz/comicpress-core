@@ -2,16 +2,30 @@
   padding-left: 20px
 }
 
-.ui-draggable {
-	border: solid black 1px;
-	background-color: #ddd
-}
-
 .cp-category-info span {
 	cursor: move;
 	color: #004
 }
 
-.placeholder {
-  border: dashed #ddd 2px
+#ordering-zoom-slider-holder {
+  width: 30px;
+}
+
+#ordering-zoom-slider {
+  height: 150px;
+  width: 6px;
+  border: solid #ccc 1px;
+  background-color: #ddd;
+  position: relative;
+  margin-left: 12px
+}
+
+#ordering-zoom-handle {
+  height: 4px;
+  width: 16px;
+  border: solid #999 1px;
+  background-color: #aaa;
+  position: absolute;
+  cursor: move;
+  margin-left: -6px
 }
