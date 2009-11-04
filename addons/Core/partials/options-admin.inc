@@ -82,7 +82,6 @@
         <td>
           <?php
             foreach (array(
-              "show_partials_info" => __('Show partials info', 'comicpress'),
               "show_inline_comic_ordering" => __('Show inline comic ordering', 'comicpress')
             ) as $key => $label) { ?>
               <label>

@@ -106,7 +106,7 @@ class ComicPressAddonCore extends ComicPressAddon {
   function admin_menu() {
 		global $plugin_page, $pagenow, $post;
 
-    add_theme_page(__("ComicPress", 'comicpress'), __('ComicPress Core', 'comicpress'), 'edit_themes', 'comicpress/render_admin', array(&$this, 'render_admin'));
+    add_theme_page(__("ComicPress", 'comicpress'), __('ComicPress', 'comicpress'), 'edit_themes', 'comicpress/render_admin', array(&$this, 'render_admin'));
     
     if (strpos($pagenow, "post") === 0) {
       add_meta_box("comic-image-ordering", __("Comic Image Ordering", 'comicpress'), array(&$this, 'render_comic_image_ordering'), "post", "normal", "low");
