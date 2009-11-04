@@ -199,7 +199,7 @@ class ComicPressAddonCore extends ComicPressAddon {
     
     if (strpos($pagenow, "post") === 0) {
       add_meta_box("comic-image-ordering", __("Comic Image Ordering", 'comicpress'), array(&$this, 'render_comic_image_ordering'), "post", "normal", "low");
-      wp_enqueue_script('cp-ordering', get_stylesheet_directory_uri() . '/js/ComicImageOrdering.js', array('scriptaculous-slider'));
+      wp_enqueue_script('cp-ordering', get_stylesheet_directory_uri() . '/js/ComicImageOrdering.js', array('scriptaculous', 'scriptaculous-slider'));
       wp_enqueue_style('cp-admin', get_stylesheet_directory_uri() . '/css/cp-admin.css');
       add_action('admin_footer', array(&$this, 'admin_footer'));
     }
@@ -347,24 +347,35 @@ class ComicPressAddonCore extends ComicPressAddon {
   /**
    * Render the comic image ordering interface.
    */
-  function render_comic_image_ordering() {
-    if (isset($_REQUEST['post'])) {
-      $comic_post = new ComicPressComicPost(get_post($_REQUEST['post']));
-      $ordering = $comic_post->normalize_comic_image_ordering();
-      
-      if (is_array($ordering)) {
-        $nonce = wp_create_nonce('comicpress');
-        $zoom_level = 40;
-        $current_user = wp_get_current_user();
-        if (!empty($current_user)) {
-          $comicpress_meta = get_usermeta($current_user->ID, 'comicpress-settings');
-          if (is_array($comicpress_meta)) {
-            if (isset($comicpress_meta['zoom_level'])) {
-              $zoom_level = floor($comicpress_meta['zoom_level']);
-            }
+  function render_comic_image_ordering($is_ajax = false, $override_post = null) {
+    global $post_ID, $temp_ID;
+
+    $uploading_iframe_ID = (int) (0 == $post_ID ? $temp_ID : $post_ID);
+    if (is_numeric($override_post)) { $uploading_iframe_ID = $override_post; }
+    
+    $comic_post = new ComicPressComicPost(get_post($uploading_iframe_ID));
+    $ordering = $comic_post->normalize_comic_image_ordering();
+
+    if (is_array($ordering)) {
+      $nonce = wp_create_nonce('comicpress');
+      $zoom_level = 40;
+      $current_user = wp_get_current_user();
+      if (!empty($current_user)) {
+        $comicpress_meta = get_usermeta($current_user->ID, 'comicpress-settings');
+        if (is_array($comicpress_meta)) {
+          if (isset($comicpress_meta['zoom_level'])) {
+            $zoom_level = floor($comicpress_meta['zoom_level']);
           }
         }
+      }
 
+      // from wp-admin/includes/media.php O_o
+      $media_upload_iframe_src = "media-upload.php?post_id=$uploading_iframe_ID";
+      $image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src&amp;type=image&amp;TB_iframe=true");
+
+      if ($is_ajax === true) {
+        include(dirname(__FILE__) . '/partials/_comic-image-ordering-sorters.inc');
+      } else {
         include(dirname(__FILE__) . '/partials/_comic-image-ordering.inc');
       }
     }
@@ -437,7 +448,15 @@ class ComicPressAddonCore extends ComicPressAddon {
     return implode("\n", $output);
   }
 
-	/**
+  /**
+   * Update attachment information.
+   */
+  function handle_update_refresh_ordering($info) {
+    $this->render_comic_image_ordering(true, $info['post_id']);
+    exit(0);
+  }
+
+  /**
    * Update attachment information.
    */
   function handle_update_attachments() {
@@ -518,16 +537,22 @@ class ComicPressAddonCore extends ComicPressAddon {
       }
     }
   }
+
+  function _json_decode($string) {
+    if (function_exists('json_decode')) {
+      return json_decode($string);
+    } else {
+      require_once(ABSPATH."/wp-includes/js/tinymce/plugins/spellchecker/classes/utils/JSON.php");
+      $j = new Moxiecode_JSON();
+      return $j->decode($string);
+    } 
+  }
   
   function handle_update_comic_ordering() {
     if (is_numeric($_POST['post_ID'])) {
       if ($post = get_post($_POST['post_ID'])) {
         $comic_post = new ComicPressComicPost(&$post);
-        $comic_post->change_comic_image_ordering($_POST['cp']['ordering']);
-        
-        if (isset($this->comicpress->comicpress_options['helpers']['show_inline_comic_ordering']) && !is_admin()) {
-          $this->info(sprintf(__("Comic ordering for post #%s updated", 'comicpress'), $_POST['post_ID']));
-        }
+        $comic_post->change_comic_image_ordering($this->_json_decode(stripslashes($_POST['cp']['comic_order'])));
       }
     }
   }

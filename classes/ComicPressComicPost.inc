@@ -171,15 +171,19 @@ class ComicPressComicPost {
     if (!is_array($orderings)) { $orderings = array(); }
     
     $new_order = array();
-    
+
+    $requested_new_order = (array)$requested_new_order;
+
     foreach ($orderings as $type => $current_order) {
       $new_order[$type] = array();
       $sort_by_position = array();
-      foreach ($requested_new_order[$type] as $id => $position) {
+      $position = 0;
+      foreach ($requested_new_order[$type] as $id) {
         if (!isset($sort_by_position[$position])) {
           $sort_by_position[$position] = array(); 
         }
         $sort_by_position[$position][] = $id;
+        $position++;
       }
       ksort($sort_by_position);
       $requested_order = array();

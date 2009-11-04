@@ -9,9 +9,16 @@ function __comicpress_init() {
   if (current_user_can('edit_files')) {
     wp_cache_flush();
   }
-  
-  foreach (glob(dirname(__FILE__) . '/classes/*.inc') as $file) {
-    if (is_file($file)) { require_once($file); }
+
+  $classes_search = array(
+    '/classes/',
+    '/classes/backends/'
+  );
+
+  foreach ($classes_search as $path) {
+    foreach (glob(dirname(__FILE__) . $path . '*.inc') as $file) {
+      if (is_file($file)) { require_once($file); }
+    }
   }
 
   $comicpress = ComicPress::get_instance();

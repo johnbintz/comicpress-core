@@ -128,21 +128,21 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
       array(
         array('comic' => array(1,2,3)),
         array(
-          'comic' => array('1' => 3, '2' => 1, '3' => 2)
+          'comic' => array(2,3,1)
         ),
         array('comic' => array(2,3,1))
       ),
       array(
         array('comic' => array(1,2,3)),
         array(
-          'comic' => array('1' => 2, '2' => 2, '3' => 1)
+          'comic' => array(3,1,2)
         ),
         array('comic' => array(3,1,2))
       ),
       array(
         array('comic' => array(1,2,3)),
         array(
-          'comic' => array('1' => 1, '2' => 2)
+          'comic' => array(1,2)
         ),
         array('comic' => array(1,2,3))
       ),
@@ -151,6 +151,7 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
   
   /**
    * @dataProvider providerTestChangeComicImageOrdering
+   * @covers ComicPressComicPost::change_comic_image_ordering
    */
   function testChangeComicImageOrdering($current_ordering, $revised_ordering, $expected_result) {
     update_post_meta(1, 'comic_ordering', $current_ordering);

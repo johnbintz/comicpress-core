@@ -1,43 +1,35 @@
-<input type="hidden" name="cp[_nonce]" value="<?php echo $nonce ?>" />
-<div id="ordering-zoom-slider-holder">
-  <div id="ordering-zoom-slider">
-    <div id="ordering-zoom-handle"></div>
-  </div>
-</div>
-
-<div id="comic-ordering-holder">
-  <?php foreach ($ordering as $type => $attachment_ids) { ?>
-    <h3><?php echo $this->comic_image_types[$type] ?></h3>
-    <div id="comic-ordering-<?php echo $type ?>">
-      <?php foreach ($attachment_ids as $attachment_id) { ?>
-        <div class="cp-comic-attachment" id="attachment_<?php echo $attachment_id ?>">
-          <img src="<?php echo wp_get_attachment_url($attachment_id) ?>" border="0" height="<?php echo $zoom_level ?>" />
-        </div>
-      <?php } ?>
+<div style="overflow: hidden">
+  <input type="hidden" name="cp[_nonce]" value="<?php echo $nonce ?>" />
+  <input type="hidden" name="cp[action]" value="comic-ordering" />
+  <div id="ordering-zoom-slider-holder">
+    <div id="ordering-zoom-slider">
+      <div id="ordering-zoom-handle"></div>
     </div>
-  <?php } ?>
-</div>
+    <a href="#" id="ordering-refresh"></a>
+  </div>
 
-<script type="text/javascript">
-  (function() {
-    new Control.Slider('ordering-zoom-handle', 'ordering-zoom-slider', {
-      axis: 'vertical',
-      range: $R(40, 150),
-      sliderValue: <?php echo $zoom_level ?>,
-      onChange: function(v) {
-        new Ajax.Request(ComicPressAdmin.ajax_uri, {
+  <input type="hidden" name="cp[comic_order]" id="cp-comic-order" />
+  <div id="comic-ordering-holder">
+    <?php include('_comic-image-ordering-sorters.inc') ?>
+  </div>
+
+  <script type="text/javascript">
+    (function() {
+      $('ordering-refresh').observe('click', function(e) {
+        Event.stop(e);
+        new Ajax.Updater('comic-ordering-holder', ComicPressAdmin.ajax_uri, {
           method: 'post',
           parameters: {
             'cp[_nonce]': ComicPressAdmin.nonce,
-            'cp[action]': 'zoom-slider',
-            'cp[zoom_level]': v
+            'cp[action]': 'refresh-ordering',
+            'cp[post_id]': <?php echo $uploading_iframe_ID ?>
+          },
+          evalScripts: true,
+          onSuccess: function() {
+            new Effect.Highlight($('comic-ordering-holder'));
           }
         });
-      },
-      onSlide: function(v) {
-        v = Math.floor(v);
-        $$('#comic-ordering-holder img').each(function(i) { i.setAttribute('height', v); });
-      }
-    });
-  }());
-</script>
+      });
+    }())
+  </script>
+</div>

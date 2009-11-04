@@ -9,6 +9,10 @@
 
 #ordering-zoom-slider-holder {
   width: 30px;
+  float: left;
+  display: inline;
+  padding-top: 25px;
+  background: url(../images/system-search.png) top center no-repeat;
 }
 
 #ordering-zoom-slider {
@@ -28,4 +32,37 @@
   position: absolute;
   cursor: move;
   margin-left: -6px
+}
+
+#comic-ordering-holder {
+  margin-left: 35px;
+}
+
+#comic-ordering-holder img {
+  float: left;
+  display: inline;
+  margin-right: 5px;
+}
+
+.comic-attachment {
+  overflow: hidden
+}
+
+.comic-ordering {
+  overflow: hidden;
+  border: solid #ccc 1px;
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+.cp-comic-attachment {
+  cursor: move
+}
+
+#ordering-refresh {
+  background: url(../images/view-refresh.png) top left no-repeat;
+  width: 16px;
+  height: 16px;
+  display: block;
+  margin: 8px 0 0 8px;
 }
