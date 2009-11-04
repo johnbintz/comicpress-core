@@ -28,100 +28,12 @@ class ComicPressAddonCore extends ComicPressAddon {
       add_filter('comicpress_display_attached_images', array(&$this, 'comicpress_display_attached_images'), 10, 2);
     }
 
-    if (isset($this->comicpress->comicpress_options['helpers']['show_partials_info'])) {
-      wp_enqueue_script('prototype');
-      add_filter('comicpress_partial', array(&$this, 'show_inline_comicpress_partial_editor'), 20, 2);
-      add_action('wp_head', array(&$this, 'add_inline_comicpress_partial_edit_hooks'));
-      add_action('wp_footer', array(&$this, 'add_inline_comicpress_partial_holders'));
-    }
-
-    if (is_admin()) {
-      add_action('admin_head', array(&$this, 'add_edit_area'));
-    } else {
-      add_action('wp_head', array(&$this, 'add_edit_area'));
-    }
-    
-    $this->comic_image_types = array(  
+    $this->comic_image_types = array(
       'none'    => __('Not a comic', 'comicpress'),
       'comic'   => __('Comic', 'comicpress'),
       'rss'     => __('RSS', 'comicpress'),
       'archive' => __('Archive', 'comicpress')
     );
-  }
-
-  function add_edit_area() { ?>
-    <script type="text/javascript" src="<?php echo get_template_directory_uri() . str_replace(realpath(get_template_directory()), '', realpath(dirname(__FILE__) . '/edit_area/edit_area_full.js')) ?>"></script>
-  <?php }
-
-  function show_inline_comicpress_partial_editor($content, $target) {
-    $target = str_replace(get_template_directory() . DIRECTORY_SEPARATOR, '', $target);
-    $content = preg_replace('#(<div class="partial-helper">)([^\<]+)(</div>)#', '\1\2 | <a href="#" rel="edit-' . md5($target) . '">Edit</a>\3', $content);
-    return $content;
-  }
-
-  function add_inline_comicpress_partial_edit_hooks() { ?>
-    <style type="text/css">
-      .inline-partial-editor {
-        display: none;
-        background: white;
-        border: solid #333 1px;
-        padding: 5px;
-        z-index: 200
-      }
-    </style>
-    <script type="text/javascript">
-      Event.observe(window, 'load', function() {
-        $$('.partial-helper a').each(function(a) {
-          Event.observe(a, 'click', function(e) {
-            Event.stop(e);
-            var edit_form = $(a.rel);
-            if (edit_form) {
-              if (!edit_form.visible()) {
-                var holder = $(a.parentNode);
-                var holder_dim = holder.getDimensions();
-                edit_form.style.display = "block";
-                edit_form.style.position = "absolute";
-                edit_form.clonePosition(holder, { setWidth: false, setHeight: false, offsetTop: holder_dim['height'] });
-
-                editAreaLoader.init({
-                  id: "text-" + a.rel,
-                  syntax: "php",
-                  start_highlight: true
-                });
-              }
-            }
-          });
-        });
-      });
-    </script>
-  <?php }
-
-  function add_inline_comicpress_partial_holders() {
-    $nonce = wp_create_nonce('comicpress');
-
-    $valid_partials = array();
-    foreach (glob(get_template_directory() . DIRECTORY_SEPARATOR . 'partials' . DIRECTORY_SEPARATOR . '*.inc') as $partial) {
-      if (preg_match('#(partials.*)\.inc$#', $partial, $matches) > 0) {
-        $valid_partials[] = $matches[1];
-      }
-    }
-
-    foreach ($valid_partials as $key) {
-      if (isset($this->comicpress->comicpress_options['override_partials'][$key])) {
-        $partial_code = htmlentities($this->comicpress->comicpress_options['override_partials'][$key]);
-      } else {
-        $partial_code = htmlentities(file_get_contents(get_template_directory() . DIRECTORY_SEPARATOR . $key . '.inc'));
-      }
-
-      $hash = md5($key); ?>
-        <form id="edit-<?php echo $hash ?>" method="post" class="inline-partial-editor" style="display: none">
-          <input type="hidden" name="cp[_nonce]" value="<?php echo $nonce ?>" />
-          <textarea id="text-edit-<?php echo $hash ?>" name="cp[code]" cols="80" rows="15" wrap="off"><?php echo $partial_code ?></textarea>
-          <input type="hidden" name="cp[partial]" value="<?php echo $key ?>" /><br />
-          <input type="submit" class="button" name="cp[action]" value="<?php _e('Update partial', 'comicpress') ?>" />
-        </form>
-      <?php
-    }
   }
 
   function comicpress_attached_image($content, $attachment_id, $index) {
@@ -194,8 +106,7 @@ class ComicPressAddonCore extends ComicPressAddon {
   function admin_menu() {
 		global $plugin_page, $pagenow, $post;
 
-    add_theme_page(__("ComicPress Core", 'comicpress'), __('ComicPress Core', 'comicpress'), 'edit_themes', 'comicpress/render_admin', array(&$this, 'render_admin'));
-    add_theme_page(__("Edit Partials", 'comicpress'), __('Edit Partials', 'comicpress'), 'edit_themes', 'comicpress/edit_partials', array(&$this, 'render_edit_partials'));
+    add_theme_page(__("ComicPress", 'comicpress'), __('ComicPress Core', 'comicpress'), 'edit_themes', 'comicpress/render_admin', array(&$this, 'render_admin'));
     
     if (strpos($pagenow, "post") === 0) {
       add_meta_box("comic-image-ordering", __("Comic Image Ordering", 'comicpress'), array(&$this, 'render_comic_image_ordering'), "post", "normal", "low");
@@ -338,12 +249,6 @@ class ComicPressAddonCore extends ComicPressAddon {
 		}
 	}
   
-  function render_edit_partials() {
-    $nonce = wp_create_nonce('comicpress');
-
-    include(dirname(__FILE__) . '/partials/edit-partials.inc');
-  }
-
   /**
    * Render the comic image ordering interface.
    */
@@ -595,33 +500,6 @@ class ComicPressAddonCore extends ComicPressAddon {
       if (method_exists($this, $method)) {
         $this->{$method}($info);
       }
-    } else if (is_array($info['ordering'])) {
-      // comic ordering
-      
-			/*
-      if (isset($_POST['meta'])) {
-        $meta_key_to_ignore = false;
-        foreach ($_POST['meta'] as $meta_key => $params) {
-          foreach ($params as $type => $value) {
-            if ($type == "key" && $value == "comic_ordering") {
-              $meta_key_to_ignore = $meta_key; break;
-            }
-          }
-        }
-        
-        if ($meta_key_to_ignore !== false) {
-          unset($_POST['meta'][$meta_key_to_ignore]);
-        }
-      }
-      
-      $this->handle_update_comic_ordering($info);
-			*/
-    } else if (isset($info['partial'])) {
-      $this->handle_update_override_partial($info);
-      $this->info(sprintf(__("Partial %s updated.", 'comicpress'), $info['partial']));
-
-      $this->comicpress->save();
-      $this->comicpress->init();
     } else {
       //coming from us
       $this->handle_update_comicpress_options($info);

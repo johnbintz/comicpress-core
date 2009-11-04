@@ -106,19 +106,14 @@ function include_partial($partials = '') {
   
   $content = $target = null;
 
-  if (($result = $comicpress->get_options_partial($partials)) !== false) {
-    list($target, $code) = $result;
-    ob_start(); eval(' ?>' . $code . '<?php '); $content = ob_get_clean();
-  } else {
-    $target = $comicpress->get_partial_path($partials);
-    
-    if ($target !== false) {
-      ob_start(); include($target); $content = ob_get_clean();
-    }
+  $target = $comicpress->get_partial_path($partials);
 
-    $target = str_replace(".inc", "", $target);
+  if ($target !== false) {
+    ob_start(); include($target); $content = ob_get_clean();
   }
-  
+
+  $target = str_replace(".inc", "", $target);
+
   if (!empty($target) && !empty($content)) {
     echo apply_filters("comicpress_partial", $content, $target);
   }
