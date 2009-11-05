@@ -1,8 +1,6 @@
 <?php
 
-class ComicPressAddonBookmarkWidget extends ComicPressAddon {
-  var $name = "Bookmark Widget";
-
+class ComicPressAddonBookmarkWidget {
   function init($comicpress) {
     wp_register_sidebar_widget('comic-bookmark', __('Comic Bookmark', 'comicpress'), array(&$this, 'render_widget'), array('description' => __('Let your readers save their place via a cookie.', 'comicpress')));
 

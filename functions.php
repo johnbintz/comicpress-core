@@ -17,61 +17,22 @@ function __comicpress_init() {
 
   foreach ($classes_search as $path) {
     foreach (glob(dirname(__FILE__) . $path . '*.inc') as $file) {
-      if (is_file($file)) { require_once($file); }
+      if (is_file($file)) {
+        require_once($file);
+      }
     }
   }
 
   $comicpress = ComicPress::get_instance();
   $comicpress->init();
-  $addons = array();
-  
-  if (is_dir($addons_dir = (dirname(__FILE__) . '/addons'))) {
-    $entries = glob($addons_dir . '/*');
-    if (is_array($entries)) {
-      foreach ($entries as $entry) {
-        if (is_dir($entry)) {
-          $classname = basename($entry);
-          if (file_exists($entry . "/${classname}.inc")) {
-            require_once($entry . "/${classname}.inc");
-            $classname = "ComicPressAddon${classname}";
-            if (class_exists($classname)) {
-              $addon =& new $classname();
 
-              if (
-                $comicpress->comicpress_options['addons'][$addon->name] ||
-                $addon->is_addon_manager
-              ) {
-                $addon->init();
-                if (current_user_can('edit_posts')) {
-                  if (is_array($_REQUEST['cp'])) {
-                    if (isset($_REQUEST['cp']['_nonce'])) {
-                      if (wp_verify_nonce($_REQUEST['cp']['_nonce'], 'comicpress')) {
-                        if (method_exists($addon, 'handle_update')) {
-                          $addon->handle_update($_REQUEST['cp']);
-                          $comicpress->load();
-                        }
-                      }
-                    }
-                  }
-                  if (is_admin()) {
-                    add_action('admin_notices', array(&$addon, 'display_messages'));
-                  } else {
-                    add_action('wp_head', array(&$addon, 'display_messages'));
-                  }
-                }
-              }
-              $addons[] = $addon;
-            }
-          }
-        }
-      }
-    }
-  }
-  
-  foreach ($addons as $addon) {
-    if ($addon->is_addon_manager) { $addon->all_addons =& $addons; break; } 
-  }
-  
+  $comicpress_admin = new ComicPressAdmin();
+  $comicpress_admin->init();
+  $comicpress_admin->handle_update();
+
+  $comicpress_filters = new ComicPressFilters();
+  $comicpress_filters->init();
+
   $layouts = $comicpress->get_layout_choices();
   if (isset($layouts[$comicpress->comicpress_options['layout']])) {
     if (isset($layouts[$comicpress->comicpress_options['layout']]['Sidebars'])) {

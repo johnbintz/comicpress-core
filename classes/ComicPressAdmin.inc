@@ -1,10 +1,6 @@
 <?php
 
-class ComicPressAddonCore extends ComicPressAddon { 
-  var $is_addon_manager = true;
-  var $cannot_be_disabled = true;
-  var $name = "ComicPress Core";
-   
+class ComicPressAdmin {
   /**
    * Initialize the addon.
    * @param ComicPress $comicpress The master ComicPress object.
@@ -14,14 +10,6 @@ class ComicPressAddonCore extends ComicPressAddon {
 		
 		add_action('admin_menu', array(&$this, 'admin_menu'));
     add_filter('attachment_fields_to_edit', array(&$this, 'setup_comic_metadata_buttons'), 10, 2);
-    add_action('show_comic', array(&$this, 'show_comic'), 1, 1);
-    add_action('show_archive', array(&$this, 'show_archive'), 1, 1);
-    add_action('show_rss', array(&$this, 'show_rss'), 1, 1);
-    add_filter('the_content', array(&$this, 'insert_comic_feed'));
-
-    if (isset($_GET['randomcomic'])) {
-      add_action('template_redirect', array(&$this, 'go_to_random_comic'));
-    }
 
     if (current_user_can('edit_posts') && isset($comicpress->comicpress_options['helpers']['show_inline_comic_ordering'])) {
       add_filter('comicpress_attached_image', array(&$this, 'comicpress_attached_image'), 10, 3);
@@ -34,6 +22,12 @@ class ComicPressAddonCore extends ComicPressAddon {
       'rss'     => __('RSS', 'comicpress'),
       'archive' => __('Archive', 'comicpress')
     );
+
+    if (is_admin()) {
+      add_action('admin_notices', array(&$this, 'display_messages'));
+    } else {
+      add_action('wp_head', array(&$this, 'display_messages'));
+    }
   }
 
   function comicpress_attached_image($content, $attachment_id, $index) {
@@ -67,54 +61,20 @@ class ComicPressAddonCore extends ComicPressAddon {
   }
 
   /**
-   * Callback to send the reader to a random comic.
-   */
-  function go_to_random_comic() {
-    $random_comic_query = new WP_Query();
-    $random_comic_query->query('showposts=1&orderby=rand&cat=' . $this->comicpress->get_all_comic_categories_as_cat_string());
-    while ($random_comic_query->have_posts()) {
-      $random_comic_query->the_post();
-      $random_comic_id = get_the_ID();
-      break;
-    }
-    if (!empty($random_comic_id)) {
-      wp_redirect(get_permalink( $random_comic_id ));
-    }
-  }
-
-  /**
-   * Markup to insert a comic into the comic feed.
-   */
-  function comic_feed() { ?>
-    <p><a href="<?php the_permalink() ?>"><?php do_action('show_rss') ?></a></p><?php
-  }
-
-  /**
-   * Filter to insert the comic into the RSS feed.
-   */
-  function insert_comic_feed($content) {
-    if (is_feed() && in_comic_category()) {
-      return $this->comic_feed() . $content;
-    } else {
-      return $content;
-    }
-  }
-
-  /**
    * Set up the admin interface and meta boxes.
    */
   function admin_menu() {
 		global $plugin_page, $pagenow, $post;
 
     add_theme_page(__("ComicPress", 'comicpress'), __('ComicPress', 'comicpress'), 'edit_themes', 'comicpress/render_admin', array(&$this, 'render_admin'));
-    
+
     if (strpos($pagenow, "post") === 0) {
       add_meta_box("comic-image-ordering", __("Comic Image Ordering", 'comicpress'), array(&$this, 'render_comic_image_ordering'), "post", "normal", "low");
       wp_enqueue_script('cp-ordering', get_stylesheet_directory_uri() . '/js/ComicImageOrdering.js', array('scriptaculous', 'scriptaculous-slider'));
       wp_enqueue_style('cp-admin', get_stylesheet_directory_uri() . '/css/cp-admin.css');
       add_action('admin_footer', array(&$this, 'admin_footer'));
     }
-		
+
 		if ($plugin_page == 'comicpress/render_admin') {
 			wp_enqueue_style('cp-admin', get_stylesheet_directory_uri() . '/css/cp-admin.css');
 			wp_enqueue_script('cp-admin', get_stylesheet_directory_uri() . '/js/Storyline.js', array('prototype', 'scriptaculous'));
@@ -134,50 +94,6 @@ class ComicPressAddonCore extends ComicPressAddon {
       }
     </script>
   <?php }
-  
-  /**
-   * Show comic media.
-   * @param object $override_post If not nul;, the post to use instead of the current Loop post.
-   * @param string $method The method to call on the comic post.
-   */
-  function show_media($override_post, $method, $format) {
-    global $post;
-    $post_to_use = $post;
-    
-    switch ($this->comicpress->comicpress_options['comic_space']) {
-      case "comic_only":
-        $comic_post = new ComicPressComicPost($post_to_use, &$this->comicpress);
-        $comic_post->{$method}($format);
-        break;
-      case "post_content":
-        $t = $post;
-        $post = $post_to_use;
-        include_partial('index-blog-post');
-        $post = $t;
-        break;
-    }
-  }
-  
-  /**
-   * Show a comic.
-   */
-  function show_comic($override_post = null, $format = "%s<br />") {
-    $this->show_media($override_post, "display_comics", $format);
-  }
-  
-  /**
-   * Show an archive comic.
-   */
-  function show_archive($override_post = null, $format = "%s<br />") {
-    $this->show_media($override_post, "display_archive", $format);
-  }
-  
-  /**
-   * Show an RSS comic.
-   */
-  function show_rss($override_post = null, $format = "%s<br />") {
-    $this->show_media($override_post, "display_rss", $format);
-  }
 
   /**
    * Modify the Media Gallery for ComicPress use.
@@ -491,24 +407,33 @@ class ComicPressAddonCore extends ComicPressAddon {
   /**
    * Handle an update.
    */
-  function handle_update($info) {
-    if (isset($_POST['attachments'])) {
-      //coming from media editor
-      $this->handle_update_attachments();
-    } else if (isset($info['action'])) {
-      $method = 'handle_update_' . strtolower(str_replace('-', '_', $info['action']));
-      if (method_exists($this, $method)) {
-        $this->{$method}($info);
+  function handle_update() {
+    if (is_array($_REQUEST['cp'])) {
+      if (isset($_REQUEST['cp']['_nonce'])) {
+        if (wp_verify_nonce($_REQUEST['cp']['_nonce'], 'comicpress')) {
+          if (isset($_POST['attachments'])) {
+            //coming from media editor
+            $this->handle_update_attachments();
+          } else if (isset($_REQUEST['cp']['action'])) {
+            $method = 'handle_update_' . strtolower(str_replace('-', '_', $_REQUEST['cp']['action']));
+            if (method_exists($this, $method)) {
+              $this->{$method}($_REQUEST['cp']);
+            }
+          } else {
+            //coming from us
+            // clean this up O_o
+            $this->handle_update_comicpress_options($_REQUEST['cp']);
+
+            $this->comicpress->save();
+
+            $this->info(__("ComicPress configuration updated.", 'comicpress'));
+
+            $this->comicpress->init();
+          }
+
+          $this->comicpress->load();
+        }
       }
-    } else {
-      //coming from us
-      $this->handle_update_comicpress_options($info);
-      
-      $this->comicpress->save();
-      
-      $this->info(__("ComicPress configuration updated.", 'comicpress'));
-      
-      $this->comicpress->init();
     }
   }
   
@@ -521,6 +446,28 @@ class ComicPressAddonCore extends ComicPressAddon {
       $output[] = '<option value="' . $layout_filename . '"' . (($layout_filename == $current_layout) ? ' selected="selected"' : '') . '>' . $info['Layout Name'] . '</option>';
     }
     return implode("\n", $output);
+  }
+
+  var $messages = array(
+    'info' => array(),
+    'warn' => array(),
+    'error' => array()
+  );
+
+  function info($message) { $this->messages['info'][] = $message; }
+  function warn($message) { $this->messages['warn'][] = $message; }
+  function error($message) { $this->messages['error'][] = $message; }
+
+  function display_messages() {
+    foreach ($this->messages as $type => $messages) {
+      if (!empty($messages)) {
+        echo '<div class="updated fade cp-' . $type . '">';
+          foreach ($messages as $message) {
+            echo '<p>' . $message . '</p>';
+          }
+        echo '</div>';
+      }
+    }
   }
 }
 
