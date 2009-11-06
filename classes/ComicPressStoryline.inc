@@ -4,7 +4,7 @@ require_once('ComicPress.inc');
 require_once('ComicPressDBInterface.inc');
 
 class ComicPressStoryline {
-  var $_structure, $root_category;
+  var $_structure;
   var $_category_search;
 
 	function read_from_options() {
@@ -52,64 +52,76 @@ class ComicPressStoryline {
    * @return boolean True if the structure was valid.
    */
   function create_structure($structure) {
-		$new_structure = array();
-    $parent   = null;
-    $all_leaves = array();
-    $this->root_category = false;
-
-    $adjacents_by_parent = array();
-
-		if (is_string($structure)) {
-			$structure = explode(',', $structure);
-		}
-
-    if (is_array($structure)) {
-      $is_valid = true;
-      foreach ($structure as $branch) {
-        if (is_string($branch)) {
-          $parts = explode('/', $branch);
-          $valid = false;
-          if (count($parts) > 1) {
-            if ($parts[0] == '0') { $valid = true; }
-          }
-          if (!$valid) {
-            $is_valid = false; break;
-          } else {
-            $data = array();
-            $leaf = end($parts);
-            $all_leaves[] = $leaf;
-
-            $data['level'] = count($parts) - 1;
-
-            if (count($parts) > 2) {
-              $parent = $parts[count($parts) - 2];
-
-              if (!isset($adjacents_by_parent[$parent])) {
-                $adjacents_by_parent[$parent] = array();
-              }
-              $adjacents_by_parent[$parent][] = $leaf;
-
-              $data['parent'] = $parent;
-            } else {
-              $this->root_category = $leaf;
-            }
-
-            $new_structure[$leaf] = $data;
-          }
-        } else {
-          $is_valid = false; break;
-        }
+    $key = null;
+    if (is_string($structure)) {
+      $key = $structure;
+      $structure = explode(',', $structure);
+    } else {
+      if (is_array($structure)) {
+        $key = implode(',', $structure);
       }
-      if ($is_valid) {
-        for ($i = 0; $i < count($all_leaves); ++$i) {
-          foreach (array('previous' => -1, 'next' => 1) as $type => $dir) {
-            if (isset($all_leaves[$i + $dir])) {
-              $new_structure[$all_leaves[$i]][$type] = $all_leaves[$i + $dir];
+    }
+
+    if (!is_null($key)) {
+      $key = "storyline-structure-${key}";
+
+      if (($result = wp_cache_get($key, 'comicpress')) !== false) {
+        $this->_structure = $result;
+      } else {
+        $new_structure = array();
+        $parent   = null;
+        $all_leaves = array();
+
+        $adjacents_by_parent = array();
+
+        if (is_array($structure)) {
+          $is_valid = true;
+          foreach ($structure as $branch) {
+            if (is_string($branch)) {
+              $parts = explode('/', $branch);
+              $valid = false;
+              if (count($parts) > 1) {
+                if ($parts[0] == '0') { $valid = true; }
+              }
+              if (!$valid) {
+                $is_valid = false; break;
+              } else {
+                $data = array();
+                $leaf = end($parts);
+                $all_leaves[] = $leaf;
+
+                $data['level'] = count($parts) - 1;
+
+                if (count($parts) > 2) {
+                  $parent = $parts[count($parts) - 2];
+
+                  if (!isset($adjacents_by_parent[$parent])) {
+                    $adjacents_by_parent[$parent] = array();
+                  }
+                  $adjacents_by_parent[$parent][] = $leaf;
+
+                  $data['parent'] = $parent;
+                }
+
+                $new_structure[$leaf] = $data;
+              }
+            } else {
+              $is_valid = false; break;
             }
           }
-        }
+          if ($is_valid) {
+            for ($i = 0; $i < count($all_leaves); ++$i) {
+              foreach (array('previous' => -1, 'next' => 1) as $type => $dir) {
+                if (isset($all_leaves[$i + $dir])) {
+                  $new_structure[$all_leaves[$i]][$type] = $all_leaves[$i + $dir];
+                }
+              }
+            }
 
-        $this->_structure = $new_structure;
+            $this->_structure = $new_structure;
+          }
+        }
+        wp_cache_set($key, $this->_structure, 'comicpress');
       }
     }
     return is_array($this->_structure);

@@ -35,13 +35,11 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
       ),
       array(
         array('0/1'),
-        array('1' => array('level' => 1)),
-        1
+        array('1' => array('level' => 1))
       ),
       array(
         array('0/1', '0/1/2'),
-        array('1' => array('next' => 2, 'level' => 1), '2' => array('parent' => 1, 'previous' => 1, 'level' => 2)),
-        1
+        array('1' => array('next' => 2, 'level' => 1), '2' => array('parent' => 1, 'previous' => 1, 'level' => 2))
       ),
       array(
         array('0/1', '0/1/2', '0/1/3'),
@@ -49,8 +47,7 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
           '1' => array('next' => 2, 'level' => 1),
           '2' => array('parent' => 1, 'previous' => 1, 'next' => 3, 'level' => 2),
           '3' => array('parent' => 1, 'previous' => 2, 'level' => 2),
-        ),
-        1
+        )
       ),
       array(
         array('0/1', '0/1/2', '0/1/2/3', '0/1/2/4', '0/1/5'),
@@ -60,8 +57,7 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
           '3' => array('parent' => 2, 'next' => 4, 'previous' => 2, 'level' => 3),
           '4' => array('parent' => 2, 'next' => 5, 'previous' => 3, 'level' => 3),
           '5' => array('parent' => 1, 'previous' => 4, 'level' => 2),
-        ),
-        1
+        )
       ),
       array(
         array('0/1', '0/1/2', '0/1/2/3', '0/1/2/4', '0/1/5', '0/1/5/6', '0/1/5/7', '0/1/5/8', '0/1/9'),
@@ -75,19 +71,38 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
           '7' => array('parent' => 5, 'next' => 8, 'previous' => 6, 'level' => 3),
           '8' => array('parent' => 5, 'next' => 9, 'previous' => 7, 'level' => 3),
           '9' => array('parent' => 1, 'previous' => 8, 'level' => 2),
-        ),
-        1
+        )
       ),
     );
   }
 
   /**
    * @dataProvider providerTestCreateStorylineStructure
+   * @group nocache
    */
-  function testCreateStorylineStructure($input, $expected_structure, $expected_root_category) {
+  function testCreateStorylineStructure($input, $expected_structure) {
+    global $wp_object_cache;
+    $this->assertTrue(empty($wp_object_cache->cache['comicpress']));
+    
     $this->assertEquals(is_array($expected_structure), $this->css->create_structure($input));
     $this->assertEquals($expected_structure, $this->css->_structure);
-    $this->assertEquals($expected_root_category, $this->css->root_category);
+
+    if ($expected_structure !== false) {
+      $this->assertTrue(!empty($wp_object_cache->cache['comicpress']));
+    }
+  }
+
+  /**
+   * @dataProvider providerTestCreateStorylineStructure
+   * @group cache
+   */
+  function testCreateStorylineStructureFromCache($input, $expected_structure) {
+    if (is_string($input)) {
+      wp_cache_set("storyline-structure-${input}", $expected_structure, 'comicpress');
+    }
+
+    $this->assertEquals(is_array($expected_structure), $this->css->create_structure($input));
+    $this->assertEquals($expected_structure, $this->css->_structure);
   }
   
   function providerTestGetFields() {

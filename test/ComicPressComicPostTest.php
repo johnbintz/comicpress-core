@@ -161,6 +161,10 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
     
     $this->assertEquals($expected_result, get_post_meta(1, 'comic_ordering', true));
   }
+
+  function testFindParents() {
+    
+  }
 }
 
 ?>

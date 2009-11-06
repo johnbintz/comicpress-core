@@ -17,7 +17,6 @@ class ComicPressNavigationTest extends PHPUnit_Framework_TestCase {
     $dbi = $this->getMock('ComicPressDBInterface', array('get_previous_comic', 'get_next_comic', 'get_first_comic', 'get_last_comic'));
     $storyline = new ComicPressStoryline();
 
-    $storyline->root_category = 1;
     $storyline->_structure = array(
       '1' => array('next' => 2),
       '2' => array('previous' => 1, 'next' => 3),

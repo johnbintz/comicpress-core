@@ -203,6 +203,13 @@ class ComicPressComicPost {
     
     update_post_meta($this->post->ID, 'comic_ordering', $new_order);
   }
+
+  function get_parent_categories() {
+    $parents = wp_get_post_categories($this->post->ID);
+    do {
+      $parents
+    } while ($parents_found);
+  }
 }
 
 ?>
