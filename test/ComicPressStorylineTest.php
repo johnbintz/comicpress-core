@@ -393,6 +393,11 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals(array(5, 6), $css->_category_search);
   }
 
+  function testEndSearch() {
+    $this->css->_category_search = array(1,2,3);
+    $this->assertEquals(array(1,2,3), $this->css->end_search());
+    $this->assertEquals(array(), $this->css->_category_search);
+  }
 }
 
 ?>

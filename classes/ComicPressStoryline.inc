@@ -413,6 +413,12 @@ class ComicPressStoryline {
     sort($this->_category_search);
     return $this;
   }
+
+  function end_search() {
+    $result = $this->_category_search;
+    $this->_category_search = array();
+    return $result;
+  }
 }
 
 ?>
