@@ -9,18 +9,27 @@ class ComicPressStoryline {
 	function read_from_options() {
 		$this->create_structure($this->get_flattened_storyline());
 	}
-	
+
+  /**
+   * Get the flattened storyline from options.
+   */
 	function get_flattened_storyline() {
 		$comicpress = &ComicPress::get_instance();
 	  return $comicpress->comicpress_options['storyline_order'];
 	}
 
+  /**
+   * Set the global storyline as a flattened storyline.
+   */
 	function set_flattened_storyline($storyline) {
 		$comicpress = &ComicPress::get_instance();
 		$comicpress->comicpress_options['storyline_order'] = $storyline;
 		$comicpress->save();
 	}
 
+  /**
+   * Set the order from a flattened storyline.
+   */
 	function set_order_via_flattened_storyline($order) {
 		$nodes = explode(',', $order);
 		$original_nodes = explode(',', $this->get_flattened_storyline());
@@ -150,10 +159,17 @@ class ComicPressStoryline {
     return $result;
   }
 
+  /**
+   * Get all comic categories.
+   * @deprecated
+   */
 	function get_comic_categories() {
 		return array_keys($this->_structure);
 	}
-	
+
+  /**
+   * Get a simple storyline.
+   */
 	function get_simple_storyline() {
 	  $simple_storyline = array('0' => array());
 		foreach ($this->_structure as $category_id => $adjacents) {
@@ -168,6 +184,9 @@ class ComicPressStoryline {
 		return $this->_merge_simple_storyline($simple_storyline);
 	}
 
+  /**
+   * Get a simple structure.
+   */
 	function get_category_simple_structure($parent = null) {
 		$structure = array();
 		foreach (get_all_category_ids() as $category_id) {
@@ -187,11 +206,17 @@ class ComicPressStoryline {
     }
 		return $structure;
 	}
-	
+
+  /**
+   * Get a flattened category node list.
+   */
 	function get_category_flattened($parent = null) {
 		return $this->flatten_simple_storyline($this->get_category_simple_structure($parent));
 	}
 
+  /**
+   * Merge a flat simple storyline into a tree.
+   */
 	function _merge_simple_storyline($simple_storyline) {
 		while (count($simple_storyline) > 0) {
 			$merge_found = false;
@@ -240,6 +265,9 @@ class ComicPressStoryline {
 		return $result;
 	}
 
+  /**
+   * Sort nodes by node count.
+   */
 	function _length_sort($parts) {
 		$new = array();
 		foreach ($parts as $part) {
@@ -257,6 +285,9 @@ class ComicPressStoryline {
 		return $output;
 	}
 
+  /**
+   * Normalize a flattened storyline, inserting and removing categories from the list is necessary.
+   */
 	function normalize_flattened_storyline($storyline, $comic_categories) {
 		$storyline_nodes = explode(",", $storyline);
 		$category_nodes  = explode(",", $comic_categories);
@@ -294,11 +325,17 @@ class ComicPressStoryline {
 		
 		return implode(',', $storyline_nodes);
 	}
-	
+
+  /**
+   * Flatten a simple storyline.
+   */
 	function flatten_simple_storyline($storyline) {
 		return implode(',', $this->_follow_simple_storyline($storyline));
 	}
-	
+
+  /**
+   * Follow the nodes of a simple storyline, creating a node list.
+   */
 	function _follow_simple_storyline($storyline, $parent = null) {
 		$output = array();
 		foreach ($storyline as $key => $children) {
