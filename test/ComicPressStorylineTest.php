@@ -35,46 +35,46 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
       ),
       array(
         array('0/1'),
-        array('1' => array()),
+        array('1' => array('level' => 1)),
         1
       ),
       array(
         array('0/1', '0/1/2'),
-        array('1' => array('next' => 2), '2' => array('parent' => 1, 'previous' => 1)),
+        array('1' => array('next' => 2, 'level' => 1), '2' => array('parent' => 1, 'previous' => 1, 'level' => 2)),
         1
       ),
       array(
         array('0/1', '0/1/2', '0/1/3'),
         array(
-          '1' => array('next' => 2),
-          '2' => array('parent' => 1, 'previous' => 1, 'next' => 3),
-          '3' => array('parent' => 1, 'previous' => 2),
+          '1' => array('next' => 2, 'level' => 1),
+          '2' => array('parent' => 1, 'previous' => 1, 'next' => 3, 'level' => 2),
+          '3' => array('parent' => 1, 'previous' => 2, 'level' => 2),
         ),
         1
       ),
       array(
         array('0/1', '0/1/2', '0/1/2/3', '0/1/2/4', '0/1/5'),
         array(
-          '1' => array('next' => 2),
-          '2' => array('parent' => 1, 'next' => 3, 'previous' => 1),
-          '3' => array('parent' => 2, 'next' => 4, 'previous' => 2),
-          '4' => array('parent' => 2, 'next' => 5, 'previous' => 3),
-          '5' => array('parent' => 1, 'previous' => 4),
+          '1' => array('next' => 2, 'level' => 1),
+          '2' => array('parent' => 1, 'next' => 3, 'previous' => 1, 'level' => 2),
+          '3' => array('parent' => 2, 'next' => 4, 'previous' => 2, 'level' => 3),
+          '4' => array('parent' => 2, 'next' => 5, 'previous' => 3, 'level' => 3),
+          '5' => array('parent' => 1, 'previous' => 4, 'level' => 2),
         ),
         1
       ),
       array(
         array('0/1', '0/1/2', '0/1/2/3', '0/1/2/4', '0/1/5', '0/1/5/6', '0/1/5/7', '0/1/5/8', '0/1/9'),
         array(
-          '1' => array('next' => 2),
-          '2' => array('parent' => 1, 'next' => 3, 'previous' => 1),
-          '3' => array('parent' => 2, 'next' => 4, 'previous' => 2),
-          '4' => array('parent' => 2, 'next' => 5, 'previous' => 3),
-          '5' => array('parent' => 1, 'next' => 6, 'previous' => 4),
-          '6' => array('parent' => 5, 'next' => 7, 'previous' => 5),
-          '7' => array('parent' => 5, 'next' => 8, 'previous' => 6),
-          '8' => array('parent' => 5, 'next' => 9, 'previous' => 7),
-          '9' => array('parent' => 1, 'previous' => 8),
+          '1' => array('next' => 2, 'level' => 1),
+          '2' => array('parent' => 1, 'next' => 3, 'previous' => 1, 'level' => 2),
+          '3' => array('parent' => 2, 'next' => 4, 'previous' => 2, 'level' => 3),
+          '4' => array('parent' => 2, 'next' => 5, 'previous' => 3, 'level' => 3),
+          '5' => array('parent' => 1, 'next' => 6, 'previous' => 4, 'level' => 2),
+          '6' => array('parent' => 5, 'next' => 7, 'previous' => 5, 'level' => 3),
+          '7' => array('parent' => 5, 'next' => 8, 'previous' => 6, 'level' => 3),
+          '8' => array('parent' => 5, 'next' => 9, 'previous' => 7, 'level' => 3),
+          '9' => array('parent' => 1, 'previous' => 8, 'level' => 2),
         ),
         1
       ),
@@ -311,6 +311,88 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 		
 		$this->assertEquals($expected_result, $this->css->_length_sort($data));
 	}
+
+  function testIncludeAll() {
+    $this->css->_structure = array(
+      '1' => array('next' => 2),
+      '2' => array('parent' => 1, 'previous' => 1, 'next' => 3),
+      '3' => array('parent' => 2, 'next' => 4, 'previous' => 2),
+      '4' => array('parent' => 2, 'previous' => 3)
+    );
+    
+    $this->assertEquals($this->css, $this->css->include_all());
+    $this->assertEquals(array(1,2,3,4), $this->css->_category_search);
+  }
+
+  function testExcludeAll() {
+    $this->css->_category_search = array(1,2,3,4);
+    
+    $this->assertEquals($this->css, $this->css->exclude_all());
+    $this->assertEquals(array(), $this->css->_category_search);
+  }
+
+  function testFindChildren() {
+    $this->css->_structure = array(
+      '1' => array('next' => 2),
+      '2' => array('parent' => 1, 'previous' => 1, 'next' => 3),
+      '3' => array('parent' => 2, 'next' => 4, 'previous' => 2),
+      '4' => array('parent' => 2, 'previous' => 3)
+    );
+
+    $this->assertEquals(array(2,3,4), $this->css->_find_children(2));
+  }
+
+  function testIncludeChildren() {
+    $css = $this->getMock('ComicPressStoryline', array('_find_children'));
+    $css->expects($this->once())->method('_find_children')->will($this->returnValue(array(2,3,4)));
+    $css->_category_search = array(4,5);
+
+    $css->include_children(2);
+
+    $this->assertEquals(array(2,3,4,5), $css->_category_search);
+  }
+
+  function testExcludeChildren() {
+    $css = $this->getMock('ComicPressStoryline', array('_find_children'));
+    $css->expects($this->once())->method('_find_children')->will($this->returnValue(array(2,3,4)));
+    $css->_category_search = array(4, 5, 6);
+
+    $css->exclude_children(2);
+
+    $this->assertEquals(array(5, 6), $css->_category_search);
+  }
+
+  function testFindLevelOrAbove() {
+    $this->css->_structure = array(
+      '1' => array('next' => 2, 'level' => 1),
+      '2' => array('parent' => 1, 'previous' => 1, 'next' => 3, 'level' => 2),
+      '3' => array('parent' => 2, 'next' => 4, 'previous' => 2, 'level' => 3),
+      '4' => array('parent' => 2, 'previous' => 3, 'level' => 3)
+    );
+
+    $this->assertEquals(array(1, 2), $this->css->_find_level_or_above(2));
+  }
+
+  function testIncludeLevelOrAbove() {
+    $css = $this->getMock('ComicPressStoryline', array('_find_level_or_above'));
+    $css->expects($this->once())->method('_find_level_or_above')->will($this->returnValue(array(2,3,4)));
+    $css->_category_search = array(4,5);
+
+    $css->include_level_or_above(2);
+
+    $this->assertEquals(array(2,3,4,5), $css->_category_search);
+  }
+
+  function testExcludeLevelOrAbove() {
+    $css = $this->getMock('ComicPressStoryline', array('_find_level_or_above'));
+    $css->expects($this->once())->method('_find_level_or_above')->will($this->returnValue(array(2,3,4)));
+    $css->_category_search = array(4, 5, 6);
+
+    $css->exclude_level_or_above(2);
+
+    $this->assertEquals(array(5, 6), $css->_category_search);
+  }
+
 }
 
 ?>

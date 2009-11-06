@@ -5,6 +5,7 @@ require_once('ComicPressDBInterface.inc');
 
 class ComicPressStoryline {
   var $_structure, $root_category;
+  var $_category_search;
 
 	function read_from_options() {
 		$this->create_structure($this->get_flattened_storyline());
@@ -77,6 +78,8 @@ class ComicPressStoryline {
             $data = array();
             $leaf = end($parts);
             $all_leaves[] = $leaf;
+
+            $data['level'] = count($parts) - 1;
 
             if (count($parts) > 2) {
               $parent = $parts[count($parts) - 2];
@@ -351,6 +354,65 @@ class ComicPressStoryline {
 		}
 		return $output;
 	}
+
+  function &include_all() {
+    $this->_category_search = array_keys($this->_structure);
+    return $this;
+  }
+
+  function &exclude_all() {
+    $this->_category_search = array();
+    return $this;
+  }
+
+  function _find_children($parent) {
+    $children = array($parent);
+    do {
+      $found_children = false;
+      foreach ($this->_structure as $category_id => $info) {
+        if (!in_array($category_id, $children)) {
+          if (in_array($info['parent'], $children)) {
+            $children[] = $category_id;
+            $found_children = true;
+          }
+        }
+      }
+    } while ($found_children);
+
+    return $children;
+  }
+
+  function &include_children($parent = null) {
+    $this->_category_search = array_unique(array_merge($this->_category_search, $this->_find_children($parent)));
+    sort($this->_category_search);
+    return $this;
+  }
+
+  function &exclude_children($parent = null) {
+    $this->_category_search = array_diff($this->_category_search, $this->_find_children($parent));
+    sort($this->_category_search);
+    return $this;
+  }
+
+  function _find_level_or_above($level = null) {
+    $found = array();
+    foreach ($this->_structure as $category_id => $info) {
+      if ($info['level'] <= $level) { $found[] = $category_id; }
+    }
+    return $found;
+  }
+
+  function &include_level_or_above($level = null) {
+    $this->_category_search = array_unique(array_merge($this->_category_search, $this->_find_level_or_above($level)));
+    sort($this->_category_search);
+    return $this;
+  }
+
+  function &exclude_level_or_above($level = null) {
+    $this->_category_search = array_diff($this->_category_search, $this->_find_level_or_above($level));
+    sort($this->_category_search);
+    return $this;
+  }
 }
 
 ?>
