@@ -206,9 +206,6 @@ class ComicPressComicPost {
 
   function get_parent_categories() {
     $parents = wp_get_post_categories($this->post->ID);
-    do {
-      $parents
-    } while ($parents_found);
   }
 }
 

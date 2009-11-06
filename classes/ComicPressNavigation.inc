@@ -18,10 +18,8 @@ class ComicPressNavigation {
     }
 
     // global first/last
-    if ($root_category = $this->_storyline->root_category) {
-      foreach (array('first', 'last') as $field) {
-        $nav[$field] = $this->_dbi->{"get_${field}_comic"}($root_category);
-      }
+    foreach (array('first', 'last') as $field) {
+      $nav[$field] = $this->_dbi->{"get_${field}_comic"}(null);
     }
 
     if ($category = $this->_storyline->get_valid_post_category($post->ID)) {

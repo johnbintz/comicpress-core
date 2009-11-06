@@ -30,8 +30,8 @@ class ComicPressNavigationTest extends PHPUnit_Framework_TestCase {
 
     $dbi->expects($this->at(0))->method('get_previous_comic')->with(null, $post);
     $dbi->expects($this->at(1))->method('get_next_comic')->with(null, $post);
-    $dbi->expects($this->at(2))->method('get_first_comic')->with(1);
-    $dbi->expects($this->at(3))->method('get_last_comic')->with(1);
+    $dbi->expects($this->at(2))->method('get_first_comic')->with(null);
+    $dbi->expects($this->at(3))->method('get_last_comic')->with(null);
     $dbi->expects($this->at(4))->method('get_previous_comic')->with(2, $post);
     $dbi->expects($this->at(5))->method('get_next_comic')->with(2, $post);
     $dbi->expects($this->at(6))->method('get_first_comic')->with(1);
