@@ -240,6 +240,7 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 		add_category(2, (object)array('parent' => 1));
 		add_category(3, (object)array('parent' => 2));
 		add_category(4, (object)array('parent' => 2));
+    add_category(5, (object)array('parent' => 0));
 		
 		$this->assertEquals(array(
 			'0' => array(
@@ -251,6 +252,18 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 				)
 			)
 		), $this->css->get_category_simple_structure(1));
+    
+    $this->assertEquals(array(
+      '0' => array(
+        '1' => array(
+          '2' => array(
+            '3' => true,
+            '4' => true
+          )
+        ),
+        '5' => true
+      )
+    ), $this->css->get_category_simple_structure());
 	}
 	
 	function providerTestNormalizeFlattenedStoryline() {

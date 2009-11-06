@@ -2,14 +2,13 @@
 
 require_once('PHPUnit/Framework.php');
 require_once('MockPress/mockpress.php');
-require_once(dirname(__FILE__) . '/../../classes/ComicPressAddon.inc');
-require_once(dirname(__FILE__) . '/../../addons/Core/Core.inc');
+require_once(dirname(__FILE__) . '/../classes/ComicPressAdmin.inc');
 
-class CoreTest extends PHPUnit_Framework_TestCase {
+class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
   function setUp() {
     _reset_wp();
     $_POST = array();
-    $this->core = new ComicPressAddonCore();
+    $this->admin = new ComicPressAdmin();
   }
   
   function providerTestGetRootComicCategories() {
@@ -34,7 +33,7 @@ class CoreTest extends PHPUnit_Framework_TestCase {
     }
     
     $result_ids = array();
-    foreach ($this->core->get_root_categories() as $category) {
+    foreach ($this->admin->get_root_categories() as $category) {
       $result_ids[] = $category->term_id;
     }
     
@@ -49,7 +48,7 @@ class CoreTest extends PHPUnit_Framework_TestCase {
       array(1,2),
       array(get_category(1), get_category(2))
     ) as $category_test) {
-      $source = $this->core->create_category_options($category_test, 1);
+      $source = $this->admin->create_category_options($category_test, 1);
       
       $this->assertTrue(($xml = _to_xml($source, true)) !== false);
       
@@ -63,7 +62,7 @@ class CoreTest extends PHPUnit_Framework_TestCase {
   }
 
   function testCreateDimensionSelector() {
-    $source = $this->core->create_dimension_selector("test", "760x340");
+    $source = $this->admin->create_dimension_selector("test", "760x340");
     
     $this->assertTrue(($xml = _to_xml($source, true)) !== false);
     
@@ -137,23 +136,23 @@ class CoreTest extends PHPUnit_Framework_TestCase {
    * @dataProvider providerTestHandleUpdate
    */
   function testHandleUpdate($original, $change, $new) {
-    $this->core->comicpress = $this->getMock('ComicPress', array('save', 'init'));
-    $this->core->comicpress->comicpress_options = array(
+    $this->admin->comicpress = $this->getMock('ComicPress', array('save', 'init'));
+    $this->admin->comicpress->comicpress_options = array(
       'comic_category_id' => 1,
       'comic_dimensions' => '760x',
       'rss_dimensions' => '350x',
       'archive_dimensions' => '125x'
     );
-    $this->core->comicpress->comicpress_options = array_merge($this->core->comicpress->comicpress_options, $original);
+    $this->admin->comicpress->comicpress_options = array_merge($this->admin->comicpress->comicpress_options, $original);
     
     add_category(2, (object)array('name' => 'test'));
     
     $_POST = $change;
 
-    $this->core->handle_update_comicpress_options($_POST['cp']);
+    $this->admin->handle_update_comicpress_options($_POST['cp']);
     
     foreach ($new as $key => $value) {
-      $this->assertEquals($value, $this->core->comicpress->comicpress_options[$key]);
+      $this->assertEquals($value, $this->admin->comicpress->comicpress_options[$key]);
     }
   }
 	
@@ -229,7 +228,7 @@ class CoreTest extends PHPUnit_Framework_TestCase {
       'attachments' => array('1' => $changes)
     );
     
-    $this->core->handle_update_attachments();
+    $this->admin->handle_update_attachments();
     
     foreach ($expected_settings as $settings_type => $settings) {
       switch ($settings_type) {
@@ -264,7 +263,7 @@ class CoreTest extends PHPUnit_Framework_TestCase {
    * @dataProvider providerTestHandleUpdateOverridePartial
    */
   function testHandleUpdateOverridePartial($code, $action) {
-    $this->core->comicpress = (object)array(
+    $this->admin->comicpress = (object)array(
       'comicpress_options' => array(
         'override_partials' => array(
           'index' => '$hiss;'
@@ -272,10 +271,10 @@ class CoreTest extends PHPUnit_Framework_TestCase {
       )
     );
     
-    $this->core->handle_update_override_partial(array_merge(compact('code', 'action'), array('partial' => 'index')));
+    $this->admin->handle_update_override_partial(array_merge(compact('code', 'action'), array('partial' => 'index')));
     
     if ($result && $action == "Update partial") {
-      $this->assertEquals($code, $this->core->comicpress->comicpress_options['override_partials']['index']);
+      $this->assertEquals($code, $this->admin->comicpress->comicpress_options['override_partials']['index']);
     }
   }
 }

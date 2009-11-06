@@ -12,7 +12,7 @@ Storyline.get_order = function() {
 Storyline.setup = function() {
   var i = 0;
   var depths = {};
-  $$('#storyline-sorter .cp-children').each(function(ch) {
+  $$('.cp-children').each(function(ch) {
     ch.id = 'children-' + i;
     var depth = ch.ancestors().length;
     if (!depths[depth]) { depths[depth] = []; }

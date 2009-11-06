@@ -168,7 +168,7 @@ class ComicPressStoryline {
 		return $this->_merge_simple_storyline($simple_storyline);
 	}
 
-	function get_category_simple_structure($parent) {
+	function get_category_simple_structure($parent = null) {
 		$structure = array();
 		foreach (get_all_category_ids() as $category_id) {
 			$category = get_category($category_id);
@@ -178,15 +178,17 @@ class ComicPressStoryline {
 			$structure[$category->parent][$category_id] = true;
 		}
 		$structure = $this->_merge_simple_storyline($structure);
-		if (isset($structure[0])) {
-			foreach ($structure[0] as $key => $children) {
-				if ($key != $parent) { unset($structure[0][$key]); }
-			}
-		}
+    if (!empty($parent)) {
+      if (isset($structure[0])) {
+        foreach ($structure[0] as $key => $children) {
+          if ($key != $parent) { unset($structure[0][$key]); }
+        }
+      }
+    }
 		return $structure;
 	}
 	
-	function get_category_flattened($parent) {
+	function get_category_flattened($parent = null) {
 		return $this->flatten_simple_storyline($this->get_category_simple_structure($parent));
 	}
 
@@ -229,7 +231,7 @@ class ComicPressStoryline {
 		if (is_null($flattened_storyline)) {
 			$flattened_storyline = $this->get_flattened_storyline();
 		}
-		$all_categories_flattened = $this->get_category_flattened($comicpress->comicpress_options['comic_category_id']);
+		$all_categories_flattened = $this->get_category_flattened();
 		
 		$result = $this->normalize_flattened_storyline($flattened_storyline, $all_categories_flattened);
 		if ($set) {
@@ -258,7 +260,7 @@ class ComicPressStoryline {
 	function normalize_flattened_storyline($storyline, $comic_categories) {
 		$storyline_nodes = explode(",", $storyline);
 		$category_nodes  = explode(",", $comic_categories);
-		
+
 		$missing_from_storyline = array_diff($category_nodes, $storyline_nodes);
 		$extra_in_storyline     = array_diff($storyline_nodes, $category_nodes);
 		

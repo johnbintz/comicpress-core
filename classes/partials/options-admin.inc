@@ -5,14 +5,6 @@
     <h3><?php _e('Global Options', 'comicpress') ?></h3>
     <table class="widefat fixed">
       <tr>
-        <th scope="row" valign="top"><?php _e('Master Comic Category', 'comicpress') ?></th>
-        <td>
-          <select name="cp[comic_category_id]">
-            <?php echo $this->create_category_options($root_categories, $this->comicpress->comicpress_options['comic_category_id']) ?>
-          </select>
-        </td>
-      </tr>
-      <tr>
         <th scope="row" valign="top"><?php _e('Layout', 'comicpress') ?></th>
         <td>
           <select name="cp[layout]">
