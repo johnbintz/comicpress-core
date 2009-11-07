@@ -12,57 +12,7 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
     unset($post);
     $this->cp = new ComicPress();
   }
-  
-  function providerTestGetLayoutChoices() {
-    return array(
-      array(
-        array(),
-        array()
-      ),
-      array(
-        array(
-          'layout.php' => <<<FILE
-            Test
-FILE
-        ),
-        array()
-      ),
-      array(
-        array(
-          'layout.php' => <<<FILE
-/*
-Layout Name: Test
-Sidebars: left,right
-*/ 
-FILE
-        ),
-        array('layout.php' => array(
-          'Layout Name' => 'Test',
-          'Sidebars' => 'left,right',
-        ))
-      ),
-    );
-  }
-  
-  /**
-   * @dataProvider providerTestGetLayoutChoices
-   */
-  function testGetLayoutChoices($files, $expected_results) {
-    $cp = $this->getMock('ComicPress', array('_glob', '_file_get_contents'));
-    
-    _set_template_directory('/test');
-    
-    $file_names = array();
-    foreach (array_keys($files) as $file) { $file_names[] = '/test/layouts/' . $file; }
-    
-    $cp->expects($this->once())->method('_glob')->with('/test/layouts/*')->will($this->returnValue($file_names));
-    foreach ($files as $file => $contents) {
-      $cp->expects($this->once())->method('_file_get_contents')->with('/test/layouts/' . $file)->will($this->returnValue($contents)); 
-    }
-    
-    $this->assertEquals($expected_results, $cp->get_layout_choices());
-  }
-  
+
   function providerTestGetSortedPostCategories() {
     return array(
       array(
