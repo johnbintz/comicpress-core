@@ -46,26 +46,35 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   function providerTestFindFile() {
   	return array(
   		array(
-  			array(), array(), false,
+  			array(), 'partials', array(), false,
   		),
   		array(
   			array('root/parent/partials/index.inc'),
+  			'partials',
   			array(),
   			vfsStream::url('root/parent/partials/index.inc')  	
+  		),
+  		array(
+  			array('root/parent/index.inc'),
+  			'',
+  			array(),
+  			vfsStream::url('root/parent/index.inc')  	
   		),
   		array(
   			array(
   			  'root/parent/partials/index.inc',
   			  'root/child/partials/index.inc'
-  			  ),
-  			array(), 
+ 			  ),
+  			'partials',
+ 			  array(), 
   			vfsStream::url('root/child/partials/index.inc')  	
   		),
   		array(
   			array(
   			  'root/child/partials/index.inc',
   			  'root/child/partials/comic/index.inc'
-  			  ),
+  			),
+  			'partials',
   			array('comic'), 
   			vfsStream::url('root/child/partials/comic/index.inc')  	
   		),
@@ -73,7 +82,8 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   			array(
   			  'root/child/partials/index.inc',
   			  'root/child/partials/comic/index.inc'
-  			  ),
+  			),
+  			'partials',
   			array('chapter-1', 'comic'), 
   			vfsStream::url('root/child/partials/comic/index.inc')  	
   		),
@@ -82,6 +92,7 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   			  'root/child/partials/index.inc',
   			  'root/child/partials/comic/index.inc'
   			  ),
+  			'partials',
   			null, 
   			vfsStream::url('root/child/partials/comic/index.inc')  	
   		)
@@ -91,7 +102,7 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   /**
    * @dataProvider providerTestFindFile
    */
-  function testFindFile($files_to_setup, $post_categories, $expected_path_result) {
+  function testFindFile($files_to_setup, $search_path, $post_categories, $expected_path_result) {
   	global $post;
   	
   	mkdir(vfsStream::url('root/parent/partials/comic/chapter-1'), 0777, true);
@@ -110,7 +121,7 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   	add_category(1, (object)array('slug' => 'comic', 'parent' => 0));
   	add_category(2, (object)array('slug' => 'chapter-1', 'parent' => 1));
   	
-  	$this->assertEquals($expected_path_result, $this->cp->find_file('index.inc', 'partials', $post_categories));
+  	$this->assertEquals($expected_path_result, $this->cp->find_file('index.inc', $search_path, $post_categories));
   }
 }
 

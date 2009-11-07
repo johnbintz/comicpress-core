@@ -136,7 +136,7 @@ class ComicPress {
 	 * @param attay $categories The child -> root category slugs to search within the specified path. If not provided, retrieve from current post.
 	 * @return string|boolean The path to the file, for false if not found.
 	 */
-	function find_file($name, $path, $categories = null) {
+	function find_file($name, $path = '', $categories = null) {
 		global $post;
 		if (!is_array($categories)) {
 			$comic_post = new ComicPressComicPost($post);
