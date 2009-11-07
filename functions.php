@@ -44,6 +44,14 @@ function __comicpress_init() {
   }
 }
 
+function F($name, $path, $override_post = null) {
+	global $post;
+	
+	$comic_post = new ComicPressComicPost(is_null($override_post) ? $post : $override_post);
+
+	return ComicPress::get_instance()->find_file($name, $path, $comic_post->find_parents());
+}
+
 /**
  * Display the list of Storyline categories.
  */
