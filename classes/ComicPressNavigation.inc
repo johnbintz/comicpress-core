@@ -11,32 +11,50 @@ class ComicPressNavigation {
 
   function get_post_nav($post) {
     $nav = array();
-
-    // global previous/next
-    foreach (array('previous', 'next') as $field) {
-      $nav[$field] = $this->_dbi->{"get_${field}_comic"}(null, $post);
-    }
-
-    // global first/last
-    foreach (array('first', 'last') as $field) {
-      $nav[$field] = $this->_dbi->{"get_${field}_comic"}(null);
-    }
-
-    if ($category = $this->_storyline->get_valid_post_category($post->ID)) {
-      // storyline previous/next
-      foreach (array('previous', 'next') as $field) {
-        $nav["storyline-${field}"] = $this->_dbi->{"get_${field}_comic"}($category, $post);
-      }
-
-      // adjacent storyline nodes
-      if (is_array($valid = $this->_storyline->valid($category))) {
-        foreach ($valid as $field) {
-          $nav["storyline-chapter-${field}"] = $this->_dbi->get_first_comic($this->_storyline->{$field}($category));
-        }
-      }
-    }
-
-		return $nav;
+    if (is_object($post)) {
+	    if (isset($post->ID)) {
+		    $cache_key = 'navigation-' . $post->ID;
+		    
+		    if (($result = wp_cache_get($cache_key, 'comicpress')) !== false) {
+		    	 foreach ($result as $key => $post_id) {
+		    	 	 $nev[$key] = get_post($post_id);
+		    	 }
+		    }
+		
+		    // global previous/next
+		    foreach (array('previous', 'next') as $field) {
+		      $nav[$field] = $this->_dbi->{"get_${field}_comic"}(null, $post);
+		    }
+		
+		    // global first/last
+		    foreach (array('first', 'last') as $field) {
+		      $nav[$field] = $this->_dbi->{"get_${field}_comic"}(null);
+		    }
+		
+		    if ($category = $this->_storyline->get_valid_post_category($post->ID)) {
+		      // storyline previous/next
+		      foreach (array('previous', 'next') as $field) {
+		        $nav["storyline-${field}"] = $this->_dbi->{"get_${field}_comic"}($category, $post);
+		      }
+		
+		      // adjacent storyline nodes
+		      if (is_array($valid = $this->_storyline->valid($category))) {
+		        foreach ($valid as $field) {
+		          $nav["storyline-chapter-${field}"] = $this->_dbi->get_first_comic($this->_storyline->{$field}($category));
+		        }
+		      }
+		    }
+		    
+		    $cache_data = array();
+		    foreach ($nav as $key => $output_post) {
+		    	if (!empty($output_post)) { $cache_data[$key] = $output_post->ID; }
+		    }
+		    
+		    wp_cache_set($cache_key, $cache_data, 'comicpress');
+		    
+				return $nav;
+			}
+		}
   }
 }
 

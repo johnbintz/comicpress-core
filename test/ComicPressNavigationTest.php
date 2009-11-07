@@ -40,7 +40,11 @@ class ComicPressNavigationTest extends PHPUnit_Framework_TestCase {
     $this->nav->_dbi = $dbi;
     $this->nav->_storyline = $storyline;
 
+    $this->assertFalse(wp_cache_get('navigation-1', 'comicpress'));
+    
     $this->nav->get_post_nav($post);
+
+    $this->assertTrue(wp_cache_get('navigation-1', 'comicpress') !== false);
   }
 }
 
