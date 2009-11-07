@@ -44,27 +44,6 @@ function __comicpress_init() {
   }
 }
 
-function include_partial($partials = '') {
-  global $comicpress, $post, $nav_comics;
-  
-  if (!is_array($partials)) { $partials = func_get_args(); }
-  
-  $content = $target = null;
-
-  $target = $comicpress->get_partial_path($partials);
-
-  if ($target !== false) {
-    ob_start(); include($target); $content = ob_get_clean();
-  }
-
-  $target = str_replace(".inc", "", $target);
-
-  if (!empty($target) && !empty($content)) {
-    echo apply_filters("comicpress_partial", $content, $target);
-  }
-}
-
-
 /**
  * Display the list of Storyline categories.
  */
