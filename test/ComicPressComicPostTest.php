@@ -162,8 +162,49 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals($expected_result, get_post_meta(1, 'comic_ordering', true));
   }
 
-  function testFindParents() {
+  function providerTestFindParents() {
+  	return array(
+  		array(
+  			array(),
+  			array()
+  		),
+  		array(
+  			array(1),
+  			array(1 => 'root')
+  		),
+  		array(
+  			array(2),
+  			array(2 => 'comic', 1 => 'root')
+  		),
+  		array(
+  			array(3),
+  			array(3 => 'part-1', 2 => 'comic', 1 => 'root')
+  		),
+  		array(
+  			array(4),
+  			array(4 => 'blog', 1 => 'root')
+  		),
+  		array(
+  			array(1, 4),
+  			array()
+  		),
+  	);
+  }
+  
+  /**
+   * @dataProvider providerTestFindParents
+   */
+  function testFindParents($post_categories, $expected_result) {
+    add_category(1, (object)array('slug' => 'root', 'parent' => 0));
+    add_category(2, (object)array('slug' => 'comic', 'parent' => 1));
+    add_category(3, (object)array('slug' => 'part-1', 'parent' => 2));
+    add_category(4, (object)array('slug' => 'blog', 'parent' => 1));
     
+    wp_set_post_categories(1, $post_categories);
+    
+    $this->p->post = (object)array('ID' => 1);
+    
+    $this->assertEquals($expected_result, $this->p->find_parents());
   }
 }
 

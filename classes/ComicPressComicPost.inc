@@ -217,8 +217,28 @@ class ComicPressComicPost {
     update_post_meta($this->post->ID, 'comic_ordering', $new_order);
   }
 
-  function get_parent_categories() {
-    $parents = wp_get_post_categories($this->post->ID);
+  function find_parents() {
+  	$parents = array();
+  	$post_categories = wp_get_post_categories($this->post->ID);
+  	if (count($post_categories) == 1) {
+  		do {
+  			$category_parent = 0;
+  			$category = get_category(end($post_categories));
+  			if (!empty($category)) {
+  				$category_parent = $category->parent;
+  				if ($category_parent != 0) {
+  				  $post_categories[] = $category_parent;
+  				} 
+  			}
+  		} while ($category_parent != 0);
+  		
+  		foreach ($post_categories as $category_id) {
+  			$category = get_category($category_id);
+  			$parents[$category_id] = $category->slug;
+  		}
+  	}
+  	
+  	return $parents;
   }
 }
 

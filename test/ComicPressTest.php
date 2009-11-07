@@ -44,6 +44,22 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   	$result = $this->cp->cascade_search('file', $force_parent);
   	$this->assertTrue($result === $expected_result);
   }
+  
+  function providerTestCategorySearch() {
+  	return array(
+  	  array(
+  	  
+  	  )
+  	);
+  }
+  
+  /**
+   * @dataProvider providerTestCategorySearch
+   */
+  function testCategorySearch() {
+  	mkdir(vfsStream::url('root/style/site/comic/chapter-1/part-1'), 0777, true);
+  	
+  }
 }
 
 ?>
