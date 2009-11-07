@@ -49,7 +49,9 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   			array(), array(), false,
   		),
   		array(
-  			array('root/parent/partials/index.inc'), array(), vfsStream::url('root/parent/partials/index.inc')  	
+  			array('root/parent/partials/index.inc'),
+  			array(),
+  			vfsStream::url('root/parent/partials/index.inc')  	
   		),
   		array(
   			array(
