@@ -126,6 +126,12 @@ class ComicPress {
 		return false;
 	}
 	
+	/**
+	 * Search a path for directories named after the slugs provided.
+	 * @param array $categories A list of category slugs going from child -> parent -> root.
+	 * @param string $path The path to search.
+	 * @return array All matching paths.
+	 */
 	function category_search($categories, $path) {
 		$path = trailingslashit($path);
 		$all_categories = array_reverse($categories);
