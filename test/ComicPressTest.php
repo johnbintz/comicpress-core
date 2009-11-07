@@ -73,6 +73,58 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   	
   	$this->assertEquals($found_path, $this->cp->category_search($categories, vfsStream::url('root/style')));
   }
+
+  function providerTestFindFile() {
+  	return array(
+  		array(
+  			array(), array(), false,
+  		),
+  		array(
+  			array('root/parent/partials/index.inc'), array(), vfsStream::url('root/parent/partials/index.inc')  	
+  		),
+  		array(
+  			array(
+  			  'root/parent/partials/index.inc',
+  			  'root/child/partials/index.inc'
+  			  ),
+  			array(), 
+  			vfsStream::url('root/child/partials/index.inc')  	
+  		),
+  		array(
+  			array(
+  			  'root/child/partials/index.inc',
+  			  'root/child/partials/comic/index.inc'
+  			  ),
+  			array('comic'), 
+  			vfsStream::url('root/child/partials/comic/index.inc')  	
+  		),
+  		array(
+  			array(
+  			  'root/child/partials/index.inc',
+  			  'root/child/partials/comic/index.inc'
+  			  ),
+  			array('chapter-1', 'comic'), 
+  			vfsStream::url('root/child/partials/comic/index.inc')  	
+  		)
+  	);
+  }
+  
+  /**
+   * @dataProvider providerTestFindFile
+   */
+  function testFindFile($files_to_setup, $post_categories, $expected_path_result) {
+  	mkdir(vfsStream::url('root/parent/partials/comic/chapter-1'), 0777, true);
+  	mkdir(vfsStream::url('root/child/partials/comic/chapter-1'), 0777, true);
+  	
+  	foreach ($files_to_setup as $path) {  	
+  		file_put_contents(vfsStream::url($path), "test");
+  	}
+  	
+  	_set_template_directory(vfsStream::url('root/parent'));
+  	_set_stylesheet_directory(vfsStream::url('root/child'));
+
+  	$this->assertEquals($expected_path_result, $this->cp->find_file('index.inc', 'partials', $post_categories));
+  }
 }
 
 ?>

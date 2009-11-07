@@ -143,6 +143,29 @@ class ComicPress {
 		}
 		return array_reverse($all_paths);
 	}
+	
+	/**
+	 * Recursively search a particular template directory for a specified file, limiting the search to the provided categories.
+	 * @param string $name The name of the file with no path information.
+	 * @param string $path The path within the template directories to start the search.
+	 * @param attay $categories The child -> root category slugs to search within the specified path. If not provided, retrieve from current post.
+	 * @return string|boolean The path to the file, for false if not found.
+	 */
+	function find_file($name, $path, $categories = null) {
+		foreach (array(get_stylesheet_directory(), get_template_directory()) as $dir) {
+			$dir = trailingslashit($dir) . $path;
+			$dirs_to_search = $this->category_search($categories, $dir);
+			$dirs_to_search[] = $dir;
+			
+			foreach ($dirs_to_search as $category_path) {
+				$target = trailingslashit($category_path) . $name;
+				if (file_exists($target)) {
+					return $target;
+				}
+			}
+		}
+		return false;
+	}
 }
 
 ?>
