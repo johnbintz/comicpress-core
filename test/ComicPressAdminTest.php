@@ -260,25 +260,6 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
       ),
     );
   }
-  
-  /**
-   * @dataProvider providerTestHandleUpdateOverridePartial
-   */
-  function testHandleUpdateOverridePartial($code, $action) {
-    $this->admin->comicpress = (object)array(
-      'comicpress_options' => array(
-        'override_partials' => array(
-          'index' => '$hiss;'
-        )
-      )
-    );
-    
-    $this->admin->handle_update_override_partial(array_merge(compact('code', 'action'), array('partial' => 'index')));
-    
-    if ($action == "Update partial") {
-      $this->assertEquals($code, $this->admin->comicpress->comicpress_options['override_partials']['index']);
-    }
-  }
 }
 
 ?>

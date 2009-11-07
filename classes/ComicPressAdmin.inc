@@ -378,6 +378,10 @@ class ComicPressAdmin {
     }
   }
 
+	/**
+	 * Update the zoom slider info.
+	 * @param $info The browser input.
+	 */
   function handle_update_zoom_slider($info) {
     $this->is_ajax = true;
 
