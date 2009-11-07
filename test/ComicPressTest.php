@@ -76,6 +76,14 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   			  ),
   			array('chapter-1', 'comic'), 
   			vfsStream::url('root/child/partials/comic/index.inc')  	
+  		),
+  		array(
+  			array(
+  			  'root/child/partials/index.inc',
+  			  'root/child/partials/comic/index.inc'
+  			  ),
+  			null, 
+  			vfsStream::url('root/child/partials/comic/index.inc')  	
   		)
   	);
   }
@@ -84,6 +92,8 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
    * @dataProvider providerTestFindFile
    */
   function testFindFile($files_to_setup, $post_categories, $expected_path_result) {
+  	global $post;
+  	
   	mkdir(vfsStream::url('root/parent/partials/comic/chapter-1'), 0777, true);
   	mkdir(vfsStream::url('root/child/partials/comic/chapter-1'), 0777, true);
   	
@@ -94,6 +104,12 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   	_set_template_directory(vfsStream::url('root/parent'));
   	_set_stylesheet_directory(vfsStream::url('root/child'));
 
+  	$post = (object)array('ID' => 1);
+  	wp_set_post_categories(1, array(2));
+  	
+  	add_category(1, (object)array('slug' => 'comic', 'parent' => 0));
+  	add_category(2, (object)array('slug' => 'chapter-1', 'parent' => 1));
+  	
   	$this->assertEquals($expected_path_result, $this->cp->find_file('index.inc', 'partials', $post_categories));
   }
 }

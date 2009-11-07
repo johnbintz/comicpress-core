@@ -1,5 +1,7 @@
 <?php
 
+require_once(dirname(__FILE__) . '/ComicPressComicPost.inc');
+
 /**
  * The core functions of ComicPress.
  */
@@ -135,6 +137,12 @@ class ComicPress {
 	 * @return string|boolean The path to the file, for false if not found.
 	 */
 	function find_file($name, $path, $categories = null) {
+		global $post;
+		if (!is_array($categories)) {
+			$comic_post = new ComicPressComicPost($post);
+			$categories = $comic_post->find_parents();
+		}
+		
 		foreach (array(get_stylesheet_directory(), get_template_directory()) as $dir) {
 			$dir = trailingslashit($dir) . $path;
 			$dirs_to_search = $this->category_search($categories, $dir);
