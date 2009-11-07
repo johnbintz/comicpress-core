@@ -48,7 +48,19 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   function providerTestCategorySearch() {
   	return array(
   	  array(
-  	  
+  	    array('comic'), array(vfsStream::url('root/style/comic'))
+  	  ),
+  	  array(
+  	    array('chapter-1', 'comic'), array(vfsStream::url('root/style/comic'), vfsStream::url('root/style/comic/chapter-1'))
+  	  ),
+  	  array(
+  	    array('part-1', 'chapter-1', 'comic'), array(vfsStream::url('root/style/comic'), vfsStream::url('root/style/comic/chapter-1'), vfsStream::url('root/style/comic/chapter-1/part-1'))
+  	  ),
+  	  array(
+  	    array('comic', 'chapter-1'), array()
+  	  ),
+  	  array(
+  	  	array(), array()
   	  )
   	);
   }
@@ -56,9 +68,10 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   /**
    * @dataProvider providerTestCategorySearch
    */
-  function testCategorySearch() {
-  	mkdir(vfsStream::url('root/style/site/comic/chapter-1/part-1'), 0777, true);
+  function testCategorySearch($categories, $found_path) {
+  	mkdir(vfsStream::url('root/style/comic/chapter-1/part-1'), 0777, true);
   	
+  	$this->assertEquals($found_path, $this->cp->category_search($categories, vfsStream::url('root/style')));
   }
 }
 

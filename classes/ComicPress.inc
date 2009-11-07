@@ -125,6 +125,18 @@ class ComicPress {
 		}
 		return false;
 	}
+	
+	function category_search($categories, $path) {
+		$path = trailingslashit($path);
+		$all_categories = array_reverse($categories);
+		$all_paths = array();
+		while (count($all_categories) > 0) {
+			$target = $path . implode('/', $all_categories);
+			if (is_dir($target)) { $all_paths[] = $target; }
+			array_pop($all_categories);
+		}
+		return array_reverse($all_paths);
+	}
 }
 
 ?>
