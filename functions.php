@@ -32,16 +32,6 @@ function __comicpress_init() {
 
   $comicpress_filters = new ComicPressFilters();
   $comicpress_filters->init();
-
-  $layouts = $comicpress->get_layout_choices();
-  if (isset($layouts[$comicpress->comicpress_options['layout']])) {
-    if (isset($layouts[$comicpress->comicpress_options['layout']]['Sidebars'])) {
-      foreach (explode(",", $layouts[$comicpress->comicpress_options['layout']]['Sidebars']) as $sidebar) {
-        $sidebar = trim($sidebar);
-        register_sidebar($sidebar); 
-      }
-    } 
-  }
 }
 
 function F($name, $path, $override_post = null) {
@@ -50,6 +40,12 @@ function F($name, $path, $override_post = null) {
 	$comic_post = new ComicPressComicPost(is_null($override_post) ? $post : $override_post);
 
 	return ComicPress::get_instance()->find_file($name, $path, $comic_post->find_parents());
+}
+
+function FinishComicPress() {
+	$content = ob_get_clean();
+	
+	include(F('application.php', ''));
 }
 
 /**
@@ -95,4 +91,5 @@ function comicpress_list_storyline_categories($args = "") {
   echo $output;
 }
 
+ob_start();
 ?>
