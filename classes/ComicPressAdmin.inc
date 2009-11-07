@@ -378,17 +378,6 @@ class ComicPressAdmin {
     }
   }
 
-  function handle_update_override_partial($info) {
-    switch ($info['action']) {
-      case __('Update partial', 'comicpress'):
-        $this->comicpress->comicpress_options['override_partials'][$info['partial']] = stripslashes($info['code']);
-        break;
-      case __('Delete override partial', 'comicpress'):
-        unset($this->comicpress->comicpress_options['override_partials'][$info['partial']]);
-        break;
-    }
-  }
-
   function handle_update_zoom_slider($info) {
     $this->is_ajax = true;
 
