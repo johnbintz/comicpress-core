@@ -79,7 +79,11 @@ class ComicPressComicPost {
     $dimensions = array();
     
     if (isset($this->comicpress->comicpress_options["${type}_dimensions"])) {
-      list($width, $height) = explode("x", $this->comicpress->comicpress_options["${type}_dimensions"]);
+    	$parts = explode("x", $this->comicpress->comicpress_options["${type}_dimensions"]);
+    	switch (count($parts)) {
+    		case 1: list($width) = $parts; break;
+    		case 2: list($width, $height) = $parts; break;
+    	}
       $dimensions = compact('width', 'height');
     }
     
@@ -145,6 +149,7 @@ class ComicPressComicPost {
       }
       
       foreach ($remaining_posts_to_sort as $type => $posts) {
+      	if (!isset($comic_image_ordering[$type])) { $comic_image_ordering[$type] = array(); }
         if (is_array($comic_image_ordering[$type])) {
           $comic_image_ordering[$type] = array_merge($comic_image_ordering[$type], $posts);
         } else {
@@ -158,8 +163,16 @@ class ComicPressComicPost {
     return false;
   }
   
+  /**
+   * Sort the remaining comic images by file date.
+   * @param object $a
+   * @param object $b
+   * @return int
+   */
   function sort_remaining_comic_images($a, $b) {
-    return strtotime($a->post_date) - strtotime($b->post_date); 
+  	$a_date = isset($a->post_date) ? $a->post_date : 0;
+  	$b_date = isset($b->post_date) ? $b->post_date : 0;
+  	return $a_date - $b_date; 
   }
 
   /**

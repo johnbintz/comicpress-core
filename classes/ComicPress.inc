@@ -234,7 +234,7 @@ class ComicPress {
           "Layout Name", "Sidebars"
         ) as $field) {
           if (preg_match('#/\*.*' . $field . ': ([^\n]+).*\*/#s', $content, $matches) > 0) {            
-            if (!is_array($this->layouts[$basename])) {
+          	if (!isset($this->layouts[$basename])) {
               $this->layouts[$basename] = array(); 
             }
             $this->layouts[$basename][$field] = $matches[1];
@@ -292,7 +292,8 @@ class ComicPress {
     $sorted_categories = array();
     
     foreach ($this->category_tree as $node) {
-      $category_id = end(explode("/", $node));
+    	$parts = explode("/", $node);
+      $category_id = end($parts);
       if (in_array($category_id, $categories)) {
         $sorted_categories[] = $category_id;
       }

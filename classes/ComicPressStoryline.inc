@@ -58,7 +58,11 @@ class ComicPressStoryline {
       $structure = explode(',', $structure);
     } else {
       if (is_array($structure)) {
-        $key = implode(',', $structure);
+      	$fixed_structure = array();
+      	foreach ($structure as $s) {
+      		if (!is_array($s)) { $fixed_structure[] = $s; }
+      	}
+        $key = implode(',', $fixed_structure);
       }
     }
 
@@ -383,10 +387,12 @@ class ComicPressStoryline {
       $found_children = false;
       foreach ($this->_structure as $category_id => $info) {
         if (!in_array($category_id, $children)) {
-          if (in_array($info['parent'], $children)) {
-            $children[] = $category_id;
-            $found_children = true;
-          }
+        	if (isset($info['parent'])) {
+	          if (in_array($info['parent'], $children)) {
+	            $children[] = $category_id;
+	            $found_children = true;
+	          }
+        	}
         }
       }
     } while ($found_children);

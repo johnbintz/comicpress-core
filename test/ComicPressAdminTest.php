@@ -149,8 +149,10 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
     
     $_POST = $change;
 
-    $this->admin->handle_update_comicpress_options($_POST['cp']);
-    
+    if (isset($_POST['cp'])) {
+	    $this->admin->handle_update_comicpress_options($_POST['cp']);
+    }
+	    
     foreach ($new as $key => $value) {
       $this->assertEquals($value, $this->admin->comicpress->comicpress_options[$key]);
     }
@@ -273,7 +275,7 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
     
     $this->admin->handle_update_override_partial(array_merge(compact('code', 'action'), array('partial' => 'index')));
     
-    if ($result && $action == "Update partial") {
+    if ($action == "Update partial") {
       $this->assertEquals($code, $this->admin->comicpress->comicpress_options['override_partials']['index']);
     }
   }
