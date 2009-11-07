@@ -2,7 +2,7 @@
 
 require_once('MockPress/mockpress.php');
 require_once('PHPUnit/Framework.php');
-require_once(dirname(__FILE__) . '/../classes/ComicPressDBInterface.inc');
+require_once('ComicPressDBInterface.inc');
 
 class ComicPressDBInterfaceTest extends PHPUnit_Framework_TestCase {
   function testSingleton() {

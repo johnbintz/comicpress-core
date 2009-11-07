@@ -2,7 +2,7 @@
 
 require_once('MockPress/mockpress.php');
 require_once('PHPUnit/Framework.php');
-require_once(dirname(__FILE__) . '/../classes/ComicPressNavigation.inc');
+require_once('ComicPressNavigation.inc');
 
 /**
  * Integration Testing. Just make sure things are called correctly.

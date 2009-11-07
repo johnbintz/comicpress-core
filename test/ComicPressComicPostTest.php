@@ -2,7 +2,7 @@
 
 require_once('PHPUnit/Framework.php');
 require_once('MockPress/mockpress.php');
-require_once(dirname(__FILE__) . '/../classes/ComicPressComicPost.inc');
+require_once('ComicPressComicPost.inc');
 
 class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
   function setUp() {
