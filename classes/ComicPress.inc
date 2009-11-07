@@ -108,23 +108,6 @@ class ComicPress {
     
     return $wp_query;
   }
-  
-  /**
-   * See if a file exists in either child or parent theme, and if it does, return the path to that file.
-   * @param string $path The path to find.
-   * @param string $force_parent If true, always find the parent.
-   * @return string|boolean The path to the file, or false if not found.
-   */
-	function cascade_search($path, $force_parent = false) {
-		$dirs_to_search = array(get_template_directory());
-		if (!$force_parent) { array_unshift($dirs_to_search, get_stylesheet_directory()); }
-		
-		foreach ($dirs_to_search as $dir) {
-			$dir = trailingslashit($dir);
-			if (file_exists($dir . $path)) { return $dir . $path;	}
-		}
-		return false;
-	}
 	
 	/**
 	 * Search a path for directories named after the slugs provided.
