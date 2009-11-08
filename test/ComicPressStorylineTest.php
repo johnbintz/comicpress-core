@@ -476,8 +476,8 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 
   function providerTestFindPostRoot() {
   	return array(
-  		array(array(1), array(1)),
-  		array(array(4), array(1)),
+  		array(array(1), array(1,2,3,4)),
+  		array(array(4), array(1,2,3,4)),
   		array(array(5), array(5)),
   		array(array(1, 5), array()),
   	);

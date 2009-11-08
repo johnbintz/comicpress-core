@@ -97,6 +97,22 @@ function R($which, $restrictions = null, $override_post = null) {
 		}
 	}
 
+	if (is_array($restrictions)) {
+		$new_restrictions = array();
+		foreach ($restrictions as $type => $list) {
+			if (is_string($list)) {
+				$value = $list;
+				switch ($list) {
+					case '__post': $value = $post_to_use; break;
+				}
+				$new_restrictions[$type] = $value;
+			} else {
+				$new_restrictions[$type] = $list;
+			}
+		}
+		$restrictions = $new_restrictions;
+	}
+
 	$categories = $storyline->build_from_restrictions($restrictions);
 
 	$dbi = ComicPressDBInterface::get_instance();

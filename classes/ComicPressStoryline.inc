@@ -499,8 +499,9 @@ class ComicPressStoryline {
   			$comic_post = new ComicPressComicPost(get_post($id));
   			$parents = $comic_post->find_parents();
   			if (!empty($parents)) {
-  				$parents = array_keys($parents); $found[] = end($parents);
+  				$parents = array_keys($parents); $found = $this->_find_children(end($parents));
   			}
+
   		}
   	}
   	return $found;
@@ -534,11 +535,14 @@ class ComicPressStoryline {
 					$method_type = $type;
 				}
 
-				foreach ((array)$list as $restriction) {
+				if (!is_array($list)) { $list = array($list); }
+
+				foreach ($list as $restriction) {
 					$method = '';
 					$args = array($restriction);
 					switch ($method_type) {
 						case 'child_of': $method = 'children'; break;
+						case 'root_of': $method = 'post_root'; break;
 						case 'from_post': $method = 'post_category'; break;
 						case 'previous':
 							$method = 'adjacent';
@@ -555,7 +559,7 @@ class ComicPressStoryline {
 						array_unshift($args, "_find_${method}");
 						call_user_func_array(array($this, "_${method_root}"), $args);
 					}
-			  }
+				}
 			}
 		} else {
 			$this->include_all();
