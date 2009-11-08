@@ -368,26 +368,6 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals(array(2,3,4), $this->css->_find_children($search));
   }
 
-  function testIncludeChildren() {
-    $css = $this->getMock('ComicPressStoryline', array('_find_children'));
-    $css->expects($this->once())->method('_find_children')->will($this->returnValue(array(2,3,4)));
-    $css->_category_search = array(4,5);
-
-    $css->include_children(2);
-
-    $this->assertEquals(array(2,3,4,5), $css->_category_search);
-  }
-
-  function testExcludeChildren() {
-    $css = $this->getMock('ComicPressStoryline', array('_find_children'));
-    $css->expects($this->once())->method('_find_children')->will($this->returnValue(array(2,3,4)));
-    $css->_category_search = array(4, 5, 6);
-
-    $css->exclude_children(2);
-
-    $this->assertEquals(array(5, 6), $css->_category_search);
-  }
-
   function testFindLevelOrAbove() {
     $this->css->_structure = array(
       '1' => array('next' => 2, 'level' => 1),
@@ -397,26 +377,6 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
     );
 
     $this->assertEquals(array(1, 2), $this->css->_find_level_or_above(2));
-  }
-
-  function testIncludeLevelOrAbove() {
-    $css = $this->getMock('ComicPressStoryline', array('_find_level_or_above'));
-    $css->expects($this->once())->method('_find_level_or_above')->will($this->returnValue(array(2,3,4)));
-    $css->_category_search = array(4,5);
-
-    $css->include_level_or_above(2);
-
-    $this->assertEquals(array(2,3,4,5), $css->_category_search);
-  }
-
-  function testExcludeLevelOrAbove() {
-    $css = $this->getMock('ComicPressStoryline', array('_find_level_or_above'));
-    $css->expects($this->once())->method('_find_level_or_above')->will($this->returnValue(array(2,3,4)));
-    $css->_category_search = array(4, 5, 6);
-
-    $css->exclude_level_or_above(2);
-
-    $this->assertEquals(array(5, 6), $css->_category_search);
   }
 
   function testEndSearch() {
@@ -514,7 +474,7 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals($expected_return, $this->css->_find_adjacent($category, $which));
   }
 
-	function providerTestBuildFromRestrictions() {
+  function providerTestBuildFromRestrictions() {
 		return array(
 			array(
 				null,

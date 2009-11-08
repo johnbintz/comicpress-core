@@ -7,7 +7,7 @@
   RT('previous', 'from_post'); the_title(); echo '<br />';
   RT('previous'); the_title(); echo '<br />';
   Restore(); the_title(); echo '<br />';
-	RT('next');	the_title();  echo '<br />';
+	RT('next', array('child_of' => 'amoc'));	the_title();  echo '<br />';
   RT('next', 'from_post');	the_title();  echo '<br />';
 	RT('last', 'from_post'); the_title(); echo '<br />';
 

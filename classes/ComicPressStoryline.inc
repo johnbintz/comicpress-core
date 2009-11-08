@@ -428,28 +428,12 @@ class ComicPressStoryline {
     return $this;
   }
 
-  function &include_children($parent = null) {
-  	return $this->_include('_find_children', $parent);
-  }
-
-  function &exclude_children($parent = null) {
-  	return $this->_exclude('_find_children', $parent);
-  }
-
   function _find_level_or_above($level = null) {
     $found = array();
     foreach ($this->_structure as $category_id => $info) {
       if ($info['level'] <= $level) { $found[] = $category_id; }
     }
     return $found;
-  }
-
-  function &include_level_or_above($level = null) {
-  	return $this->_include('_find_level_or_above', $level);
-  }
-
-  function &exclude_level_or_above($level = null) {
-  	return $this->_exclude('_find_level_or_above', $level);
   }
 
   function _find_only($id = null) {
@@ -459,28 +443,12 @@ class ComicPressStoryline {
   	return array();
   }
 
-  function &include_only($id = null) {
-  	return $this->_include('_find_only', $id);
-  }
-
-  function &exclude_only($id = null) {
-  	return $this->_exclude('_find_only', $id);
-  }
-
   function _find_level($level = null) {
 		$found = array();
 		foreach ($this->_structure as $category_id => $info) {
 			if ($info['level'] == $level) { $found[] = $category_id; }
 		}
 		return $found;
-  }
-
-  function &include_level($id = null) {
-  	return $this->_include('_find_level', $id);
-  }
-
-  function &exclude_level($id = null) {
-  	return $this->_exclude('_find_level', $id);
   }
 
   function _find_post_category($post = null) {
@@ -501,14 +469,6 @@ class ComicPressStoryline {
   	return $found;
   }
 
-  function &include_post_category($post = null) {
-  	return $this->_include('_find_post_category', $post);
-  }
-
-  function &exclude_post_category($post = null) {
-  	return $this->_exclude('_find_post_category', $post);
-  }
-
   function _find_adjacent($category = null, $next = false) {
   	$found = array();
 
@@ -523,15 +483,6 @@ class ComicPressStoryline {
 
   	return $found;
   }
-
-  function &include_adjacent($category = null, $next = false) {
-  	return $this->_include('_find_adjacent', $category, $next);
-  }
-
-  function &exclude_adjacent($category = null, $next = false) {
-  	return $this->_exclude('_find_adjacent', $category, $next);
-  }
-
 
   function end_search() {
     $result = $this->_category_search;
@@ -579,7 +530,8 @@ class ComicPressStoryline {
 							$method = $method_type; break;
 					}
 					if (!empty($method)) {
-						call_user_func_array(array($this, "${method_root}_${method}"), $args);
+						array_unshift($args, "_find_${method}");
+						call_user_func_array(array($this, "_${method_root}"), $args);
 					}
 			  }
 			}
