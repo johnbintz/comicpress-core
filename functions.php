@@ -5,7 +5,7 @@ add_action('init', '__comicpress_init');
 
 function __comicpress_init() {
   global $comicpress, $wp_query;
-  
+
   if (current_user_can('edit_files')) {
     wp_cache_flush();
   }
@@ -36,16 +36,84 @@ function __comicpress_init() {
 
 function F($name, $path, $override_post = null) {
 	global $post;
-	
+
 	$comic_post = new ComicPressComicPost(is_null($override_post) ? $post : $override_post);
 
 	return ComicPress::get_instance()->find_file($name, $path, $comic_post->find_parents());
 }
 
-function FinishComicPress() {
+/**
+ * Finish rendering this template and shove the output into application.php.
+ */
+function finish_comicpress() {
 	$content = ob_get_clean();
-	
+
 	include(F('application.php', ''));
+}
+
+/**
+ * Protect global $post and $wp_query.
+ */
+function protect_query() {
+	global $post, $wp_query, $__post, $__wp_query;
+
+	$__post = $post;
+	$__wp_query = $wp_query;
+}
+
+/**
+ * Restore global $post and $wp_query.
+ */
+function unprotect_query() {
+	global $post, $wp_query, $__post, $__wp_query;
+
+	$post = $__post;
+	$wp_query = $__wp_query;
+
+	$__post = $__wp_query = null;
+}
+
+function retrieve_storyline_post($which, $restrictions = null, $override_post = null) {
+	global $post;
+
+	$storyline = new ComicPressStoryline();
+	$storyline->read_from_options()->exclude_all();
+
+	if (!is_null($restrictions)) {
+		if (is_array($restrictions)) {
+			foreach ($restrictions as $type => $list) {
+				switch ($type) {
+					case 'child_of':
+						foreach ($list as $restriction) {	$storyline->include_children($restriction); }
+						break;
+				}
+			}
+		}
+	} else {
+		$storyline->include_all();
+	}
+
+	$categories = $storyline->end_search();
+
+	var_dump($categories);
+
+	$dbi = ComicPressDBInterface::get_instance();
+
+	$new_post = false;
+
+	switch ($which) {
+		case 'first':
+		case 'last':
+		case 'next':
+		case 'previous':
+		  $method = "get_${which}_post";
+		  if (method_exists($dbi, $method)) {
+		  	$new_post = $dbi->{$method}($categories);
+		  }
+		  break;
+  }
+
+  return $new_post;
 }
 
 /**

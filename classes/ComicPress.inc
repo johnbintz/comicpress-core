@@ -16,15 +16,6 @@ class ComicPress {
 		'storyline_order'     => ''
   );
 
-  var $additional_stylesheets = array();
-  var $additional_javascripts = array();
-
-  var $comic_post_attachments_cache = array();
-  var $category_tree = array();
-
-  var $partial_paths = array();
-  var $layouts = null;
-
 	function &get_instance() {
 		static $instance;
 

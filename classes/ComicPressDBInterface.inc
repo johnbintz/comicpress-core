@@ -1,40 +1,33 @@
 <?php
 
 class ComicPressDBInterface {
-  var $_non_comic_categories, $_all_categories;
-
   function ComicPressDBInterface() {}
-  
+
   function get_instance() {
     static $instance;
-    
+
     if (!isset($instance)) { $instance = new ComicPressDBInterface(); }
     return $instance;
   }
 
   function _get_categories() { return get_categories("hide_empty=0"); }
 
-  /**
-   * Set the comic categories for the current run of ComicPress.
-   */
-  function set_comic_categories($categories) {
-    $this->_all_categories       = get_all_category_ids();
-    $this->_non_comic_categories = array_values(array_diff($this->_all_categories, $categories));
-  }
-
-  function _get_categories_to_exclude($category = null) {
-    return (is_null($category)) ? $this->_non_comic_categories : array_values(array_diff($this->_all_categories, array($category)));
-  }
-  
-  /**
-   * Find the terminal post in a specific category.
-   */
-  function get_terminal_post_in_category($category_id, $first = true) {
+  function get_terminal_post($first = true, $include_categories = null) {
     $this->_prepare_wp_query();
-    
-    $sort_order = $first ? "asc" : "desc";
+
     $terminal_comic_query = new WP_Query();
-    $terminal_comic_query->query("showposts=1&order=${sort_order}&cat=${category_id}&status=publish");
+
+    $query_parameters = array(
+    	'showposts' => 1,
+    	'order'     => $first ? "asc" : "desc",
+    	'status'    => 'publish'
+    );
+
+    if (is_array($include_categories)) {
+    	$query_parameters['category_in'] = $include_categories;
+    }
+
+    $terminal_comic_query->query($query_parameters);
     $post = false;
     if ($terminal_comic_query->have_posts()) {
       $post = reset($terminal_comic_query->posts);
@@ -43,19 +36,19 @@ class ComicPressDBInterface {
     $this->_reset_wp_query();
     return $post;
   }
-  
+
   /**
    * Get the first comic in a category.
    */
-  function get_first_comic($category_id) {
-    return $this->get_terminal_post_in_category($category_id);
+  function get_first_comic($include_categories = null) {
+    return $this->get_terminal_post(true, $include_categories);
   }
-  
+
   /**
    * Get the last comic in a category.
    */
-  function get_last_comic($category_id) {
-    return $this->get_terminal_post_in_category($category_id, false);  
+  function get_last_comic($include_categories = null) {
+    return $this->get_terminal_post(false, $include_categories);
   }
 
   /**
@@ -67,7 +60,7 @@ class ComicPressDBInterface {
 
     $this->_prepare_wp_query();
     if (!is_null($override_post)) { $temp_post = $post; $post = $override_post; }
-    
+
     $result = get_adjacent_post(false, implode(" and ", $this->_get_categories_to_exclude($category)), !$next);
 
     $this->_reset_wp_query();
@@ -91,7 +84,7 @@ class ComicPressDBInterface {
     $wp_query->is_single = $this->is_single;
     $wp_query->in_the_loop = $this->in_the_loop;
   }
-  
+
   /**
    * Get the previous comic from the current one.
    */

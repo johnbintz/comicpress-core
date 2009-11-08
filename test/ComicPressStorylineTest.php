@@ -7,7 +7,7 @@ require_once('ComicPressStoryline.inc');
 class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
   function setUp() {
     _reset_wp();
-    
+
     $this->css = new ComicPressStoryline();
   }
 
@@ -83,7 +83,7 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
   function testCreateStorylineStructure($input, $expected_structure) {
     global $wp_object_cache;
     $this->assertTrue(empty($wp_object_cache->cache['comicpress']));
-    
+
     $this->assertEquals(is_array($expected_structure), $this->css->create_structure($input));
     $this->assertEquals($expected_structure, $this->css->_structure);
 
@@ -104,7 +104,7 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals(is_array($expected_structure), $this->css->create_structure($input));
     $this->assertEquals($expected_structure, $this->css->_structure);
   }
-  
+
   function providerTestGetFields() {
     return array(
       array('parent', 1, false),
@@ -115,7 +115,7 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
       array('valid', 6, false),
     );
   }
-  
+
   /**
    * @dataProvider providerTestGetFields
    */
@@ -126,7 +126,7 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
       '3' => array('parent' => 2, 'next' => 4, 'previous' => 2),
       '4' => array('parent' => 2, 'previous' => 3)
     );
-    
+
     $this->assertEquals($expected_value, $this->css->{$field}($category));
   }
 
@@ -139,13 +139,13 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
       array(array(3),   array('previous')),
     );
   }
-  
+
   /**
    * @dataProvider providerTestGetValidNav
    */
   function testGetValidNav($post_categories, $expected_navigation) {
     wp_set_post_categories(1, $post_categories);
-  
+
     $this->css->_structure = array(
       '1' => array('next' => 2),
       '2' => array('previous' => 1, 'next' => 3),
@@ -169,12 +169,12 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
   function testGetValidPostCategory($post_categories, $expected_result) {
     $css = $this->getMock('ComicPressStoryline', array('valid'));
     $css->expects($this->any())->method('valid')->will($this->returnValue(true));
-    
+
     wp_set_post_categories(1, $post_categories);
 
     $this->assertEquals($expected_result, $css->get_valid_post_category(1));
   }
-	
+
 	function testGetSimpleStoryline() {
 		$this->css->_structure = array(
       '1' => array('next' => 2),
@@ -182,7 +182,7 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
       '3' => array('parent' => 2, 'next' => 4, 'previous' => 2),
       '4' => array('parent' => 2, 'previous' => 3)
 		);
-		
+
 		$expected_result = array(
 		  array(
 			  '1' => array(
@@ -193,10 +193,10 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 				)
 			)
 		);
-		
+
 		$this->assertEquals($expected_result, $this->css->get_simple_storyline());
 	}
-	
+
 	function providerTestSetFlattenedStorylineOrder() {
 		return array(
 			array('0/1,0/1/2,0/1/2/3,0/1/2/4', '0/1,0/1/2,0/1/2/3,0/1/2/4', true),
@@ -204,7 +204,7 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 			array('0/1,0/1/2,0/1/2/5,0/1/2/3', '0/1,0/1/2,0/1/2/3,0/1/2/4', false),
 		);
 	}
-	
+
 	/**
 	 * @dataProvider providerTestSetFlattenedStorylineOrder
 	 */
@@ -212,11 +212,11 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 		$css = $this->getMock('ComicPressStoryline', array(
 			'get_flattened_storyline', 'set_flattened_storyline'
 		));
-		
+
 		$css->expects($this->once())
 		    ->method('get_flattened_storyline')
 				->will($this->returnValue('0/1,0/1/2,0/1/2/3,0/1/2/4'));
-				
+
 		if ($expected_return === true) {
 			$css->expects($this->once())
 					->method('set_flattened_storyline')
@@ -225,17 +225,17 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 			$css->expects($this->never())
 					->method('set_flattened_storyline');
 		}
-		
+
 		$this->assertEquals($expected_return, $css->set_order_via_flattened_storyline($input));
 	}
-	
+
 	function testMergeSimpleStoryline() {
 		$original = array(
 		  0 => array(1 => true),
 			1 => array(2 => true),
 			2 => array(3 => true, 4 => true)
 		);
-		
+
 		$expected = array(
 			0 => array(
 			  1 => array(
@@ -246,17 +246,17 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 				)
 			)
 		);
-		
+
 		$this->assertEquals($expected, $this->css->_merge_simple_storyline($original));
 	}
-	
+
 	function testGetCategorySimpleStructure() {
 		add_category(1, (object)array('parent' => 0));
 		add_category(2, (object)array('parent' => 1));
 		add_category(3, (object)array('parent' => 2));
 		add_category(4, (object)array('parent' => 2));
     add_category(5, (object)array('parent' => 0));
-		
+
 		$this->assertEquals(array(
 			'0' => array(
 				'1' => array(
@@ -267,7 +267,7 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 				)
 			)
 		), $this->css->get_category_simple_structure(1));
-    
+
     $this->assertEquals(array(
       '0' => array(
         '1' => array(
@@ -280,7 +280,7 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
       )
     ), $this->css->get_category_simple_structure());
 	}
-	
+
 	function providerTestNormalizeFlattenedStoryline() {
 		return array(
 			array('0/1,0/1/2,0/1/2/4', '0/1,0/1/2,0/1/2/4,0/1/2/3'),
@@ -289,7 +289,7 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 			array('', '0/1,0/1/2,0/1/2/3,0/1/2/4'),
 		);
 	}
-	
+
 	/**
 	 * @dataProvider providerTestNormalizeFlattenedStoryline
 	 */
@@ -299,7 +299,7 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 			$this->css->normalize_flattened_storyline($original_structure, '0/1,0/1/2,0/1/2/3,0/1/2/4')
 		);
 	}
-	
+
 	function testFlattenSimpleStoryline() {
 		$this->assertEquals('0/1,0/1/2,0/1/2/3,0/1/2/4', $this->css->flatten_simple_storyline(
 			array(
@@ -314,16 +314,16 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 			)
 		));
 	}
-	
+
 	function testLengthSort() {
 		$data = array(
 			'0/1', '0/1/3', '0/1/3/6', '0/1/3/7', '0/1/4', '0/1/4/2', '0/1/4/3'
 		);
-		
+
 		$expected_result = array(
 			'0/1', '0/1/3', '0/1/4', '0/1/3/6', '0/1/3/7', '0/1/4/2', '0/1/4/3'
 		);
-		
+
 		$this->assertEquals($expected_result, $this->css->_length_sort($data));
 	}
 
@@ -334,19 +334,28 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
       '3' => array('parent' => 2, 'next' => 4, 'previous' => 2),
       '4' => array('parent' => 2, 'previous' => 3)
     );
-    
+
     $this->assertEquals($this->css, $this->css->include_all());
     $this->assertEquals(array(1,2,3,4), $this->css->_category_search);
   }
 
   function testExcludeAll() {
     $this->css->_category_search = array(1,2,3,4);
-    
+
     $this->assertEquals($this->css, $this->css->exclude_all());
     $this->assertEquals(array(), $this->css->_category_search);
   }
 
-  function testFindChildren() {
+  function providerTestFindChildren() {
+  	return array(
+  		array(2), array('test')
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestFindChildren
+   */
+  function testFindChildren($search) {
     $this->css->_structure = array(
       '1' => array('next' => 2),
       '2' => array('parent' => 1, 'previous' => 1, 'next' => 3),
@@ -354,7 +363,9 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
       '4' => array('parent' => 2, 'previous' => 3)
     );
 
-    $this->assertEquals(array(2,3,4), $this->css->_find_children(2));
+    add_category(2, (object)array('slug' => 'test'));
+
+    $this->assertEquals(array(2,3,4), $this->css->_find_children($search));
   }
 
   function testIncludeChildren() {
@@ -412,6 +423,87 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
     $this->css->_category_search = array(1,2,3);
     $this->assertEquals(array(1,2,3), $this->css->end_search());
     $this->assertEquals(array(), $this->css->_category_search);
+  }
+
+  function providerTestFindOnly() {
+  	return array(
+  		array(1, array(1)),
+  		array(5, array()),
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestFindOnly
+   */
+  function testFindOnly($id, $expected_return) {
+  	$this->css->_structure = array(
+      '1' => array('next' => 2, 'level' => 1),
+      '2' => array('parent' => 1, 'previous' => 1, 'next' => 3, 'level' => 2),
+      '3' => array('parent' => 2, 'next' => 4, 'previous' => 2, 'level' => 3),
+      '4' => array('parent' => 2, 'previous' => 3, 'level' => 3)
+    );
+
+    $this->assertEquals($expected_return, $this->css->_find_only($id));
+  }
+
+	function providerTestFindLevel() {
+		return array(
+			array(1, array(1)),
+			array(2, array(2)),
+			array(3, array(3,4))
+		);
+	}
+
+  /**
+   * @dataProvider providerTestFindLevel
+   */
+  function testFindLevel($id, $expected_return) {
+  	$this->css->_structure = array(
+      '1' => array('next' => 2, 'level' => 1),
+      '2' => array('parent' => 1, 'previous' => 1, 'next' => 3, 'level' => 2),
+      '3' => array('parent' => 2, 'next' => 4, 'previous' => 2, 'level' => 3),
+      '4' => array('parent' => 2, 'previous' => 3, 'level' => 3)
+    );
+
+    $this->assertEquals($expected_return, $this->css->_find_level($id));
+  }
+
+	function providerTestBuildFromRestrictions() {
+		return array(
+			array(
+				null,
+				array(1,2,3,4,5,6,7)
+			),
+			array(
+				array(),
+				array(1,2,3,4,5,6,7)
+			),
+			array(
+				array('child_of' => 1),
+				array(1,2,3)
+			),
+			array(
+				array('only' => 1),
+				array(1)
+			),
+			array(
+				array('child_of' => 1, 'only' => 7),
+				array(1,2,3,7)
+			),
+			array(
+				array('level' => 1),
+				array(1,4,7)
+				)
+		);
+	}
+
+  /**
+   * @dataProvider providerTestBuildFromRestrictions
+   */
+  function testBuildFromRestrictions($restrictions, $expected_categories) {
+  	$this->css->set_flattened_storyline('0/1,0/1/2,0/1/3,0/4,0/4/5,0/4/6,0/7');
+
+  	$this->assertEquals($expected_categories, $this->css->build_from_restrictions($restrictions));
   }
 }
 
