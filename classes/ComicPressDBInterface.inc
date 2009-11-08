@@ -1,7 +1,7 @@
 <?php
 
 class ComicPressDBInterface {
-  function ComicPressDBInterface() {}
+	function ComicPressDBInterface() {}
 
   function get_instance() {
     static $instance;
@@ -40,14 +40,14 @@ class ComicPressDBInterface {
   /**
    * Get the first comic in a category.
    */
-  function get_first_comic($include_categories = null) {
+  function get_first_post($include_categories = null) {
     return $this->get_terminal_post(true, $include_categories);
   }
 
   /**
    * Get the last comic in a category.
    */
-  function get_last_comic($include_categories = null) {
+  function get_last_post($include_categories = null) {
     return $this->get_terminal_post(false, $include_categories);
   }
 
@@ -55,13 +55,13 @@ class ComicPressDBInterface {
    * Get the comic post adjacent to the current comic.
    * Wrapper around get_adjacent_post(). Don't unit test this method.
    */
-  function get_adjacent_comic($category, $next = false, $override_post = null) {
+  function get_adjacent_post($categories = array(), $next = false, $override_post = null) {
     global $post;
 
     $this->_prepare_wp_query();
     if (!is_null($override_post)) { $temp_post = $post; $post = $override_post; }
 
-    $result = get_adjacent_post(false, implode(" and ", $this->_get_categories_to_exclude($category)), !$next);
+    $result = get_adjacent_post(false, implode(" and ", array_diff(get_all_category_ids(), $categories)), !$next);
 
     $this->_reset_wp_query();
     if (!is_null($override_post)) { $post = $temp_post; }
@@ -88,12 +88,12 @@ class ComicPressDBInterface {
   /**
    * Get the previous comic from the current one.
    */
-  function get_previous_comic($category = null, $override_post = null) { return $this->get_adjacent_comic($category, false, $override_post); }
+  function get_previous_post($categories = array(), $override_post = null) { return $this->get_adjacent_post($categories, false, $override_post); }
 
   /**
    * Get the next comic from the current one.
    */
-  function get_next_comic($category = null, $override_post = null) { return $this->get_adjacent_comic($category, true, $override_post); }
+  function get_next_post($categories = array(), $override_post = null) { return $this->get_adjacent_post($categories, true, $override_post); }
 }
 
 ?>

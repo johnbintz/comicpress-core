@@ -54,7 +54,7 @@ function finish_comicpress() {
 /**
  * Protect global $post and $wp_query.
  */
-function protect_query() {
+function Protect() {
 	global $post, $wp_query, $__post, $__wp_query;
 
 	$__post = $post;
@@ -62,9 +62,19 @@ function protect_query() {
 }
 
 /**
+ * Temporarily restore the global $post variable and set it up for use.
+ */
+function Restore() {
+	global $post, $__post;
+
+	$post = $__post;
+	setup_postdata($post);
+}
+
+/**
  * Restore global $post and $wp_query.
  */
-function unprotect_query() {
+function Unprotect() {
 	global $post, $wp_query, $__post, $__wp_query;
 
 	$post = $__post;
@@ -73,47 +83,49 @@ function unprotect_query() {
 	$__post = $__wp_query = null;
 }
 
-function retrieve_storyline_post($which, $restrictions = null, $override_post = null) {
+function R($which, $restrictions = null, $override_post = null) {
 	global $post;
+	$post_to_use = !is_null($override_post) ? $override_post : $post;
 
 	$storyline = new ComicPressStoryline();
-	$storyline->read_from_options()->exclude_all();
 
-	if (!is_null($restrictions)) {
-		if (is_array($restrictions)) {
-			foreach ($restrictions as $type => $list) {
-				switch ($type) {
-					case 'child_of':
-						foreach ($list as $restriction) {	$storyline->include_children($restriction); }
-						break;
-				}
-			}
+	if (is_string($restrictions)) {
+		switch ($restrictions) {
+			case 'from_post':
+				$restrictions = array('from_post' => $post_to_use);
+				break;
 		}
-	} else {
-		$storyline->include_all();
 	}
 
-	$categories = $storyline->end_search();
-
-	var_dump($categories);
+	$categories = $storyline->build_from_restrictions($restrictions);
 
 	$dbi = ComicPressDBInterface::get_instance();
 
 	$new_post = false;
 
 	switch ($which) {
-		case 'first':
-		case 'last':
-		case 'next':
-		case 'previous':
-		  $method = "get_${which}_post";
-		  if (method_exists($dbi, $method)) {
-		  	$new_post = $dbi->{$method}($categories);
-		  }
-		  break;
+		case 'first':     $new_post = $dbi->get_first_post($categories); break;
+		case 'last':      $new_post = $dbi->get_last_post($categories); break;
+		case 'next':      $new_post = $dbi->get_next_post($categories, $post_to_use); break;
+		case 'previous':  $new_post = $dbi->get_previous_post($categories, $post_to_use); break;
   }
 
   return $new_post;
+}
+
+function RT($which, $restrictions = null, $override_post = null) {
+	global $post, $__post;
+	if (!empty($override_post)) {
+		$post_to_use = $override_post;
+	} else {
+	  $post_to_use = (!empty($__post)) ? $__post : $post;
+	}
+
+	if (($new_post = R($which, $restrictions, $post_to_use)) !== false) {
+		$post = $new_post;
+		setup_postdata($post);
+	}
+	return $post;
 }
 
 /**

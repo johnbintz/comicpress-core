@@ -1,7 +1,9 @@
 <?php
-	$current_post = retrieve_storyline_post('last', array('child_of' => array('amoc', 'dawns-dictionary-drama')));
+	$previous_post = R('previous');
+	$next_post = R('next');
 
-	var_dump($current_post);
+	var_dump($previous_post);
+	var_dump($next_post);
 
 	finish_comicpress();
 ?>

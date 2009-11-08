@@ -412,14 +412,18 @@ class ComicPressStoryline {
   	return false;
   }
 
-  function &_include($method, $parameter) {
-    $this->_category_search = array_unique(array_merge($this->_category_search, $this->{$method}($parameter)));
+  function &_include() {
+  	$args = func_get_args();
+  	$method = array_shift($args);
+    $this->_category_search = array_unique(array_merge($this->_category_search, call_user_func_array(array($this, $method), $args)));
     sort($this->_category_search);
     return $this;
   }
 
-  function &_exclude($method, $parameter) {
-    $this->_category_search = array_diff($this->_category_search, $this->{$method}($parameter));
+  function &_exclude() {
+  	$args = func_get_args();
+  	$method = array_shift($args);
+  	$this->_category_search = array_diff($this->_category_search, call_user_func_array(array($this, $method), $args));
     sort($this->_category_search);
     return $this;
   }
@@ -479,6 +483,56 @@ class ComicPressStoryline {
   	return $this->_exclude('_find_level', $id);
   }
 
+  function _find_post_category($post = null) {
+  	$found = array();
+
+  	$id = null;
+  	if (is_object($post)) {
+			if (isset($post->ID)) { $id = $post->ID; }
+  	} else {
+  		if (is_numeric($post)) { $id = $post; }
+  	}
+
+  	if (!is_null($id)) {
+  		if (count($categories = wp_get_post_categories($id)) == 1) {
+  			$found = $categories;
+  		}
+  	}
+  	return $found;
+  }
+
+  function &include_post_category($post = null) {
+  	return $this->_include('_find_post_category', $post);
+  }
+
+  function &exclude_post_category($post = null) {
+  	return $this->_exclude('_find_post_category', $post);
+  }
+
+  function _find_adjacent($category = null, $next = false) {
+  	$found = array();
+
+  	if (!is_null($category)) {
+  	  if (isset($this->_structure[$category])) {
+				$field = $next ? 'next' : 'previous';
+				if (isset($this->_structure[$category][$field])) {
+					$found = array($this->_structure[$category][$field]);
+				}
+  	  }
+  	}
+
+  	return $found;
+  }
+
+  function &include_adjacent($category = null, $next = false) {
+  	return $this->_include('_find_adjacent', $category, $next);
+  }
+
+  function &exclude_adjacent($category = null, $next = false) {
+  	return $this->_exclude('_find_adjacent', $category, $next);
+  }
+
+
   function end_search() {
     $result = $this->_category_search;
     $this->_category_search = array();
@@ -486,6 +540,8 @@ class ComicPressStoryline {
   }
 
   function build_from_restrictions($restrictions = null) {
+  	global $post;
+
 		$this->read_from_options()->exclude_all();
 
 		$include_all = true;
@@ -497,17 +553,33 @@ class ComicPressStoryline {
 
 		if (!$include_all) {
 			foreach ($restrictions as $type => $list) {
+				if (substr($type, 0, 1) == "!") {
+				  $method_root = 'exclude';
+					$method_type = substr($type, 1);
+				} else {
+					$method_root = 'include';
+					$method_type = $type;
+				}
+
 				foreach ((array)$list as $restriction) {
-					switch ($type) {
-						case 'child_of':
-						  $this->include_children($restriction);
+					$method = '';
+					$args = array($restriction);
+					switch ($method_type) {
+						case 'child_of': $method = 'children'; break;
+						case 'from_post': $method = 'post_category'; break;
+						case 'previous':
+							$method = 'adjacent';
+							$args[] = false;
 							break;
-						case 'only':
-						  $this->include_only($restriction);
-						  break;
-						case 'level':
-							$this->include_level($restriction);
+						case 'next':
+							$method = 'adjacent';
+							$args[] = true;
 							break;
+						default:
+							$method = $method_type; break;
+					}
+					if (!empty($method)) {
+						call_user_func_array(array($this, "${method_root}_${method}"), $args);
 					}
 			  }
 			}

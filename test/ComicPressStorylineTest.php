@@ -468,6 +468,52 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals($expected_return, $this->css->_find_level($id));
   }
 
+  function providerTestFindPostCategory() {
+  	return array(
+  		array(array(1), array(1)),
+  		array(array(1,2), array())
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestFindPostCategory
+   */
+  function testFindPostCategory($post_categories, $expected_return) {
+  	$this->css->_structure = array(
+      '1' => array('next' => 2, 'level' => 1),
+      '2' => array('parent' => 1, 'previous' => 1, 'next' => 3, 'level' => 2),
+      '3' => array('parent' => 2, 'next' => 4, 'previous' => 2, 'level' => 3),
+      '4' => array('parent' => 2, 'previous' => 3, 'level' => 3)
+    );
+
+    wp_set_post_categories(1, $post_categories);
+
+    $this->assertEquals($expected_return, $this->css->_find_post_category(1));
+  }
+
+  function providerTestFindAdjacentCategory() {
+  	return array(
+  		array(3, false, array(2)),
+  		array(3, true, array(4)),
+  		array(1, false, array()),
+  		array(4, true, array()),
+  		);
+  }
+
+  /**
+   * @dataProvider providerTestFindAdjacentCategory
+   */
+  function testFindAdjacentCategory($category, $which, $expected_return) {
+  	$this->css->_structure = array(
+      '1' => array('next' => 2, 'level' => 1),
+      '2' => array('parent' => 1, 'previous' => 1, 'next' => 3, 'level' => 2),
+      '3' => array('parent' => 2, 'next' => 4, 'previous' => 2, 'level' => 3),
+      '4' => array('parent' => 2, 'previous' => 3, 'level' => 3)
+    );
+
+    $this->assertEquals($expected_return, $this->css->_find_adjacent($category, $which));
+  }
+
 	function providerTestBuildFromRestrictions() {
 		return array(
 			array(
@@ -493,7 +539,19 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 			array(
 				array('level' => 1),
 				array(1,4,7)
-				)
+			),
+			array(
+				array('from_post' => 1),
+				array(3)
+			),
+			array(
+				array('previous' => 3),
+				array(2)
+			),
+			array(
+				array('next' => 3),
+				array(4)
+			)
 		);
 	}
 
@@ -501,7 +559,12 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
    * @dataProvider providerTestBuildFromRestrictions
    */
   function testBuildFromRestrictions($restrictions, $expected_categories) {
+  	global $post;
+
   	$this->css->set_flattened_storyline('0/1,0/1/2,0/1/3,0/4,0/4/5,0/4/6,0/7');
+
+  	wp_set_post_categories(1, array(3));
+  	$post = (object)array('ID' => 1);
 
   	$this->assertEquals($expected_categories, $this->css->build_from_restrictions($restrictions));
   }
