@@ -7,7 +7,7 @@ class ComicPressAdmin {
    */
   function init() {
 		$this->comicpress = &ComicPress::get_instance();
-		
+
 		add_action('admin_menu', array(&$this, 'admin_menu'));
     add_filter('attachment_fields_to_edit', array(&$this, 'setup_comic_metadata_buttons'), 10, 2);
 
@@ -39,10 +39,10 @@ class ComicPressAdmin {
               . ']" value="'
               . $index
               . '" /></label>';
-              
+
     return $content;
   }
-  
+
   function comicpress_display_attached_images($content, $post_id) {
     $content = '<form method="post">'
              . '<input type="hidden" name="cp[_nonce]" value="'
@@ -56,7 +56,7 @@ class ComicPressAdmin {
              . __('Change image ordering', 'comicpress')
              . '" />'
              . '</form>';
-    
+
     return $content;
   }
 
@@ -118,7 +118,7 @@ class ComicPressAdmin {
                           . $label
                           . '</label>';
     }
-    
+
     $form_fields['comic_image_type'] = array(
       'label' => __("Comic Image Type", 'comicpress'),
       'input' => 'html',
@@ -134,7 +134,7 @@ class ComicPressAdmin {
                 . '</em>'
       );
     }
-    
+
     return $form_fields;
   }
 
@@ -143,14 +143,13 @@ class ComicPressAdmin {
    */
   function render_admin() {
     $nonce = wp_create_nonce('comicpress');
-    $root_categories = $this->get_root_categories();
 		$storyline = new ComicPressStoryline();
 		$storyline->normalize();
 		$storyline->read_from_options();
 
-    include(dirname(__FILE__) . '/partials/options-admin.inc'); 
+    include(dirname(__FILE__) . '/partials/options-admin.inc');
   }
-	
+
 	function _render_admin_storyline_tree($node, $parent_id = "0") {
 	  foreach ($node as $category_id => $children) {
 			$category = get_category($category_id);
@@ -164,7 +163,7 @@ class ComicPressAdmin {
 			echo '</div>';
 		}
 	}
-  
+
   /**
    * Render the comic image ordering interface.
    */
@@ -173,7 +172,7 @@ class ComicPressAdmin {
 
     $uploading_iframe_ID = (int) (0 == $post_ID ? $temp_ID : $post_ID);
     if (is_numeric($override_post)) { $uploading_iframe_ID = $override_post; }
-    
+
     $comic_post = new ComicPressComicPost(get_post($uploading_iframe_ID));
     $ordering = $comic_post->normalize_comic_image_ordering();
 
@@ -203,52 +202,6 @@ class ComicPressAdmin {
   }
 
   /**
-   * Get all categories with a parent ID of 0.
-   * @return array All root categories.
-   */
-  function get_root_categories() {
-    $root_categories = array();
-    foreach (get_all_category_ids() as $id) {
-      $category = get_category($id);
-      if (!empty($category)) {
-        if ($category->parent == 0) {
-          $root_categories[] = $category;
-        }
-      }
-    }
-    return $root_categories;
-  }
-
-  /**
-   * Create &lt;option&gt; elements for each of the provided categories.
-   * @param array $categories The categories to display as either IDs or category objects.
-   * @param int $selected_id The category to mark as selected.
-   * @return string The category options as HTML.
-   */
-  function create_category_options($categories, $selected_id) {
-    $output = array();
-    if (is_array($categories)) {
-      $final_categories = array();
-      foreach ($categories as $category) {
-        if (is_numeric($category)) {
-          $result = get_category($category);
-          if (!(is_a($result, "WP_Error") || empty($result))) {
-            $final_categories[] = $result;
-          }
-        }
-        if (is_object($category)) {
-          $final_categories[] = $category;
-        }
-      }
-
-      foreach ($final_categories as $category) {
-        $output[] = '<option value="' . $category->term_id . '"' . (($category->term_id == $selected_id) ? ' selected="selected"' : '') . '>' . $category->name . '</option>';
-      }
-    }
-    return implode("\n", $output);
-  }
-  
-  /**
    * Create a dimension selector.
    * @param string $root The field name root.
    * @param $dimension The dimension to pre-fill into the fields.
@@ -256,7 +209,7 @@ class ComicPressAdmin {
    */
   function create_dimension_selector($root, $dimension) {
     $output = array();
-    
+
     $parts = explode("x", $dimension);
     foreach (array(
       'width' => __('Width', 'comicpress'),
@@ -264,7 +217,7 @@ class ComicPressAdmin {
     ) as $id => $name) {
       $dim = array_shift($parts);
       if (!empty($dim) && !is_numeric($dim)) { $dim = ""; }
-      $output[] = '<label>' . $name . ': <input type="text" name="' . $root . '[' . $id . ']" value="' . $dim . '" size="4" />px</label><br />';       
+      $output[] = '<label>' . $name . ': <input type="text" name="' . $root . '[' . $id . ']" value="' . $dim . '" size="4" />px</label><br />';
     }
     return implode("\n", $output);
   }
@@ -283,7 +236,7 @@ class ComicPressAdmin {
   function handle_update_attachments() {
     foreach ($_POST['attachments'] as $post_id => $settings) {
       if (isset($settings['comic_image_type'])) {
-        update_post_meta($post_id, 'comic_image_type', $settings['comic_image_type']); 
+        update_post_meta($post_id, 'comic_image_type', $settings['comic_image_type']);
       }
       if (isset($settings['auto_attach']) && isset($settings['post_parent'])) {
         $media_post = get_post($post_id);
@@ -292,7 +245,7 @@ class ComicPressAdmin {
       }
     }
   }
-  
+
   /**
    * Update ComicPress options.
    */
@@ -303,14 +256,6 @@ class ComicPressAdmin {
     foreach ($this->comicpress->comicpress_options as $option => $value) {
       if (isset($info[$option])) {
         switch ($option) {
-          case 'comic_category_id':
-            if (is_numeric($info[$option])) {
-              $result = get_category($info[$option]);
-              if (!(is_a($result, 'WP_Error') || empty($result))) {
-                $this->comicpress->comicpress_options[$option] = $info[$option]; 
-              } 
-            }
-            break;
           case 'comic_dimensions':
           case 'rss_dimensions':
           case 'archive_dimensions':
@@ -330,19 +275,11 @@ class ComicPressAdmin {
                   }
                 }
               }
-              
+
               if ($is_valid) {
                 $this->comicpress->comicpress_options[$option] = implode("x", $dim_parts);
               }
             }
-            break;
-          case 'blogpost_count':
-            $this->comicpress->comicpress_options[$option] = (int)$info[$option];
-            break;
-          case 'comic_space':
-          case 'category_usage':
-          case 'layout';
-            $this->comicpress->comicpress_options[$option] = $info[$option];
             break;
           case 'helpers':
           case 'addons':
@@ -366,9 +303,9 @@ class ComicPressAdmin {
       require_once(ABSPATH."/wp-includes/js/tinymce/plugins/spellchecker/classes/utils/JSON.php");
       $j = new Moxiecode_JSON();
       return $j->decode($string);
-    } 
+    }
   }
-  
+
   function handle_update_comic_ordering() {
     if (is_numeric($_POST['post_ID'])) {
       if ($post = get_post($_POST['post_ID'])) {
@@ -429,7 +366,7 @@ class ComicPressAdmin {
       }
     }
   }
-  
+
   /**
    * Create the dropdown for choosing a layout.
    */

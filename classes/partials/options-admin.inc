@@ -9,7 +9,7 @@
         <td>
 					<input type="hidden" name="cp[storyline_order]" />
 					<div id="storyline-sorter" class="cp-children">
-	          <?php 
+	          <?php
 							$this->_render_admin_storyline_tree(reset($storyline->get_simple_storyline()))
 						?>
 					</div>
@@ -30,12 +30,6 @@
           </td>
         </tr>
       <?php } ?>
-      <tr>
-        <th scope="row" valign="top"><?php _e("Number of blog posts on home page", 'comicpress') ?></th>
-        <td>
-          <input type="text" name="cp[blogpost_count]" value="<?php echo $this->comicpress->comicpress_options['blogpost_count'] ?>" size="3" />
-        </td>
-      </tr>
     </table>
     <h3><?php _e('Admin Options', 'comicpress') ?></h3>
     <table class="widefat fixed">
@@ -64,11 +58,11 @@
           <td>
             <?php
               foreach ($this->all_addons as $addon) {
-                if (!empty($addon->name)) {                
+                if (!empty($addon->name)) {
                   $enabled = ($addon->is_addon_manager !== true);
                   $checked = $enabled && $this->comicpress->comicpress_options['addons'][$addon->name];
                   ?>
-                  
+
                   <label>
                     <input type="checkbox"
                            name="cp[addons][<?php echo $addon->name ?>]"
@@ -82,7 +76,7 @@
             ?>
           </td>
         </tr>
-      <?php } ?>      
+      <?php } ?>
     </table>
     <input class="button" type="submit" value="<?php _e('Submit Changes', 'comicpress') ?>" />
   </form>
