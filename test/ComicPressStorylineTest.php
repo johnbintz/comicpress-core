@@ -474,6 +474,39 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals($expected_return, $this->css->_find_adjacent($category, $which));
   }
 
+  function providerTestFindPostRoot() {
+  	return array(
+  		array(array(1), array(1)),
+  		array(array(4), array(1)),
+  		array(array(5), array(5)),
+  		array(array(1, 5), array()),
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestFindPostRoot
+   */
+  function testFindPostRoot($post_categories, $expected_return) {
+  	$this->css->_structure = array(
+      '1' => array('next' => 2, 'level' => 1, 'parent' => 0),
+      '2' => array('parent' => 1, 'previous' => 1, 'next' => 3, 'level' => 2),
+      '3' => array('parent' => 2, 'next' => 4, 'previous' => 2, 'level' => 3),
+      '4' => array('parent' => 2, 'previous' => 3, 'next' => 5, 'level' => 3),
+      '5' => array('parent' => 0, 'previous' => 4, 'level' => 1),
+  	);
+
+  	wp_set_post_categories(1, $post_categories);
+  	wp_insert_post(array('ID' => 1));
+
+    add_category(1, (object)array('slug' => 'root', 'parent' => 0));
+    add_category(2, (object)array('slug' => 'comic', 'parent' => 1));
+    add_category(3, (object)array('slug' => 'part-1', 'parent' => 2));
+    add_category(4, (object)array('slug' => 'blog', 'parent' => 1));
+    add_category(5, (object)array('slug' => 'blog', 'parent' => 0));
+
+    $this->assertEquals($expected_return, $this->css->_find_post_root(1));
+  }
+
   function providerTestBuildFromRestrictions() {
 		return array(
 			array(

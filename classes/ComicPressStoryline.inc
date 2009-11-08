@@ -451,15 +451,20 @@ class ComicPressStoryline {
 		return $found;
   }
 
+  function _ensure_post_id($thing) {
+  	$id = null;
+  	if (is_object($thing)) {
+			if (isset($thing->ID)) { $id = $thing->ID; }
+  	} else {
+  		if (is_numeric($thing)) { $id = $thing; }
+  	}
+  	return $id;
+  }
+
   function _find_post_category($post = null) {
   	$found = array();
 
-  	$id = null;
-  	if (is_object($post)) {
-			if (isset($post->ID)) { $id = $post->ID; }
-  	} else {
-  		if (is_numeric($post)) { $id = $post; }
-  	}
+  	$id = $this->_ensure_post_id($post);
 
   	if (!is_null($id)) {
   		if (count($categories = wp_get_post_categories($id)) == 1) {
@@ -481,6 +486,23 @@ class ComicPressStoryline {
   	  }
   	}
 
+  	return $found;
+  }
+
+  function _find_post_root($post = null) {
+  	$found = array();
+
+  	$id = $this->_ensure_post_id($post);
+
+  	if (!is_null($id)) {
+  		if (count($categories = wp_get_post_categories($id)) == 1) {
+  			$comic_post = new ComicPressComicPost(get_post($id));
+  			$parents = $comic_post->find_parents();
+  			if (!empty($parents)) {
+  				$parents = array_keys($parents); $found[] = end($parents);
+  			}
+  		}
+  	}
   	return $found;
   }
 
