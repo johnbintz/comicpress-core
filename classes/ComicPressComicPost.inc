@@ -113,10 +113,10 @@ class ComicPressComicPost {
 			if (!is_array($current_ordering)) { $current_ordering = array(); }
 
       $all_current_ids = array();
-      foreach ($current_ordering as $key => $children) {
+      foreach ($current_ordering as $key => $properties) {
       	$all_current_ids[$key] = true;
-      	if (is_array($children)) {
-      		foreach ($children as $type => $kids) {
+      	if (isset($properties['children'])) {
+      		foreach ($properties['children'] as $type => $kids) {
       			$all_current_ids = array_merge($all_current_ids, $kids);
       		}
       	}
@@ -130,22 +130,28 @@ class ComicPressComicPost {
       $missing_attachments = array_diff($all_current_ids, $attachment_ids);
 
       foreach ($new_attachments as $attachment_id) {
-      	$current_ordering[$attachment_id] = true;
+      	$current_ordering[$attachment_id] = array('enabled' => true);
       }
 
       foreach ($missing_attachments as $attachment_id) {
       	if (isset($current_ordering[$attachment_id])) {
       		unset($current_ordering[$attachment_id]);
       	} else {
-      		foreach ($current_ordering as $key => $children) {
-      			foreach ($children as $type => $kids) {
-      				if (isset($kids[$attachment_id])) { unset($kids[$attachment_id]);	}
-      				$children[$type] = $kids;
-      			}
-      			if (empty($children[$type])) {
-      				$current_ordering[$key] = true;
-      			} else {
-      				$current_ordering[$key] = $children;
+      		foreach ($current_ordering as $key => $properties) {
+      			if (isset($properties['children'])) {
+	      			foreach ($properties['children'] as $type => $kids) {
+	      				if (isset($kids[$attachment_id])) { unset($kids[$attachment_id]);	}
+	      				if (empty($kids)) {
+	      				  unset($properties['children'][$type]);
+	      				} else {
+	      				  $properties['children'][$type] = $kids;
+	      				}
+	      			}
+	      			if (empty($properties['children'])) {
+	      				unset($current_ordering[$key]['children']);
+	      			} else {
+	      				$current_ordering[$key] = $properties;
+	      			}
       			}
       		}
       	}
