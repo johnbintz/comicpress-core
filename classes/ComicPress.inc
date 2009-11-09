@@ -13,8 +13,15 @@ class ComicPress {
     'mini_dimensions'     => '100x',
     'helpers'             => array(),
     'addons'              => array(),
-		'storyline_order'     => ''
+		'storyline_order'     => '',
+    'subattachment_types' => array(
+  		'rss'     => 'RSS',
+  		'archive' => 'Archive',
+  		'mini'    => 'Mini Thumb'
+  	)
   );
+
+  var $backends = array('ComicPressBackendAttachment');
 
 	function &get_instance() {
 		static $instance;
@@ -58,6 +65,7 @@ class ComicPress {
     }
 
     add_filter('intermediate_image_sizes', array(&$this, 'intermediate_image_sizes'));
+		add_filter('editor_max_image_size', array(&$this, 'editor_max_image_size'), 10, 2);
 
     foreach (array('comic', 'rss', 'archive', 'mini') as $size) {
       list($w, $h) = explode("x", $this->comicpress_options["${size}_dimensions"]);
@@ -69,6 +77,14 @@ class ComicPress {
 
   function intermediate_image_sizes($sizes) {
     return array_merge($sizes, array('comic', 'rss', 'archive', 'mini'));
+  }
+
+  function editor_max_image_size($current_max, $size) {
+  	if (isset($this->comicpress_options["${size}_dimensions"])) {
+  		list($width, $height) = explode('x', $this->comicpress_options["${size}_dimensions"]);
+  		$current_max = array(intval($width), intval($height));
+  	}
+  	return $current_max;
   }
 
   function announce_activated_helpers() {

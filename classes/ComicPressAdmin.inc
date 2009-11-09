@@ -80,7 +80,7 @@ class ComicPressAdmin {
 			wp_enqueue_script('cp-admin', get_template_directory_uri() . '/js/Storyline.js', array('prototype', 'scriptaculous'));
 		}
 
-		if (strpos($pagenow, "media-upload") === 0) {
+		if (strpos($pagenow, "-upload") !== false) {
 			wp_enqueue_script('cp-media', get_template_directory_uri() . '/js/MediaUpload.js', array('prototype'));
 		}
 	}
@@ -176,28 +176,26 @@ class ComicPressAdmin {
     $comic_post = new ComicPressComicPost(get_post($uploading_iframe_ID));
     $ordering = $comic_post->normalize_comic_image_ordering();
 
-    if (is_array($ordering)) {
-      $nonce = wp_create_nonce('comicpress');
-      $zoom_level = 40;
-      $current_user = wp_get_current_user();
-      if (!empty($current_user)) {
-        $comicpress_meta = get_usermeta($current_user->ID, 'comicpress-settings');
-        if (is_array($comicpress_meta)) {
-          if (isset($comicpress_meta['zoom_level'])) {
-            $zoom_level = floor($comicpress_meta['zoom_level']);
-          }
+    $nonce = wp_create_nonce('comicpress');
+    $zoom_level = 40;
+    $current_user = wp_get_current_user();
+    if (!empty($current_user)) {
+      $comicpress_meta = get_usermeta($current_user->ID, 'comicpress-settings');
+      if (is_array($comicpress_meta)) {
+        if (isset($comicpress_meta['zoom_level'])) {
+          $zoom_level = floor($comicpress_meta['zoom_level']);
         }
       }
+    }
 
-      // from wp-admin/includes/media.php O_o
-      $media_upload_iframe_src = "media-upload.php?post_id=$uploading_iframe_ID";
-      $image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src&amp;type=image&amp;TB_iframe=true");
+    // from wp-admin/includes/media.php O_o
+    $media_upload_iframe_src = "media-upload.php?post_id=$uploading_iframe_ID";
+    $image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src&amp;type=image&amp;TB_iframe=true");
 
-      if ($is_ajax === true) {
-        include(dirname(__FILE__) . '/partials/_comic-image-ordering-sorters.inc');
-      } else {
-        include(dirname(__FILE__) . '/partials/_comic-image-ordering.inc');
-      }
+    if ($is_ajax === true) {
+      include(dirname(__FILE__) . '/partials/_comic-image-ordering-sorters.inc');
+    } else {
+      include(dirname(__FILE__) . '/partials/_comic-image-ordering.inc');
     }
   }
 

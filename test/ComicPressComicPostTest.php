@@ -20,7 +20,7 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
       )
     );
   }
-  
+
   /**
    * @dataProvider providerTestGenerateComicTag
    */
@@ -30,7 +30,7 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
         'comic_dimensions' => $dimensions
       )
     );
-    
+
     $source = $this->p->get_comic_img_tag("test.gif", "comic");
 
     if (count($parts = explode("x", $dimensions)) == 2) {
@@ -46,83 +46,54 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
       }
     }
   }
-  
-  function testNormalizeComicImageOrdering() {
-    $p = $this->getMock('ComicPressComicPost', array('get_comic_image_attachments'));
-    
-    $comic_attachments = array(
-      array(
-        'ID' => 2,
-        'post_parent' => 1,
-        'post_title' => 'Comic one',
-        'post_meta' => array(
-          'comic_image_type' => 'comic'
-        ),
-        'post_date' => 1
-      ),
-      array(
-        'ID' => 3,
-        'post_parent' => 1,
-        'post_title' => 'Comic two',
-        'post_meta' => array(
-          'comic_image_type' => 'comic'
-        ),
-        'post_date' => 2
-      ),
-      array(
-        'ID' => 4,
-        'post_parent' => 1,
-        'post_title' => 'Comic three',
-        'post_meta' => array(
-          'comic_image_type' => 'rss'
-        ),
-        'post_date' => 4
-      ),      
-      array(
-        'ID' => 5,
-        'post_parent' => 1,
-        'post_title' => 'Comic four',
-        'post_meta' => array(
-          'comic_image_type' => 'rss'
-        ),
-        'post_date' => 3
-      ),      
-    );
-    
-    $attachments = array();
-    foreach ($comic_attachments as $attachment_info) {
-      $attachment = (object)array();
-      foreach ($attachment_info as $field => $value) {        
-        switch ($field) {
-          case "post_meta":
-            foreach ($value as $meta => $meta_value) {
-              update_post_meta($attachment_info['ID'], $meta, $meta_value);
-            }
-            break;
-          case "post_date":
-            $attachment->{$field} = date("r", $value);
-            break;
-          default:
-            $attachment->{$field} = $value;
-            break; 
-        }
-      }
-      $attachments[] = $attachment;
-    }
-    
-    $p->expects($this->any())->method('get_comic_image_attachments')->will($this->returnValue($attachments));
-    
-    wp_insert_post((object)array('ID' => 1));
-    update_post_meta(1, 'comic_ordering', array('comic' => array(3)));
-    
-    $p->post = (object)array('ID' => 1);
-    
-    $result = $p->normalize_comic_image_ordering();
-    
-    $this->assertEquals(array('comic' => array(3,2), 'rss' => array(5,4)), $result);
-    $this->assertEquals(array('comic' => array(3,2), 'rss' => array(5,4)), get_post_meta(1, 'comic_ordering', true));
+
+  function providerTestNormalizeOrdering() {
+  	return array(
+  		array(
+  			array('attachment-1'),
+  			array(),
+  			array('attachment-1' => true)
+  		),
+  		array(
+  			array('attachment-1'),
+  			array('attachment-1' => true, 'attachment-2' => true),
+  			array('attachment-1' => true)
+  		),
+  		array(
+  			array('attachment-1'),
+  			array('attachment-1' => array('rss' => array('attachment-2' => true))),
+  			array('attachment-1' => true)
+  		),
+  		array(
+  			array('attachment-1', 'attachment-2', 'attachment-3'),
+  			array('attachment-1' => array('rss' => array('attachment-2' => true))),
+  			array('attachment-1' => array('rss' => array('attachment-2' => true)), 'attachment-3' => true)
+  		),
+  	);
   }
-  
+
+  /**
+   * @dataProvider providerTestNormalizeOrdering
+   */
+  function testNormalizeOrdering($attachments, $current_meta, $expected_result) {
+    $p = $this->getMock('ComicPressComicPost', array('get_attachments'));
+
+    $attachment_objects = array();
+    foreach ($attachments as $attachment) {
+    	$attachment_objects[] = (object)array('id' => $attachment);
+    }
+
+    $p->expects($this->any())->method('get_attachments')->will($this->returnValue($attachment_objects));
+
+    wp_insert_post((object)array('ID' => 1));
+    update_post_meta(1, 'image-ordering', $current_meta);
+
+    $p->post = (object)array('ID' => 1);
+
+    $this->assertEquals($expected_result, $p->normalize_ordering());
+    $this->assertEquals($expected_result, get_post_meta(1, 'image-ordering', true));
+  }
+
   function providerTestChangeComicImageOrdering() {
     return array(
       array(
@@ -148,17 +119,17 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
       ),
     );
   }
-  
+
   /**
    * @dataProvider providerTestChangeComicImageOrdering
    * @covers ComicPressComicPost::change_comic_image_ordering
    */
   function testChangeComicImageOrdering($current_ordering, $revised_ordering, $expected_result) {
     update_post_meta(1, 'comic_ordering', $current_ordering);
-    
+
     $this->p->post = (object)array('ID' => 1);
     $this->p->change_comic_image_ordering($revised_ordering);
-    
+
     $this->assertEquals($expected_result, get_post_meta(1, 'comic_ordering', true));
   }
 
@@ -190,7 +161,7 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
   		),
   	);
   }
-  
+
   /**
    * @dataProvider providerTestFindParents
    */
@@ -199,11 +170,11 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
     add_category(2, (object)array('slug' => 'comic', 'parent' => 1));
     add_category(3, (object)array('slug' => 'part-1', 'parent' => 2));
     add_category(4, (object)array('slug' => 'blog', 'parent' => 1));
-    
+
     wp_set_post_categories(1, $post_categories);
-    
+
     $this->p->post = (object)array('ID' => 1);
-    
+
     $this->assertEquals($expected_result, $this->p->find_parents());
   }
 }

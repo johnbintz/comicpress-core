@@ -9,29 +9,31 @@
   <?php _e('Click the Refesh button underneath the zoom slider if you\'ve changed the images attached to this post.', 'comicpress') ?>
 
 </em></p>
-<?php foreach ($ordering as $type => $attachment_ids) { ?>
-  <h3><?php echo $this->comic_image_types[$type] ?></h3>
-  <div class="comic-ordering" id="comic-ordering-<?php echo $type ?>">
-    <?php foreach ($attachment_ids as $attachment_id) {
-      $backend = new ComicPressBackendAttachment($attachment_id);
-      $info = $backend->get_info(); ?>
-      <div class="cp-comic-attachment" id="attachment_<?php echo $attachment_id ?>">
-        <img src="<?php echo $backend->get_url() ?>" border="0" height="<?php echo $zoom_level ?>" />
-        <div>
-          <?php if (isset($info['file'])) { ?>
-            <p><strong><?php echo basename($info['file']) ?></strong></p>
-          <?php } ?>
-          <?php if (isset($info['width']) && isset($info['height'])) { ?>
-            <p>
-              <?php _e('Size:', 'comicpress') ?>
-              <?php printf('%dx%d', $info['width'], $info['height'] ) ?>
-            </p>
-          <?php } ?>
-        </div>
-        <br style="clear: both" />
-      </div>
-    <?php } ?>
-  </div>
+<?php if (!empty($ordering)) { ?>
+	<?php foreach ($ordering as $type => $attachment_ids) { ?>
+	  <h3><?php echo $this->comic_image_types[$type] ?></h3>
+	  <div class="comic-ordering" id="comic-ordering-<?php echo $type ?>">
+	    <?php foreach ($attachment_ids as $attachment_id) {
+	      $backend = new ComicPressBackendAttachment($attachment_id);
+	      $info = $backend->get_info(); ?>
+	      <div class="cp-comic-attachment" id="attachment_<?php echo $attachment_id ?>">
+	        <img src="<?php echo $backend->url() ?>" border="0" height="<?php echo $zoom_level ?>" />
+	        <div>
+	          <?php if (isset($info['file'])) { ?>
+	            <p><strong><?php echo basename($info['file']) ?></strong></p>
+	          <?php } ?>
+	          <?php if (isset($info['width']) && isset($info['height'])) { ?>
+	            <p>
+	              <?php _e('Size:', 'comicpress') ?>
+	              <?php printf('%dx%d', $info['width'], $info['height'] ) ?>
+	            </p>
+	          <?php } ?>
+	        </div>
+	        <br style="clear: both" />
+	      </div>
+	    <?php } ?>
+	  </div>
+	<?php } ?>
 <?php } ?>
 
 <script type="text/javascript">

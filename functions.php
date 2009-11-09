@@ -144,6 +144,14 @@ function RT($which, $restrictions = null, $override_post = null) {
 	return $post;
 }
 
+function M($override_post = null) {
+	global $post;
+	$post_to_use = !is_null($override_post) ? $override_post : $post;
+
+	$comic_post = new ComicPressComicPost($post_to_use);
+	return $comic_post->get_attachments();
+}
+
 /**
  * Display the list of Storyline categories.
  */
