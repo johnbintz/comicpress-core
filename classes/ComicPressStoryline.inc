@@ -153,6 +153,20 @@ class ComicPressStoryline {
     return false;
   }
 
+  function all_adjacent($id, $direction) {
+  	if (isset($this->_structure[$id])) {
+  		$all_adjacent = array();
+  		do {
+  			if ($has_adjacent = isset($this->_structure[$id][$direction])) {
+  				$all_adjacent[] = $this->_structure[$id][$direction];
+  				$id = $this->_structure[$id][$direction];
+  			}
+  		} while ($has_adjacent);
+  		return $all_adjacent;
+  	}
+  	return false;
+  }
+
   /**
    * Get the valid navigation directions for a particular post.
    */

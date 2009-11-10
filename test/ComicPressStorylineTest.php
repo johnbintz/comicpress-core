@@ -561,6 +561,29 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 
   	$this->assertEquals($expected_categories, $this->css->build_from_restrictions($restrictions));
   }
+
+  function providerTestAllAdjacent() {
+  	return array(
+  		array(3, 'previous', array(2, 1)),
+  		array(2, 'next', array(3, 4)),
+  		array(4, 'next', array()),
+  		array(5, 'next', false)
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestAllAdjacent
+   */
+  function testAllAdjacent($start, $direction, $expected_result) {
+  	$this->css->_structure = array(
+  		'1' => array('next' => 2),
+  		'2' => array('previous' => 1, 'parent' => 1, 'next' => 3),
+  	  '3' => array('previous' => 2, 'parent' => 1, 'next' => 4),
+  		'4' => array('previous' => 3, 'parent' => 1)
+  	);
+
+  	$this->assertEquals($expected_result, $this->css->all_adjacent($start, $direction));
+  }
 }
 
 ?>
