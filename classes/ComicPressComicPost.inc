@@ -83,6 +83,7 @@ class ComicPressComicPost {
     return false;
   }
 
+  // @codeCoverageIgnoreStart
   /**
    * Sort the remaining comic images by file date.
    * @param object $a
@@ -94,6 +95,7 @@ class ComicPressComicPost {
   	$b_date = isset($b->post_date) ? $b->post_date : 0;
   	return $a_date - $b_date;
   }
+  // @codeCoverageIgnoreEnd
 
   /**
    * Change the ordering of comic images in the associated post.

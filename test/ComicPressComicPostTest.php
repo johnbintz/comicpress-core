@@ -12,7 +12,12 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
 
   function providerTestNormalizeOrdering() {
   	return array(
-  		array(
+      array(
+        false,
+        array('attachment-1' => array('enabled' => false), 'attachment-2' => array('enabled' => true)),
+        false,
+      ),
+      array(
   			array('attachment-1'),
   			array(),
   			array('attachment-1' => array('enabled' => true))
@@ -27,6 +32,11 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
   			array('attachment-1' => array('enabled' => true, 'children' => array('rss' => array('attachment-2' => true)))),
   			array('attachment-1' => array('enabled' => true))
   		),
+      array(
+        array('attachment-1', 'attachment-2'),
+        array('attachment-1' => array('enabled' => true, 'children' => array('rss' => array('attachment-2' => true, 'attachment-3' => true)))),
+        array('attachment-1' => array('enabled' => true, 'children' => array('rss' => array('attachment-2' => true))))
+      ),
   		array(
   			array('attachment-1', 'attachment-2', 'attachment-3'),
   			array('attachment-1' => array('enabled' => false, 'children' => array('rss' => array('attachment-2' => true)))),
@@ -41,9 +51,13 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
   function testNormalizeOrdering($attachments, $current_meta, $expected_result) {
     $p = $this->getMock('ComicPressComicPost', array('get_attachments'));
 
-    $attachment_objects = array();
-    foreach ($attachments as $attachment) {
-    	$attachment_objects[] = (object)array('id' => $attachment);
+    if (is_array($attachments)) {
+      $attachment_objects = array();
+      foreach ($attachments as $attachment) {
+        $attachment_objects[] = (object)array('id' => $attachment);
+      }
+    } else {
+      $attachment_objects = $attachments;
     }
 
     $p->expects($this->any())->method('get_attachments')->will($this->returnValue($attachment_objects));
@@ -54,7 +68,11 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
     $p->post = (object)array('ID' => 1);
 
     $this->assertEquals($expected_result, $p->normalize_ordering());
-    $this->assertEquals($expected_result, get_post_meta(1, 'image-ordering', true));
+    if ($expected_result === false) {
+      $this->assertEquals($current_meta, get_post_meta(1, 'image-ordering', true));
+    } else {
+      $this->assertEquals($expected_result, get_post_meta(1, 'image-ordering', true));
+    }
   }
 
   function providerTestChangeComicImageOrdering() {
