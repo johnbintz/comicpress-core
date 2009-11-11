@@ -4,10 +4,12 @@ require_once('ComicPressStoryline.inc');
 require_once('ComicPressDBInterface.inc');
 
 class ComicPressNavigation {
+  // @codeCoverageIgnoreStart
   function init($storyline) {
     $this->_storyline = $storyline;
     $this->_dbi       = ComicPressDBInterface::get_instance();
   }
+  // @codeCoverageIgnoreEnd
 
   function get_post_nav($post) {
     $nav = array();
@@ -61,6 +63,7 @@ class ComicPressNavigation {
 				return $nav;
 			}
 		}
+    return false;
   }
 }
 

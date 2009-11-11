@@ -13,6 +13,14 @@ class ComicPressNavigationTest extends PHPUnit_Framework_TestCase {
     $this->nav = new ComicPressNavigation();
   }
 
+  function testGetPostNavNotAPost() {
+    $this->assertTrue($this->nav->get_post_nav(false) === false);
+  }
+
+  function testGetPostNavFromCache() {
+    $this->markTestIncomplete();
+  }
+
   function testGetPostNav() {
     $dbi = $this->getMock('ComicPressDBInterface', array('get_previous_comic', 'get_next_comic', 'get_first_comic', 'get_last_comic'));
     $storyline = new ComicPressStoryline();
