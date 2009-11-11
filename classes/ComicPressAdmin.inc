@@ -218,7 +218,9 @@ class ComicPressAdmin {
         $media_post->post_parent = $settings['post_parent'];
         wp_update_post($media_post);
       }
-      update_post_meta($post_id, 'comicpress_management', isset($settings['comicpress_management']));
+      update_post_meta($post_id, 'comicpress', array(
+        'managed' => isset($settings['comicpress_management']
+      )));
     }
   }
 

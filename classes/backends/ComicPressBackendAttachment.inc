@@ -17,7 +17,8 @@ class ComicPressBackendAttachment extends ComicPressBackend {
 
 		    if (!empty($children)) {
 		    	foreach ($children as $child) {
-            if (get_post_meta($child->ID, 'comicpress_management', true)) {
+            $meta = get_post_meta($child->ID, 'comicpress', true);
+            if ($meta['managed']) {
               $result[] = new ComicPressBackendAttachment($child);
             }
 		    	}

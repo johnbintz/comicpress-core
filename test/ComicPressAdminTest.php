@@ -92,7 +92,9 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
         ),
         array(
           'post_meta' => array(
-            'comicpress_management' => true
+            'comicpress' => array(
+              'managed' => true
+            )
           ),
         ),
       ),
@@ -126,7 +128,9 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
             'post_parent' => 2,
           ),
           'post_meta' => array(
-            'comicpress_management' => true
+            'comicpress' => array(
+              'managed' => true
+            )
           )
         ),
       )
