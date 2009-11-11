@@ -88,11 +88,11 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
           'post_meta' => array(),
         ),
         array(
-          'comic_image_type' => "test"
+          'comicpress_management' => "yes"
         ),
         array(
           'post_meta' => array(
-            'comic_image_type' => "test"
+            'comicpress_management' => true
           ),
         ),
       ),
@@ -119,12 +119,15 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
         ),
         array(
           'post_parent' => "2",
-          'auto_attach' => 1
+          'comicpress_management' => "yes"
         ),
         array(
           'post' => array(
-            'post_parent' => 2
+            'post_parent' => 2,
           ),
+          'post_meta' => array(
+            'comicpress_management' => true
+          )
         ),
       )
     );
