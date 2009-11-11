@@ -201,14 +201,6 @@ class ComicPressStoryline {
   }
 
   /**
-   * Get all comic categories.
-   * @deprecated
-   */
-	function get_comic_categories() {
-		return array_keys($this->_structure);
-	}
-
-  /**
    * Get a simple storyline.
    */
 	function get_simple_storyline() {

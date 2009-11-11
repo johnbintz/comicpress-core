@@ -7,7 +7,7 @@ require_once('ComicPressAdmin.inc');
 class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
   function setUp() {
     _reset_wp();
-    $_POST = array();
+    $_POST = $_REQUEST = array();
     $this->admin = new ComicPressAdmin();
   }
 
@@ -24,7 +24,7 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
     }
   }
 
-  function providerTestHandleUpdate() {
+  function providerTestHandleUpdateComicPressOptions() {
     return array(
       array(
         array('comic_dimensions' => '150x150'),
@@ -57,9 +57,9 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
   }
 
   /**
-   * @dataProvider providerTestHandleUpdate
+   * @dataProvider providerTestHandleUpdateComicPressOptions
    */
-  function testHandleUpdate($original, $change, $new) {
+  function testHandleUpdateComicPressOptions($original, $change, $new) {
     $this->admin->comicpress = $this->getMock('ComicPress', array('save', 'init'));
     $this->admin->comicpress->comicpress_options = array(
       'comic_dimensions' => '760x',
@@ -197,6 +197,45 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals(array(
       'zoom_level' => 100
     ), get_usermeta(1, 'comicpress-settings'));
+  }
+
+  function providerTestHandleUpdate() {
+    return array(
+      array(array()),
+      array(array('cp' => true), false),
+      array(array('cp' => array()), false),
+      array(array('cp' => array()), true, true, true),
+      array(array('cp' => array(), 'attachments' => array()), true, true, false),
+      array(array('cp' => array('action' => 'test')), true, true, false),
+      array(array('cp' => array('action' => 'comic_ordering')), true, true, false),
+    );
+  }
+
+  /**
+   * @dataProvider providerTestHandleUpdate
+   * @covers ComicPressAdmin::handle_update
+   */
+  function testHandleUpdate($input, $add_nonce = false, $comicpress_load = false, $comicpress_save = false) {
+    $this->admin->comicpress = $this->getMock('ComicPress', array('save', 'init', 'load'));
+    if ($comicpress_load) {
+      $this->admin->comicpress->expects($this->once())->method('load');
+    }
+    if ($comicpress_save) {
+      $this->admin->comicpress->expects($this->once())->method('save');
+      $this->admin->comicpress->expects($this->once())->method('init');
+    }
+
+    if ($add_nonce) {
+      if (isset($input['cp'])) {
+        if (is_array($input['cp'])) {
+          $input['cp']['_nonce'] = wp_create_nonce('comicpress');
+        }
+      }
+    }
+
+    $_POST = $_REQUEST = $input;
+
+    $this->admin->handle_update();
   }
 }
 

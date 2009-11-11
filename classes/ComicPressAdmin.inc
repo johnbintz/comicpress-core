@@ -293,10 +293,12 @@ class ComicPressAdmin {
   }
 
   function handle_update_comic_ordering() {
-    if (is_numeric($_POST['post_ID'])) {
-      if ($post = get_post($_POST['post_ID'])) {
-        $comic_post = new ComicPressComicPost(&$post);
-        $comic_post->change_comic_image_ordering($this->_json_decode(stripslashes($_POST['cp']['comic_order'])));
+    if (isset($_POST['post_ID'])) {
+      if (is_numeric($_POST['post_ID'])) {
+        if ($post = get_post($_POST['post_ID'])) {
+          $comic_post = new ComicPressComicPost(&$post);
+          $comic_post->change_comic_image_ordering($this->_json_decode(stripslashes($_POST['cp']['comic_order'])));
+        }
       }
     }
   }
@@ -332,30 +334,31 @@ class ComicPressAdmin {
    * Handle an update.
    */
   function handle_update() {
-    if (is_array($_REQUEST['cp'])) {
-      if (isset($_REQUEST['cp']['_nonce'])) {
-        if (wp_verify_nonce($_REQUEST['cp']['_nonce'], 'comicpress')) {
-          if (isset($_POST['attachments'])) {
-            //coming from media editor
-            $this->handle_update_attachments();
-          } else if (isset($_REQUEST['cp']['action'])) {
-            $method = 'handle_update_' . strtolower(str_replace('-', '_', $_REQUEST['cp']['action']));
-            if (method_exists($this, $method)) {
-              $this->{$method}($_REQUEST['cp']);
+    if (isset($_REQUEST['cp'])) {
+      if (is_array($_REQUEST['cp'])) {
+        if (isset($_REQUEST['cp']['_nonce'])) {
+          if (wp_verify_nonce($_REQUEST['cp']['_nonce'], 'comicpress')) {
+            if (isset($_POST['attachments'])) {
+              //coming from media editor
+              $this->handle_update_attachments();
+            } else if (isset($_REQUEST['cp']['action'])) {
+              $method = 'handle_update_' . strtolower(str_replace('-', '_', $_REQUEST['cp']['action']));
+              if (method_exists($this, $method)) {
+                $this->{$method}($_REQUEST['cp']);
+              }
+            } else {
+              //coming from us
+              $this->handle_update_comicpress_options($_REQUEST['cp']);
+
+              $this->comicpress->save();
+
+              $this->info(__("ComicPress configuration updated.", 'comicpress'));
+
+              $this->comicpress->init();
             }
-          } else {
-            //coming from us
-            // clean this up O_o
-            $this->handle_update_comicpress_options($_REQUEST['cp']);
 
-            $this->comicpress->save();
-
-            $this->info(__("ComicPress configuration updated.", 'comicpress'));
-
-            $this->comicpress->init();
+            $this->comicpress->load();
           }
-
-          $this->comicpress->load();
         }
       }
     }
