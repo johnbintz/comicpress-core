@@ -10,43 +10,6 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
     $this->p = new ComicPressComicPost();
   }
 
-  function providerTestGenerateComicTag() {
-    return array(
-      array(
-        "150x150",
-      ),
-      array(
-        false,
-      )
-    );
-  }
-
-  /**
-   * @dataProvider providerTestGenerateComicTag
-   */
-  function testGenerateComicImgTag($dimensions) {
-    $this->p->comicpress = (object)array(
-      'comicpress_options' => array(
-        'comic_dimensions' => $dimensions
-      )
-    );
-
-    $source = $this->p->get_comic_img_tag("test.gif", "comic");
-
-    if (count($parts = explode("x", $dimensions)) == 2) {
-      list($width, $height) = $parts;
-      $dimensions = compact('width', 'height');
-    }
-
-    foreach (array('width', 'height') as $field) {
-      if (isset($dimensions[$field])) {
-        $this->assertTrue(strpos($source, "${field}=\"{$dimensions[$field]}\"") !== false, $field);
-      } else {
-        $this->assertTrue(strpos($source, "${field}=") === false, 'not set');
-      }
-    }
-  }
-
   function providerTestNormalizeOrdering() {
   	return array(
   		array(
