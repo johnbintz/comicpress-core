@@ -1,17 +1,64 @@
 <?php
 
-class ComicPressBackendAttachment {
-  function ComicPressBackendAttachment($attachment_id) {
-    $this->attachment_id = $attachment_id;
+require_once(dirname(__FILE__) . '/../ComicPressBackend.inc');
+
+class ComicPressBackendAttachment extends ComicPressBackend {
+	var $root_id = 'attachment';
+
+	function generate_from_post($post) {
+		$result = array();
+		if (is_object($post)) {
+			if (isset($post->ID)) {
+				$children = get_children(array(
+		      'post_parent' => $post->ID,
+		      'post_type' => 'attachment',
+		      'post_mime_type' => 'image'
+		    ));
+
+		    if (!empty($children)) {
+		    	foreach ($children as $child) {
+		    		$result[] = new ComicPressBackendAttachment($child);
+		    	}
+		    }
+			}
+		}
+		return $result;
+	}
+
+  function ComicPressBackendAttachment($attachment) {
+  	$this->attachment = $attachment;
+  	$this->id = sprintf('%s-%d', $this->root_id, $this->attachment->ID);
+  	$this->type = get_post_meta($this->attachment->ID, 'comic_image_type', true);
   }
 
-  function get_url() {
-    return wp_get_attachment_url($this->attachment_id);
+  function dims($size = 'comic') {
+  	$metadata = image_downsize($this->attachment->ID, $size);
+  	if (!empty($metadata)) {
+  		if (is_array($metadata)) {
+				return array_combine(array('width', 'height'), array_slice($metadata, 1, 2));
+  		}
+  	}
+  	return false;
   }
 
-  function get_info() {
-    return wp_get_attachment_metadata($this->attachment_id);
+  function url($size = 'comic') {
+  	$metadata = image_downsize($this->attachment->ID, $size);
+  	if (!empty($metadata)) {
+  		if (is_array($metadata)) {
+  			return $metadata[0];
+  		}
+  	}
+  	return false;
   }
+
+  function embed($size = 'comic') {
+		return $this->_embed_image($size);
+  }
+
+  function alt() { return $this->attachment->post_title; }
+  function title() { return $this->attachment->post_excerpt; }
+
+  function get_info() { return array(); }
 }
 
 ?>

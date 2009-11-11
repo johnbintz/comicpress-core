@@ -5,7 +5,7 @@ add_action('init', '__comicpress_init');
 
 function __comicpress_init() {
   global $comicpress, $wp_query;
-  
+
   if (current_user_can('edit_files')) {
     wp_cache_flush();
   }
@@ -32,56 +32,124 @@ function __comicpress_init() {
 
   $comicpress_filters = new ComicPressFilters();
   $comicpress_filters->init();
-
-  $layouts = $comicpress->get_layout_choices();
-  if (isset($layouts[$comicpress->comicpress_options['layout']])) {
-    if (isset($layouts[$comicpress->comicpress_options['layout']]['Sidebars'])) {
-      foreach (explode(",", $layouts[$comicpress->comicpress_options['layout']]['Sidebars']) as $sidebar) {
-        $sidebar = trim($sidebar);
-        register_sidebar($sidebar); 
-      }
-    } 
-  }
 }
 
-function comicpress_init() {
-  global $post, $comicpress;
-  
-  if (!empty($post)) {
-    if (in_comic_category() && $comicpress->is_multicomic() && !is_index()) {
-      $comicpress->setup_multicomic_partial_paths($post->ID);
-    }
-  }
-  
-  $comicpress->partial_paths[] = get_template_directory() . '/partials';
+function F($name, $path, $override_post = null) {
+	global $post;
+
+	$comic_post = new ComicPressComicPost(is_null($override_post) ? $post : $override_post);
+
+	return ComicPress::get_instance()->find_file($name, $path, $comic_post->find_parents());
 }
 
-function comicpress_get_header() {
-  get_header();
+/**
+ * Finish rendering this template and shove the output into application.php.
+ */
+function finish_comicpress() {
+	$content = ob_get_clean();
+
+	include(F('application.php', ''));
 }
 
-function include_partial($partials = '') {
-  global $comicpress, $post, $nav_comics;
-  
-  if (!is_array($partials)) { $partials = func_get_args(); }
-  
-  $content = $target = null;
+/**
+ * Protect global $post and $wp_query.
+ */
+function Protect() {
+	global $post, $wp_query, $__post, $__wp_query;
 
-  $target = $comicpress->get_partial_path($partials);
-
-  if ($target !== false) {
-    ob_start(); include($target); $content = ob_get_clean();
-  }
-
-  $target = str_replace(".inc", "", $target);
-
-  if (!empty($target) && !empty($content)) {
-    echo apply_filters("comicpress_partial", $content, $target);
-  }
+	$__post = $post;
+	$__wp_query = $wp_query;
 }
 
-function in_comic_category() {
-  global $post, $comicpress;
+/**
+ * Temporarily restore the global $post variable and set it up for use.
+ */
+function Restore() {
+	global $post, $__post;
+
+	$post = $__post;
+	setup_postdata($post);
+}
+
+/**
+ * Restore global $post and $wp_query.
+ */
+function Unprotect() {
+	global $post, $wp_query, $__post, $__wp_query;
+
+	$post = $__post;
+	$wp_query = $__wp_query;
+
+	$__post = $__wp_query = null;
+}
+
+function R($which, $restrictions = null, $override_post = null) {
+	global $post;
+	$post_to_use = !is_null($override_post) ? $override_post : $post;
+
+	$storyline = new ComicPressStoryline();
+
+	if (is_string($restrictions)) {
+		switch ($restrictions) {
+			case 'from_post':
+				$restrictions = array('from_post' => $post_to_use);
+				break;
+		}
+	}
+
+	if (is_array($restrictions)) {
+		$new_restrictions = array();
+		foreach ($restrictions as $type => $list) {
+			if (is_string($list)) {
+				$value = $list;
+				switch ($list) {
+					case '__post': $value = $post_to_use; break;
+				}
+				$new_restrictions[$type] = $value;
+			} else {
+				$new_restrictions[$type] = $list;
+			}
+		}
+		$restrictions = $new_restrictions;
+	}
+
+	$categories = $storyline->build_from_restrictions($restrictions);
+
+	$dbi = ComicPressDBInterface::get_instance();
+
+	$new_post = false;
+
+	switch ($which) {
+		case 'first':     $new_post = $dbi->get_first_post($categories); break;
+		case 'last':      $new_post = $dbi->get_last_post($categories); break;
+		case 'next':      $new_post = $dbi->get_next_post($categories, $post_to_use); break;
+		case 'previous':  $new_post = $dbi->get_previous_post($categories, $post_to_use); break;
+  }
+
+  return $new_post;
+}
+
+function RT($which, $restrictions = null, $override_post = null) {
+	global $post, $__post;
+	if (!empty($override_post)) {
+		$post_to_use = $override_post;
+	} else {
+	  $post_to_use = (!empty($__post)) ? $__post : $post;
+	}
+
+	if (($new_post = R($which, $restrictions, $post_to_use)) !== false) {
+		$post = $new_post;
+		setup_postdata($post);
+	}
+	return $post;
+}
+
+function M($override_post = null) {
+	global $post;
+	$post_to_use = !is_null($override_post) ? $override_post : $post;
+
+	$comic_post = new ComicPressComicPost($post_to_use);
+	return $comic_post->get_attachments();
 }
 
 /**
@@ -127,74 +195,5 @@ function comicpress_list_storyline_categories($args = "") {
   echo $output;
 }
 
-/**
-* Display the comic transcript
-* Transcript must be entered into a custom field named "transcript"
-* @param string $displaymode, "raw" (straight from the field), "br" (includes html line breaks), "styled" (fully css styled with JavaScript expander)
-*/
-function the_transcript($displaymode = 'raw') {
-	$transcript = get_post_meta( get_the_ID(), "transcript", true );
-  switch ($displaymode) {
-    case "raw":
-      echo $transcript;
-      break;
-    case "br":
-      echo nl2br($transcript);
-      break;
-    case "styled":
-      if (!empty($transcript)) { ?>
-        <script type='text/javascript'>
-          <!--
-            function toggle_expander(id) {
-              var e = document.getElementById(id);
-              if(e.style.height == 'auto')
-                e.style.height = '1px';
-              else
-              e.style.height = 'auto';
-            }
-          //-->
-        </script>
-        <div class="transcript-border"><div id="transcript"><a href="javascript:toggle_expander('transcript-content');" class="transcript-title">&darr; Transcript</a><div id="transcript-content"><?php echo nl2br($transcript); ?><br /><br /></div></div></div>
-        <script type='text/javascript'>
-          <!--
-            document.getElementById('transcript-content').style.height = '1px';
-          //-->
-        </script><?php
-      }
-      break;
-  }
-}
-	
-// Register Sidebar and Define Widgets
-	
- function widget_comicpress_latest_comics() { ?>
-	<li>
-		<h2>Latest Comics</h2>
-		<ul>	
-			 <?php global $post;
-			$latestcomics = get_posts('numberposts=5&category='.get_all_comic_categories_as_cat_string());
-			foreach($latestcomics as $post) : ?>
-				<li><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></li>
-			<?php endforeach; ?>
-     	</ul>
-	</li>
-	<?php } if ( function_exists('register_sidebar_widget') )
-	register_sidebar_widget(__('Latest Comics'), 'widget_comicpress_latest_comics');
- 
-function widget_comicpress_random_comic() { ?> 
-	<li>
-		<h2><a href="?randomcomic"><span class="random-comic-icon">?</span> Random Comic</a></h2>
-	</li>
-	<?php } if ( function_exists('register_sidebar_widget') )
-	register_sidebar_widget(__('Random Comic'), 'widget_comicpress_random_comic');
-  
-function widget_comicpress_archive_dropdown() { ?>
-	<li class="archive-dropdown-wrap">
-		<select name="archive-dropdown" class="archive-dropdown" onChange='document.location.href=this.options[this.selectedIndex].value;'> 
-		<option value=""><?php echo attribute_escape(__('Archives...')); ?></option> 
-		<?php wp_get_archives('type=monthly&format=option&show_post_count=1'); ?> </select>
-	</li>
-	<?php } if ( function_exists('register_sidebar_widget') )
-	register_sidebar_widget(__('Archive Dropdown'), 'widget_comicpress_archive_dropdown');
-
+ob_start();
 ?>

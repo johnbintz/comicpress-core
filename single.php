@@ -1,37 +1,29 @@
- <?php 
-  global $comicpress, $nav_comics;
+<?php
+	$storyline = new ComicPressStoryline();
+	$storyline->read_from_options();
 
-  comicpress_init();
+	the_title();  echo '<br />';
 
-  ob_start();
+  Protect();
 
-  if (have_posts()) {
-    the_post();
-    if (in_comic_category()) { include_partial('single-display-comic'); }
+	RT('first', 'from_post'); the_title(); echo '<br />';
+  RT('previous', 'from_post'); the_title(); echo '<br />';
+  RT('previous', array('root_of' => '__post'));	the_title();  echo '<br />';
+  RT('previous');	the_title();  echo '<br />';
+  Restore(); the_title(); echo '<br />';
+
+  foreach (M() as $image) {
+  	echo $image->embed();
   }
-  rewind_posts();
-  
-  $comic = ob_get_clean();
 
-  ob_start();
+  RT('next');	the_title();  echo '<br />';
+  RT('next', array('root_of' => '__post'));	the_title();  echo '<br />';
+  RT('next', 'from_post');	the_title();  echo '<br />';
+	RT('last', 'from_post'); the_title(); echo '<br />';
 
-  $nav_comics = $comicpress->get_nav_comics();
-  
-  if (have_posts()) {
-    while (have_posts()) { the_post();
-      if (in_comic_category()) {
-        if ($comicpress->comicpress_options['comic_space'] == "comic_only") {
-          include_partial('single-comic-post');
-        }
-      } else {
-        include_partial('single-blog-post');
-      }
-    }
-  } else {
-    include_partial('single-no-matches');
-  }
-  
-  $content = ob_get_clean();
-  
-  include(get_template_directory() . '/layouts/' . $comicpress->comicpress_options['layout']);  
+	Unprotect();
+
+	the_title();  echo '<br />';
+
+	finish_comicpress();
 ?>
