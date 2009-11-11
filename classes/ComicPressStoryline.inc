@@ -156,13 +156,16 @@ class ComicPressStoryline {
   	if (isset($this->_structure[$id])) {
   		$all_adjacent = array();
   		do {
-        $new_id = $this->_structure[$id][$direction];
-        
         $has_adjacent = false;
-        if (!in_array($new_id, $all_adjacent)) {
-          if ($has_adjacent = isset($this->_structure[$id][$direction])) {
-            $all_adjacent[] = $new_id;
-            $id = $new_id;
+
+        if (isset($this->_structure[$id][$direction])) {
+          $new_id = $this->_structure[$id][$direction];
+
+          if (!in_array($new_id, $all_adjacent)) {
+            if ($has_adjacent = isset($this->_structure[$id][$direction])) {
+              $all_adjacent[] = $new_id;
+              $id = $new_id;
+            }
           }
         }
   		} while ($has_adjacent);
