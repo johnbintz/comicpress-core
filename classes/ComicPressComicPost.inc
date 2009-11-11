@@ -8,6 +8,10 @@ class ComicPressComicPost {
     if (!is_null($post)) { $this->post = $post; }
   }
 
+  /**
+   * TODO normalize the attachments
+   * @return unknown_type
+   */
   function get_attachments() {
   	$comicpress = ComicPress::get_instance();
   	$attachments = array();

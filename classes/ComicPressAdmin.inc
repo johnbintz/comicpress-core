@@ -174,7 +174,7 @@ class ComicPressAdmin {
     if (is_numeric($override_post)) { $uploading_iframe_ID = $override_post; }
 
     $comic_post = new ComicPressComicPost(get_post($uploading_iframe_ID));
-    $ordering = $comic_post->normalize_comic_image_ordering();
+    $ordering = $comic_post->normalize_ordering();
 
     $nonce = wp_create_nonce('comicpress');
     $zoom_level = 40;
