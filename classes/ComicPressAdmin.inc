@@ -101,37 +101,17 @@ class ComicPressAdmin {
   function setup_comic_metadata_buttons($form_fields, $post) {
     global $pagenow;
 
-    $current_type = get_post_meta($post->ID, 'comic_image_type', true);
-    if (empty($current_type)) { $current_type = reset(array_keys($this->comic_image_types)); }
-
-    $field_html_lines = array();
-    $field_html_lines[] = '<input type="hidden" name="cp[_nonce]" value="' . wp_create_nonce('comicpress')  . '" />';
-    foreach ($this->comic_image_types as $field => $label) {
-      $field_html_lines[] = '<label>'
-                          . ' <input type="radio" name="attachments['
-                          . $post->ID
-                          . '][comic_image_type]" value="'
-                          . $field
-                          . '"'
-                          . (($field == $current_type) ? ' checked="checked"' :  '')
-                          . ' /> '
-                          . $label
-                          . '</label>';
-    }
-
-    $form_fields['comic_image_type'] = array(
-      'label' => __("Comic Image Type", 'comicpress'),
-      'input' => 'html',
-      'html' => '<center>' . implode("\n", $field_html_lines) . '</center>'
-    );
+    $comicpress_management = get_post_meta($post->ID, 'comicpress_management', true);
 
     if ($pagenow !== "media.php") {
       $form_fields['auto_attach'] = array(
-        'label' => __("Auto-attach?", 'comicpress'),
+        'label' => __("Let ComicPress Manage?", 'comicpress'),
         'input' => 'html',
-        'html' => '<input type="checkbox" name="attachments[' . $post->ID . '][auto_attach]" value="yes" checked="checked" /> <em>'
-                . __('Attach to this post w/o needing to insert into post', 'comicpress')
-                . '</em>'
+        'html' => '<label><input type="checkbox" name="attachments[' . $post->ID . '][comicpress_management]" value="yes" ' . ($comicpress_management ? 'checked="checked"' : '') . '/> '
+                . __('Let ComicPress treat this image as a comic media file', 'comicpress')
+                . '</label>'
+                . '<input type="hidden" name="cp[_nonce]" value="' . wp_create_nonce('comicpress')  . '" />'
+                . '<input type="hidden" name="attachments[' . $post->ID . '][post_parent]" value="' . $post->post_parent  . '" />'
       );
     }
 
@@ -233,14 +213,12 @@ class ComicPressAdmin {
    */
   function handle_update_attachments() {
     foreach ($_POST['attachments'] as $post_id => $settings) {
-      if (isset($settings['comic_image_type'])) {
-        update_post_meta($post_id, 'comic_image_type', $settings['comic_image_type']);
-      }
-      if (isset($settings['auto_attach']) && isset($settings['post_parent'])) {
+      if (isset($settings['comicpress_management'])) {
         $media_post = get_post($post_id);
         $media_post->post_parent = $settings['post_parent'];
         wp_update_post($media_post);
       }
+      update_post_meta($post_id, 'comicpress_management', isset($settings['comicpress_management']));
     }
   }
 
