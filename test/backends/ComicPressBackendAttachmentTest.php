@@ -7,6 +7,8 @@ require_once('backends/ComicPressBackendAttachment.inc');
 class ComicPressBackendAttachmentTest extends PHPUnit_Framework_TestCase {
 	function setUp() {
 		_reset_wp();
+
+    $this->ba = new ComicPressBackendAttachment((object)array('ID' => 1));
 	}
 
 	function providerTestGenerateFromPost() {
@@ -40,4 +42,38 @@ class ComicPressBackendAttachmentTest extends PHPUnit_Framework_TestCase {
 	    }
     }
 	}
+
+  function providerTestDims() {
+    return array(
+      array(false, false),
+      array(true, false),
+      array(array(), false),
+      array(array('url', 300, 200, false), array('width' => 300, 'height' => 200))
+    );
+  }
+
+  /**
+   * @dataProvider providerTestDims
+   */
+  function testDims($image_downsize_result, $expected_result) {
+    _set_image_downsize_result(1, 'comic', $image_downsize_result);
+    $this->assertEquals($expected_result, $this->ba->dims('comic'));
+  }
+
+  function providerTestUrl() {
+    return array(
+      array(false, false),
+      array(true, false),
+      array(array(), false),
+      array(array('url', 300, 200, false), 'url')
+    );
+  }
+
+  /**
+   * @dataProvider providerTestUrl
+   */
+  function testUrl($image_downsize_result, $expected_result) {
+    _set_image_downsize_result(1, 'comic', $image_downsize_result);
+    $this->assertEquals($expected_result, $this->ba->url('comic'));
+  }
 }
