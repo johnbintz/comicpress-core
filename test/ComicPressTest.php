@@ -123,6 +123,26 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   	
   	$this->assertEquals($expected_path_result, $this->cp->find_file('index.inc', $search_path, $post_categories));
   }
+
+  function providerTestLoad() {
+    return array(
+      array(false, 'default'),
+      array(array(), 'default'),
+      array(array(
+        'comic_dimensions' => '1000x'
+      ), '1000x')
+    );
+  }
+  
+  /**
+   * @dataProvider providerTestLoad
+   */
+  function testLoad($options_array, $expected_dimensions) {
+    update_option('comicpress-options', $options_array);
+    if ($expected_dimensions == 'default') { $expected_dimensions = $this->cp->comicpress_options['comic_dimensions']; }
+    $this->cp->load();
+    $this->assertEquals($expected_dimensions, $this->cp->comicpress_options['comic_dimensions']);
+  }
 }
 
 ?>

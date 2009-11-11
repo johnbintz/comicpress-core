@@ -36,6 +36,7 @@ class ComicPressBackendAttachment extends ComicPressBackend {
   	$this->type = get_post_meta($this->attachment->ID, 'comic_image_type', true);
   }
 
+  // @codeCoverageIgnoreStart
   function dims($size = 'comic') {
   	$metadata = image_downsize($this->attachment->ID, $size);
   	if (!empty($metadata)) {
@@ -64,6 +65,7 @@ class ComicPressBackendAttachment extends ComicPressBackend {
   function title() { return $this->attachment->post_excerpt; }
 
   function get_info() { return array(); }
+  // @codeCoverageIgnoreEnd
 }
 
 ?>

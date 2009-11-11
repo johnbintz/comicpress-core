@@ -10,6 +10,7 @@ class ComicPressDBInterface {
     return $instance;
   }
 
+  // @codeCoverageIgnoreStart
   function _get_categories() { return get_categories("hide_empty=0"); }
 
   function get_terminal_post($first = true, $include_categories = null) {
@@ -96,4 +97,4 @@ class ComicPressDBInterface {
   function get_next_post($categories = array(), $override_post = null) { return $this->get_adjacent_post($categories, true, $override_post); }
 }
 
-?>
+// @codeCoverageIngoreEnd

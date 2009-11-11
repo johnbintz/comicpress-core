@@ -52,6 +52,8 @@ class ComicPress {
     }
   }
 
+  // @codeCoverageIgnoreStart
+  
   /**
    * Initialize the class.
    */
@@ -75,6 +77,8 @@ class ComicPress {
     }
   }
 
+  // WordPress Filters
+
   function intermediate_image_sizes($sizes) {
     return array_merge($sizes, array('comic', 'rss', 'archive', 'mini'));
   }
@@ -90,7 +94,6 @@ class ComicPress {
   function announce_activated_helpers() {
     echo "<center>[ <strong>Activated ComicPress helpers:</strong> " . implode(", ", array_keys($this->comicpress_options['helpers'])) . " ]</center>";
   }
-
   /**
    * Gather blog posts for the given index page.
    */
@@ -111,6 +114,8 @@ class ComicPress {
 
     return $wp_query;
   }
+
+  // @codeCoverageIgnoreEnd
 
 	/**
 	 * Search a path for directories named after the slugs provided.

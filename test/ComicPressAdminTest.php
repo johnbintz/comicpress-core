@@ -178,17 +178,25 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
     }
   }
 
-  function providerTestHandleUpdateOverridePartial() {
+  function providerTestUpdateZoomSliderMeta() {
     return array(
-      array(
-        'hello',
-        'Update partial'
-      ),
-      array(
-        'meow',
-        'Delete override partial'
-      ),
+      array(false),
+      array(array()),
+      array(array('zoom_level' => 50))
     );
+  }
+
+  /**
+   * @dataProvider providerTestUpdateZoomSliderMeta
+   */
+  function testUpdateZoomSliderMeta($initial_usermeta) {
+    update_usermeta(1, 'comicpress-settings', $initial_usermeta);
+
+    $this->admin->_update_zoom_slider_meta(1, 100);
+
+    $this->assertEquals(array(
+      'zoom_level' => 100
+    ), get_usermeta(1, 'comicpress-settings'));
   }
 }
 

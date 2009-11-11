@@ -1,6 +1,7 @@
 <?php
 
 class ComicPressAdmin {
+  // @codeCoverageIgnoreStart
   /**
    * Initialize the addon.
    * @param ComicPress $comicpress The master ComicPress object.
@@ -178,6 +179,7 @@ class ComicPressAdmin {
       include(dirname(__FILE__) . '/partials/_comic-image-ordering.inc');
     }
   }
+  // @codeCoverageIgnoreEnd
 
   /**
    * Create a dimension selector.
@@ -200,6 +202,7 @@ class ComicPressAdmin {
     return implode("\n", $output);
   }
 
+  // @codeCoverageIgnoreStart
   /**
    * Update attachment information.
    */
@@ -207,6 +210,7 @@ class ComicPressAdmin {
     $this->render_comic_image_ordering(true, $info['post_id']);
     exit(0);
   }
+  // @codeCoverageIgnoreEnd
 
   /**
    * Update attachment information.
@@ -261,8 +265,8 @@ class ComicPressAdmin {
               }
             }
             break;
+          // @codeCoverageIgnoreStart
           case 'helpers':
-          case 'addons':
             foreach ($info[$option] as $type => $set) {
               $this->comicpress->comicpress_options[$option][$type] = true;
             }
@@ -271,11 +275,13 @@ class ComicPressAdmin {
 						$storyline = new ComicPressStoryline();
 						$storyline->normalize($info[$option]);
 						break;
+          // @codeCoverageIgnoreEnd
         }
       }
     }
   }
 
+  // @codeCoverageIgnoreStart
   function _json_decode($string) {
     if (function_exists('json_decode')) {
       return json_decode($string);
@@ -295,23 +301,31 @@ class ComicPressAdmin {
     }
   }
 
-	/**
-	 * Update the zoom slider info.
-	 * @param $info The browser input.
-	 */
+  /**
+   * Update the zoom slider info.
+   * @param $info The browser input.
+   */
   function handle_update_zoom_slider($info) {
     $this->is_ajax = true;
 
     $current_user = wp_get_current_user();
     if (!empty($current_user)) {
-      $comicpress_meta = get_usermeta($current_user->ID, 'comicpress-settings');
-      if (!is_array($comicpress_meta)) { $comicpress_meta = array(); }
-      $comicpress_meta['zoom_level'] = $info['zoom_level'];
-      update_usermeta($current_user->ID, 'comicpress-settings', $comicpress_meta);
+      $this->_update_zoom_slider_meta($current_user->ID, $info['zoom_level']);
       exit(0);
     }
     header('HTTP/1.1 500 Internal Server Error');
     exit(0);
+  }
+  // @codeCoverageIgnoreEnd
+
+  /**
+   * Update the user's zoom slider metadata.
+   */
+  function _update_zoom_slider_meta($user_id, $level) {
+    $comicpress_meta = get_usermeta($user_id, 'comicpress-settings');
+    if (!is_array($comicpress_meta)) { $comicpress_meta = array(); }
+    $comicpress_meta['zoom_level'] = $level;
+    update_usermeta($user_id, 'comicpress-settings', $comicpress_meta);
   }
 
   /**
@@ -347,17 +361,7 @@ class ComicPressAdmin {
     }
   }
 
-  /**
-   * Create the dropdown for choosing a layout.
-   */
-  function create_layout_options($layouts, $current_layout) {
-    $output = array();
-    foreach ($layouts as $layout_filename => $info) {
-      $output[] = '<option value="' . $layout_filename . '"' . (($layout_filename == $current_layout) ? ' selected="selected"' : '') . '>' . $info['Layout Name'] . '</option>';
-    }
-    return implode("\n", $output);
-  }
-
+  // @codeCoverageIgnoreStart
   var $messages = array(
     'info' => array(),
     'warn' => array(),
@@ -379,6 +383,7 @@ class ComicPressAdmin {
       }
     }
   }
+  // @codeCoverageIgnoreEnd
 }
 
 ?>

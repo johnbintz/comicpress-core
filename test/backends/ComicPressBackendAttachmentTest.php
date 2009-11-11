@@ -12,7 +12,9 @@ class ComicPressBackendAttachmentTest extends PHPUnit_Framework_TestCase {
 	function providerTestGenerateFromPost() {
 		return array(
 			array(array(), array(), false),
-			array(array((object)array('ID' => 1)), array(), array())
+			array(array((object)array('ID' => 2)), array(), array()),
+      array(array((object)array('ID' => 2)), array('managed' => false), array()),
+      array(array((object)array('ID' => 2)), array('managed' => true), array('attachment-2')),
 		);
 	}
 
@@ -26,11 +28,7 @@ class ComicPressBackendAttachmentTest extends PHPUnit_Framework_TestCase {
       'post_mime_type' => 'image'
     ), $get_children_response);
 
-    foreach ($post_meta as $id => $meta) {
-      foreach ($meta as $field => $value) {
-        update_post_meta($id, $field, $value);
-      }
-    }
+    update_post_meta(2, 'comicpress', $post_meta);
 
     $results = ComicPressBackendAttachment::generate_from_post((object)array('ID' => 1));
     if ($expected_ids === false) {
