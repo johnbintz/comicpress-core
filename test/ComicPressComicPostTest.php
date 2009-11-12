@@ -11,38 +11,38 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
   }
 
   function providerTestNormalizeOrdering() {
-  	return array(
+    return array(
       array(
         false,
         array('attachment-1' => array('enabled' => false), 'attachment-2' => array('enabled' => true)),
         false,
       ),
       array(
-  			array('attachment-1'),
-  			array(),
-  			array('attachment-1' => array('enabled' => true))
-  		),
-  		array(
-  			array('attachment-1'),
-  			array('attachment-1' => array('enabled' => false), 'attachment-2' => array('enabled' => true)),
-  			array('attachment-1' => array('enabled' => false))
-  		),
-  		array(
-  			array('attachment-1'),
-  			array('attachment-1' => array('enabled' => true, 'children' => array('rss' => array('attachment-2' => true)))),
-  			array('attachment-1' => array('enabled' => true))
-  		),
+        array('attachment-1'),
+        array(),
+        array('attachment-1' => array('enabled' => true))
+      ),
+      array(
+        array('attachment-1'),
+        array('attachment-1' => array('enabled' => false), 'attachment-2' => array('enabled' => true)),
+        array('attachment-1' => array('enabled' => false))
+      ),
+      array(
+        array('attachment-1'),
+        array('attachment-1' => array('enabled' => true, 'children' => array('rss' => array('attachment-2' => true)))),
+        array('attachment-1' => array('enabled' => true))
+      ),
       array(
         array('attachment-1', 'attachment-2'),
         array('attachment-1' => array('enabled' => true, 'children' => array('rss' => array('attachment-2' => true, 'attachment-3' => true)))),
         array('attachment-1' => array('enabled' => true, 'children' => array('rss' => array('attachment-2' => true))))
       ),
-  		array(
-  			array('attachment-1', 'attachment-2', 'attachment-3'),
-  			array('attachment-1' => array('enabled' => false, 'children' => array('rss' => array('attachment-2' => true)))),
-  			array('attachment-1' => array('enabled' => false, 'children' => array('rss' => array('attachment-2' => true))), 'attachment-3' => array('enabled' => true))
-  		),
-  	);
+      array(
+        array('attachment-1', 'attachment-2', 'attachment-3'),
+        array('attachment-1' => array('enabled' => false, 'children' => array('rss' => array('attachment-2' => true)))),
+        array('attachment-1' => array('enabled' => false, 'children' => array('rss' => array('attachment-2' => true))), 'attachment-3' => array('enabled' => true))
+      ),
+    );
   }
 
   /**
@@ -115,32 +115,32 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
   }
 
   function providerTestFindParents() {
-  	return array(
-  		array(
-  			array(),
-  			array()
-  		),
-  		array(
-  			array(1),
-  			array(1 => 'root')
-  		),
-  		array(
-  			array(2),
-  			array(2 => 'comic', 1 => 'root')
-  		),
-  		array(
-  			array(3),
-  			array(3 => 'part-1', 2 => 'comic', 1 => 'root')
-  		),
-  		array(
-  			array(4),
-  			array(4 => 'blog', 1 => 'root')
-  		),
-  		array(
-  			array(1, 4),
-  			array()
-  		),
-  	);
+    return array(
+      array(
+        array(),
+        array()
+      ),
+      array(
+        array(1),
+        array(1 => 'root')
+      ),
+      array(
+        array(2),
+        array(2 => 'comic', 1 => 'root')
+      ),
+      array(
+        array(3),
+        array(3 => 'part-1', 2 => 'comic', 1 => 'root')
+      ),
+      array(
+        array(4),
+        array(4 => 'blog', 1 => 'root')
+      ),
+      array(
+        array(1, 4),
+        array()
+      ),
+    );
   }
 
   /**
@@ -157,6 +157,21 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
     $this->p->post = (object)array('ID' => 1);
 
     $this->assertEquals($expected_result, $this->p->find_parents());
+  }
+
+  function testGetAttachments() {
+    $backend = $this->getMock('ComicPressFakeBackend', array('generate_from_post'));
+
+    $post = (object)array('ID' => 1);
+
+    $backend->expects($this->once())->method('generate_from_post')->with($post)->will($this->returnValue(array('test')));
+
+    $comicpress = ComicPress::get_instance();
+    $comicpress->backends = array($backend);
+
+    $this->p->post = $post;
+
+    $this->assertEquals(array('test'), $this->p->get_attachments());
   }
 }
 
