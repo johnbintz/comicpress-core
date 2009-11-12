@@ -7,18 +7,30 @@ require_once(dirname(__FILE__) . '/ComicPressComicPost.inc');
  */
 class ComicPress {
   var $comicpress_options = array(
-    'comic_dimensions'    => '760x',
-    'rss_dimensions'      => '350x',
-    'archive_dimensions'  => '125x',
-    'mini_dimensions'     => '100x',
+		'image_types' => array(
+			'comic' => array(
+  			'default' => true,
+  			'name' => 'Comic',
+  			'dimensions' => '760x'
+  		),
+			'rss' => array(
+  			'default' => false,
+  			'name' => 'RSS',
+  			'dimensions' => '350x'
+  		),
+			'archive' => array(
+  			'default' => false,
+  			'name' => 'Archive',
+  			'dimensions' => '125x'
+  		),
+  		'mini' => array(
+  			'default' => false,
+  			'name' => 'Minithumb',
+  			'dimensions' => '100x'
+  		),
+  	),
     'helpers'             => array(),
-    'addons'              => array(),
 		'storyline_order'     => '',
-    'subattachment_types' => array(
-  		'rss'     => 'RSS',
-  		'archive' => 'Archive',
-  		'mini'    => 'Mini Thumb'
-  	)
   );
 
   var $backends = array();
@@ -39,8 +51,32 @@ class ComicPress {
   function load() {
     $result = get_option('comicpress-options');
     if (is_array($result)) {
-      $this->comicpress_options = array_merge($this->comicpress_options, $result);
+      $this->comicpress_options = $this->_array_merge_replace_recursive($this->comicpress_options, $result);
     }
+  }
+
+  function _array_merge_replace_recursive() {
+  	$args = func_get_args();
+
+  	foreach ($args as $arg) {
+  		if (!is_array($arg)) { return end($args); }
+  	}
+
+  	$all_keys = array();
+  	$result = array();
+  	foreach ($args as $arg) {
+  		$all_keys = array_merge($all_keys, array_keys($arg));
+  	}
+
+  	foreach ($all_keys as $key) {
+  		$parts_to_merge = array();
+  		foreach ($args as $arg) {
+  			if (isset($arg[$key])) { $parts_to_merge[] = $arg[$key]; }
+  		}
+  		$result[$key] = call_user_func_array(array($this, '_array_merge_replace_recursive'), $parts_to_merge);
+  	}
+
+  	return $result;
   }
 
   /**
