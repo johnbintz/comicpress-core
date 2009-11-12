@@ -95,9 +95,11 @@ class ComicPress {
   }
 
   function editor_max_image_size($current_max, $size) {
-  	if (isset($this->comicpress_options["${size}_dimensions"])) {
-  		list($width, $height) = explode('x', $this->comicpress_options["${size}_dimensions"]);
-  		$current_max = array(intval($width), intval($height));
+  	if (isset($this->comicpress_options['image_types'][$size])) {
+  		if (isset($this->comicpress_options['image_types'][$size]['dimensions'])) {
+	  		list($width, $height) = explode('x', $this->comicpress_options['image_types'][$size]['dimensions']);
+  			$current_max = array(intval($width), intval($height));
+  	}
   	}
   	return $current_max;
   }

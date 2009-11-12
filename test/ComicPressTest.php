@@ -210,6 +210,28 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
 
   	$this->assertEquals(array('test3', 'comic', 'test', 'test2'), $this->cp->intermediate_image_sizes(array('test3')));
   }
+
+  function providerTestEditorMaxImageSize() {
+  	return array(
+  		array(array(1, 1), 'comic', array(760, 500)),
+  		array(array(1, 1), 'test', array(1, 1)),
+  		);
+  }
+
+  /**
+   * @dataProvider providerTestEditorMaxImageSize
+   */
+  function testEditorMaxImageSize($input, $type, $expected_result) {
+  	$this->cp->comicpress_options = array(
+  		'image_types' => array(
+  			'comic' => array(
+  				'dimensions' => '760x500'
+  			)
+  		)
+  	);
+
+  	$this->assertEquals($expected_result, $this->cp->editor_max_image_size($input, $type));
+  }
 }
 
 ?>
