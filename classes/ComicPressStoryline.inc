@@ -46,28 +46,37 @@ class ComicPressStoryline {
 		}
 	}
 
+	function _create_structure_key($input) {
+		$key = 'storyline-structure-';
+		if (is_string($input)) { return $key . $input;	}
+		if (is_array($input))  {
+			$fixed_parts = array();
+			foreach ($input as $i) { if (is_string($i)) { $fixed_parts[] = $i; } }
+			if (!empty($fixed_parts)) {	return $key . implode(',', $fixed_parts); }
+		}
+		return false;
+	}
+
   /**
    * Create a searchable structure from a node list.
    * @param array $structure The structure to process.
    * @return boolean True if the structure was valid.
    */
   function create_structure($structure) {
-    $key = null;
-    if (is_string($structure)) {
-      $key = $structure;
-      $structure = explode(',', $structure);
-    } else {
-      if (is_array($structure)) {
-      	$fixed_structure = array();
-      	foreach ($structure as $s) {
-      		if (!is_array($s)) { $fixed_structure[] = $s; }
-      	}
-        $key = implode(',', $fixed_structure);
-      }
-    }
+    $key = $this->_create_structure_key($structure);
 
-    if (!is_null($key)) {
-      $key = "storyline-structure-${key}";
+    if ($key !== false) {
+	    if (is_string($structure)) {
+	      $structure = explode(',', $structure);
+	    } else {
+	      if (is_array($structure)) {
+	      	$fixed_structure = array();
+	      	foreach ($structure as $s) {
+	      		if (!is_array($s)) { $fixed_structure[] = $s; }
+	      	}
+	      	$structure = $fixed_structure;
+	      }
+	    }
 
       if (($result = wp_cache_get($key, 'comicpress')) !== false) {
         $this->_structure = $result;
@@ -142,9 +151,12 @@ class ComicPressStoryline {
     return false;
   }
 
+  // @codeCoverageIgnoreStart
   function parent($id)   { return $this->_get_field('parent', $id); }
   function previous($id) { return $this->_get_field('previous', $id); }
   function next($id)     { return $this->_get_field('next', $id); }
+  // @codeCoverageIgnoreEnd
+
   function valid($id)    {
     if (isset($this->_structure[$id])) {
       return array_keys($this->_structure[$id]);
@@ -168,7 +180,9 @@ class ComicPressStoryline {
             }
           }
         }
+      // @codeCoverageIgnoreStart
   		} while ($has_adjacent);
+      // @codeCoverageIgnoreEnd
   		return $all_adjacent;
   	}
   	return false;
@@ -243,9 +257,11 @@ class ComicPressStoryline {
   /**
    * Get a flattened category node list.
    */
+	// @codeCoverageIgnoreStart
 	function get_category_flattened($parent = null) {
 		return $this->flatten_simple_storyline($this->get_category_simple_structure($parent));
 	}
+	// @codeCoverageIgnoreEnd
 
   /**
    * Merge a flat simple storyline into a tree.
@@ -285,7 +301,6 @@ class ComicPressStoryline {
 	 * Integrates a bunch of other things.
 	 */
 	function normalize($flattened_storyline = null, $set = true) {
-		$comicpress = ComicPress::get_instance();
 		if (is_null($flattened_storyline)) {
 			$flattened_storyline = $this->get_flattened_storyline();
 		}
@@ -418,7 +433,9 @@ class ComicPressStoryline {
 	        	}
 	        }
 	      }
+	    // @codeCoverageIgnoreStart
 	    } while ($found_children);
+	    // @codeCoverageIgnoreEnd
 
 	    return $children;
   	}

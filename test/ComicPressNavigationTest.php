@@ -17,8 +17,18 @@ class ComicPressNavigationTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue($this->nav->get_post_nav(false) === false);
   }
 
+  function testGetPostNavPostHasNoID() {
+    $this->assertTrue($this->nav->get_post_nav((object)array()) === false);
+  }
+
   function testGetPostNavFromCache() {
-    $this->markTestIncomplete();
+    wp_cache_set('navigation-1', array('test' => 2), 'comicpress');
+
+    $post_2 = (object)array('ID' => 2);
+
+    wp_insert_post((array)$post_2);
+
+    $this->assertEquals(array('test' => $post_2), $this->nav->get_post_nav((object)array('ID' => 1)));
   }
 
   function testGetPostNav() {

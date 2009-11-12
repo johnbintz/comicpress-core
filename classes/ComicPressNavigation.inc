@@ -19,8 +19,9 @@ class ComicPressNavigation {
 
 		    if (($result = wp_cache_get($cache_key, 'comicpress')) !== false) {
 		    	 foreach ($result as $key => $post_id) {
-		    	 	 $nev[$key] = get_post($post_id);
+		    	 	 $nav[$key] = get_post($post_id);
 		    	 }
+		    	 return $nav;
 		    }
 
 		    // global previous/next

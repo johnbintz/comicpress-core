@@ -15,22 +15,18 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
     return array(
       array(
         false,
-        false,
         false
       ),
       array(
         array('0'),
-        false,
         false
       ),
       array(
         array('1'),
         false,
-        false
       ),
       array(
         array(array(0,1)),
-        false,
         false
       ),
       array(
@@ -40,6 +36,10 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
       array(
         array('0/1', '0/1/2'),
         array('1' => array('next' => 2, 'level' => 1), '2' => array('parent' => 1, 'previous' => 1, 'level' => 2))
+      ),
+      array(
+        array('0/1', false),
+        false
       ),
       array(
         array('0/1', '0/1/2', '0/1/3'),
@@ -97,12 +97,28 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
    * @group cache
    */
   function testCreateStorylineStructureFromCache($input, $expected_structure) {
-    if (is_string($input)) {
-      wp_cache_set("storyline-structure-${input}", $expected_structure, 'comicpress');
-    }
+  	$key = $this->css->_create_structure_key($input);
+  	if ($key !== false) {
+      wp_cache_set($key, $expected_structure, 'comicpress');
 
-    $this->assertEquals(is_array($expected_structure), $this->css->create_structure($input));
-    $this->assertEquals($expected_structure, $this->css->_structure);
+	    $this->assertEquals(is_array($expected_structure), $this->css->create_structure($input));
+	    $this->assertEquals($expected_structure, $this->css->_structure);
+  	}
+  }
+
+  function providerTestCreateStructureKey() {
+  	return array(
+  		array(false, false),
+  		array('blah', 'storyline-structure-blah'),
+  		array(array('test', 'test2'), 'storyline-structure-test,test2')
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestCreateStructureKey
+   */
+  function testCreateStructureKey($input, $expected_key) {
+  	$this->assertTrue($expected_key === $this->css->_create_structure_key($input));
   }
 
   function providerTestGetFields() {
@@ -511,11 +527,11 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 		return array(
 			array(
 				null,
-				array(1,2,3,4,5,6,7)
+				array(1,2,3,4,5,6,8,7)
 			),
 			array(
 				array(),
-				array(1,2,3,4,5,6,7)
+				array(1,2,3,4,5,6,8,7)
 			),
 			array(
 				array('child_of' => 1),
@@ -528,6 +544,14 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 			array(
 				array('child_of' => 1, 'only' => 7),
 				array(1,2,3,7)
+			),
+			array(
+				array('child_of' => 1, '!only' => 2),
+				array(1, 3)
+			),
+			array(
+				array('child_of' => 4),
+				array(4,5,6,8)
 			),
 			array(
 				array('level' => 1),
@@ -554,12 +578,16 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
   function testBuildFromRestrictions($restrictions, $expected_categories) {
   	global $post;
 
-  	$this->css->set_flattened_storyline('0/1,0/1/2,0/1/3,0/4,0/4/5,0/4/6,0/7');
+  	$this->css->set_flattened_storyline('0/1,0/1/2,0/1/3,0/4,0/4/5,0/4/6,0/4/6/8,0/7');
 
   	wp_set_post_categories(1, array(3));
   	$post = (object)array('ID' => 1);
 
   	$this->assertEquals($expected_categories, $this->css->build_from_restrictions($restrictions));
+  }
+
+  function testFindChildrenEmpty() {
+  	$this->assertTrue(false === $this->css->_find_children(null));
   }
 
   function providerTestAllAdjacent() {
@@ -583,6 +611,51 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
   	);
 
   	$this->assertEquals($expected_result, $this->css->all_adjacent($start, $direction));
+  }
+
+  function providerTestNormalize() {
+  	return array(
+  		array(null, false),
+  		array(true, false),
+  		array(null, true),
+  		array(true, true),
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestNormalize
+   */
+  function testNormalize($flattened_storyline, $do_set) {
+  	$css = $this->getMock('ComicPressStoryline', array('get_flattened_storyline', 'get_category_flattened', 'normalize_flattened_storyline', 'set_flattened_storyline'));
+  	$css->expects(is_null($flattened_storyline) ? $this->once() : $this->never())->method('get_flattened_storyline');
+  	$css->expects($do_set ? $this->once() : $this->never())->method('set_flattened_storyline');
+
+  	$css->normalize($flattened_storyline, $do_set);
+  }
+
+  function testExclude() {
+  	$css = $this->getMock('ComicPressStoryline', array('_find_blah'));
+  	$css->expects($this->once())->method('_find_blah')->with(1)->will($this->returnValue(array(1,2,3)));
+  	$css->_category_search = array(1,2,3,4,5,6);
+  	$css->_exclude('_find_blah', 1);
+  	$this->assertEquals(array(4,5,6), $css->_category_search);
+  }
+
+  function providerTestEnsurePostID() {
+  	return array(
+  		array(null, null),
+  		array((object)array('test' => 'blah'), null),
+  		array((object)array('ID' => 1), 1),
+  		array("1", 1),
+  		array("1a", null),
+  		);
+  }
+
+  /**
+	 * @dataProvider providerTestEnsurePostID
+   */
+  function testEnsurePostID($thing, $expected_result) {
+  	$this->assertEquals($expected_result, $this->css->_ensure_post_id($thing));
   }
 }
 
