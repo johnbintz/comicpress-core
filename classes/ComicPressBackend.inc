@@ -9,7 +9,7 @@ class ComicPressBackend {
         $extras = array_merge($extras, $dims);
       }
 		}
-    
+
 		foreach ($extras as $field => $value) {
 			$extras[] = "${field}=\"${value}\" ";
 			unset($extras[$field]);
@@ -17,5 +17,16 @@ class ComicPressBackend {
 
 		$output = sprintf('<img src="%s" alt="%s" title="%s" %s/>', $this->url(), $this->alt(), $this->title(), implode("", $extras));
 		return apply_filters('comicpress_embed_image', $output, $this);
+	}
+
+	function generate_from_id($id) {
+		$comicpress = ComicPress::get_instance();
+		foreach ($comicpress->backends as $backend) {
+			$result = $backend->generate_from_id($id);
+			if ($result !== false) {
+				return $result;
+			}
+		}
+		return false;
 	}
 }

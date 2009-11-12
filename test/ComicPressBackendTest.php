@@ -42,4 +42,25 @@ class ComicPressBackendTest extends PHPUnit_Framework_TestCase {
       $this->assertTrue(preg_match($pattern, $result) > 0);
     }
   }
+
+  function providerTestGenerateFromID() {
+  	return array(
+			array(null, false),
+			array('1', false),
+			array('attachment-1', (object)array('ID' => 1))
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestGenerateFromID
+   */
+  function testGenerateFromID($id, $expected_result) {
+  	$backend = $this->getMock('ComicPressFakeBackend', array('generate_from_id'));
+		$backend->expects($this->once())->method('generate_from_id')->with($id)->will($this->returnValue($expected_result));
+
+  	$comicpress = ComicPress::get_instance();
+  	$comicpress->backends = array($backend);
+
+  	$this->assertEquals($expected_result, ComicPressBackend::generate_from_id($id));
+  }
 }

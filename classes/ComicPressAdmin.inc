@@ -219,7 +219,7 @@ class ComicPressAdmin {
     foreach ($_POST['attachments'] as $post_id => $settings) {
       if (isset($settings['comicpress_management'])) {
         $media_post = get_post($post_id);
-        if (isset($media_post->post_parent)) { 
+        if (isset($media_post->post_parent)) {
           $media_post->post_parent = $settings['post_parent'];
           wp_update_post($media_post);
         }
