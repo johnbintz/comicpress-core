@@ -232,6 +232,58 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
 
   	$this->assertEquals($expected_result, $this->cp->editor_max_image_size($input, $type));
   }
+
+  function providerTestNormalizeImageSizeOptions() {
+  	return array(
+  		array(
+  			array(
+  			  'comic_size_w' => 500,
+  			  'comic_size_h' => 500,
+  			  'comic_crop' => 0,
+  			  'thumbnail_size_w' => 500,
+  			  'thumbnail_size_h' => 500,
+  			  'thumbnail_crop' => 1,
+  			),
+  			array(),
+  			array(
+  			  'comic_size_w' => false,
+  			  'comic_size_h' => false,
+  			  'comic_crop' => false,
+  			  'thumbnail_size_w' => 500,
+  			  'thumbnail_size_h' => 500,
+  			  'thumbnail_crop' => 1,
+  			)
+  		),
+  		array(
+  			array(),
+  			array('comic' => array(
+  				'dimensions' => '500x500'
+  			)),
+  			array(
+  			  'comic_size_w' => 500,
+  			  'comic_size_h' => 500,
+  			  'comic_crop' => 0
+  			)
+  		),
+  		);
+  }
+
+  /**
+   * @dataProvider providerTestNormalizeImageSizeOptions
+   */
+  function testNormalizeImageSizeOptions($options, $image_types, $expected_options) {
+  	foreach ($options as $option => $value) {
+  		update_option($option, $value);
+  	}
+
+  	$this->cp->comicpress_options['image_types'] = $image_types;
+
+  	$this->cp->normalize_image_size_options();
+
+  	foreach ($expected_options as $option => $value) {
+  		$this->assertTrue($value === get_option($option));
+  	}
+  }
 }
 
 ?>

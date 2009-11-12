@@ -104,6 +104,31 @@ class ComicPress {
   	return $current_max;
   }
 
+  function normalize_image_size_options() {
+  	$protected_options = apply_filters('comicpress_protected_image_size_options', array('thumbnail', 'medium', 'large'));
+  	foreach (get_alloptions() as $option => $value) {
+  		if (strpos($option, '_size_w') !== false) {
+  			$size = str_replace('_size_w', '', $option);
+  			if (!in_array($size, $protected_options)) {
+  				foreach (array('_size_w', '_size_h', '_crop') as $suffix) {
+  					delete_option("${size}${suffix}");
+  				}
+  			}
+  		}
+  	}
+
+  	if (isset($this->comicpress_options['image_types'])) {
+  		foreach ($this->comicpress_options['image_types'] as $type => $info) {
+	  		if (isset($info['dimensions'])) {
+	  			list($width, $height) = explode('x', $info['dimensions']);
+	  			update_option("${type}_size_w", intval($width));
+	  			update_option("${type}_size_h", intval($height));
+	  			update_option("${type}_crop", 0);
+	  		}
+	  	}
+  	}
+  }
+
   // @codeCoverageIgnoreStart
 
   /**
