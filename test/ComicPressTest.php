@@ -198,6 +198,18 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   function testArrayMergeReplaceRecursive($inputs, $expected_output) {
   	$this->assertEquals($expected_output, call_user_func_array(array($this->cp, '_array_merge_replace_recursive'), $inputs));
   }
+
+  function testIntermediateImageSizes() {
+  	$this->cp->comicpress_options = array(
+  		'image_types' => array(
+  			'comic' => true,
+  			'test' => true,
+  			'test2' => true,
+  		)
+  	);
+
+  	$this->assertEquals(array('test3', 'comic', 'test', 'test2'), $this->cp->intermediate_image_sizes(array('test3')));
+  }
 }
 
 ?>

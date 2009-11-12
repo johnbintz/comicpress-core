@@ -88,6 +88,20 @@ class ComicPress {
     }
   }
 
+  // WordPress Filters
+
+  function intermediate_image_sizes($sizes) {
+    return array_merge($sizes, array_keys($this->comicpress_options['image_types']));
+  }
+
+  function editor_max_image_size($current_max, $size) {
+  	if (isset($this->comicpress_options["${size}_dimensions"])) {
+  		list($width, $height) = explode('x', $this->comicpress_options["${size}_dimensions"]);
+  		$current_max = array(intval($width), intval($height));
+  	}
+  	return $current_max;
+  }
+
   // @codeCoverageIgnoreStart
 
   /**
@@ -117,20 +131,6 @@ class ComicPress {
     		$this->backends[] = new $class();
     	}
     }
-  }
-
-  // WordPress Filters
-
-  function intermediate_image_sizes($sizes) {
-    return array_merge($sizes, array('comic', 'rss', 'archive', 'mini'));
-  }
-
-  function editor_max_image_size($current_max, $size) {
-  	if (isset($this->comicpress_options["${size}_dimensions"])) {
-  		list($width, $height) = explode('x', $this->comicpress_options["${size}_dimensions"]);
-  		$current_max = array(intval($width), intval($height));
-  	}
-  	return $current_max;
   }
 
   function announce_activated_helpers() {
