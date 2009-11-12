@@ -21,7 +21,7 @@ class ComicPress {
   	)
   );
 
-  var $backends = array('ComicPressBackendAttachment');
+  var $backends = array();
 
 	function &get_instance() {
 		static $instance;
@@ -53,7 +53,7 @@ class ComicPress {
   }
 
   // @codeCoverageIgnoreStart
-  
+
   /**
    * Initialize the class.
    */
@@ -74,6 +74,12 @@ class ComicPress {
       update_option("${size}_size_w", $w);
       update_option("${size}_size_h", $h);
       update_option("${size}_crop", 0);
+    }
+
+    foreach (get_declared_classes() as $class) {
+    	if (preg_match('#^ComicPressBackend.+$#', $class) > 0) {
+    		$this->backends[] = new $class();
+    	}
     }
   }
 

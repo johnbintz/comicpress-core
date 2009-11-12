@@ -1,5 +1,5 @@
 <p><em>
-  <?php _e('Drag and drop the comic files below to change the order in which they\'ll appear in within each category.', 'comicpress') ?>
+  <?php _e('Drag and drop the comic files below to change the order in which they\'ll appear.', 'comicpress') ?>
   <?php
     printf(
       __('To upload new images, use the %s.', 'comicpress'),
@@ -10,14 +10,13 @@
 
 </em></p>
 <?php if (!empty($ordering)) { ?>
-	<?php foreach ($ordering as $type => $attachment_ids) { ?>
-	  <h3><?php echo $this->comic_image_types[$type] ?></h3>
-	  <div class="comic-ordering" id="comic-ordering-<?php echo $type ?>">
-	    <?php foreach ($attachment_ids as $attachment_id) {
-	      $backend = new ComicPressBackendAttachment($attachment_id);
-	      $info = $backend->get_info(); ?>
-	      <div class="cp-comic-attachment" id="attachment_<?php echo $attachment_id ?>">
-	        <img src="<?php echo $backend->url() ?>" border="0" height="<?php echo $zoom_level ?>" />
+	<div class="comic-ordering">
+		<?php foreach ($ordering as $id => $info) {
+			$result = ComicPressBackend::generate_from_id($id);
+			if (!empty($result)) {
+	      $info = $result->get_info(); ?>
+	      <div class="cp-comic-attachment" id="attachment_<?php echo $id ?>">
+	        <img src="<?php echo $result->url() ?>" border="0" height="<?php echo $zoom_level ?>" />
 	        <div>
 	          <?php if (isset($info['file'])) { ?>
 	            <p><strong><?php echo basename($info['file']) ?></strong></p>
@@ -31,9 +30,9 @@
 	        </div>
 	        <br style="clear: both" />
 	      </div>
-	    <?php } ?>
-	  </div>
-	<?php } ?>
+			<?php } ?>
+		<?php } ?>
+	</div>
 <?php } ?>
 
 <script type="text/javascript">

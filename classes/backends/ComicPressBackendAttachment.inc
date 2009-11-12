@@ -57,15 +57,24 @@ class ComicPressBackendAttachment extends ComicPressBackend {
   }
 
   // @codeCoverageIgnoreStart
-  function embed($size = 'comic') {
-		return $this->_embed_image($size);
-  }
-
+  function embed($size = 'comic') { return $this->_embed_image($size); }
+  function file($size = 'comic') {	return $this->attachment->guid; }
   function alt() { return $this->attachment->post_title; }
   function title() { return $this->attachment->post_excerpt; }
-
-  function get_info() { return array(); }
   // @codeCoverageIgnoreEnd
+
+  function get_info($size = 'comic') {
+  	$info = array();
+  	foreach (array('dims', 'url', 'file') as $field) {
+  		$result = $this->{$field}($size);
+  		if (is_array($result)) {
+  			$info = array_merge($info, $result);
+  		} else {
+  			$info[$field] = $result;
+  		}
+  	}
+  	return $info;
+  }
 
   function generate_from_id($id) {
   	if (strpos($id, 'attachment-') === 0) {
@@ -73,7 +82,7 @@ class ComicPressBackendAttachment extends ComicPressBackend {
   		if (is_numeric($id)) {
   			$post = get_post($id);
   			if (!empty($post)) {
-  				return $post;
+  				return new ComicPressBackendAttachment($post);
   			}
   		}
   	}

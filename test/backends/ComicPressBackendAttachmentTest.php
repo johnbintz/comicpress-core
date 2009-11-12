@@ -92,6 +92,27 @@ class ComicPressBackendAttachmentTest extends PHPUnit_Framework_TestCase {
   function testGenerateFromID($id, $is_successful) {
   	wp_insert_post(array('ID' => 1));
 
-  	$this->assertTrue($is_successful == is_object($this->ba->generate_from_id($id)));
+  	if ($is_successful) {
+  		$return = new ComicPressBackendAttachment((object)array('ID' => 1));
+  	} else {
+  	  $return = false;
+  	}
+
+  	$this->assertEquals($return, $this->ba->generate_from_id($id));
+  }
+
+  function testGetInfo() {
+  	$ba = $this->getMock('ComicPressBackendAttachment', array('dims', 'url', 'file'), array(), 'Mock_ComicPressBackendAttachment', false);
+
+  	$ba->expects($this->once())->method('dims')->will($this->returnValue(array('width' => 320, 'height' => 240)));
+  	$ba->expects($this->once())->method('url')->will($this->returnValue('http://blah/file.jpg'));
+  	$ba->expects($this->once())->method('file')->will($this->returnValue('/root/file.jpg'));
+
+  	$this->assertEquals(array(
+  		'width' => 320,
+  		'height' => 240,
+  		'url' => 'http://blah/file.jpg',
+  		'file' => '/root/file.jpg'
+  	), $ba->get_info());
   }
 }
