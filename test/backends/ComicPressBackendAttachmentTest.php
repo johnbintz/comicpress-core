@@ -76,4 +76,22 @@ class ComicPressBackendAttachmentTest extends PHPUnit_Framework_TestCase {
     _set_image_downsize_result(1, 'comic', $image_downsize_result);
     $this->assertEquals($expected_result, $this->ba->url('comic'));
   }
+
+  function providerTestGenerateFromID() {
+  	return array(
+  		array(null, false),
+  		array(1, false),
+  		array('attachment-1', true),
+  		array('attachment-2', false)
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestGenerateFromID
+   */
+  function testGenerateFromID($id, $is_successful) {
+  	wp_insert_post(array('ID' => 1));
+
+  	$this->assertTrue($is_successful == is_object($this->ba->generate_from_id($id)));
+  }
 }

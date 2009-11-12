@@ -66,6 +66,19 @@ class ComicPressBackendAttachment extends ComicPressBackend {
 
   function get_info() { return array(); }
   // @codeCoverageIgnoreEnd
+
+  function generate_from_id($id) {
+  	if (strpos($id, 'attachment-') === 0) {
+  		$id = str_replace('attachment-', '', $id);
+  		if (is_numeric($id)) {
+  			$post = get_post($id);
+  			if (!empty($post)) {
+  				return $post;
+  			}
+  		}
+  	}
+  	return false;
+  }
 }
 
 ?>
