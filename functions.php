@@ -39,7 +39,8 @@ function F($name, $path, $override_post = null) {
 
 	$comic_post = new ComicPressComicPost(is_null($override_post) ? $post : $override_post);
 
-	return ComicPress::get_instance()->find_file($name, $path, $comic_post->find_parents());
+	$comicpress = ComicPress::get_instance();
+	return $comicpress->find_file($name, $path, $comic_post->find_parents());
 }
 
 /**
