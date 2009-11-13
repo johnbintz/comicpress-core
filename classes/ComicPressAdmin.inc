@@ -79,6 +79,7 @@ class ComicPressAdmin {
 		if ($plugin_page == 'comicpress/render_admin') {
 			wp_enqueue_style('cp-admin', get_template_directory_uri() . '/css/cp-admin.css');
 			wp_enqueue_script('cp-admin', get_template_directory_uri() . '/js/Storyline.js', array('prototype', 'scriptaculous'));
+      add_action('admin_footer', array(&$this, 'admin_footer'));
 		}
 
 		if (strpos($pagenow, "-upload") !== false) {
