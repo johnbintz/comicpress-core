@@ -135,11 +135,11 @@ class ComicPressAdmin {
 	function _render_admin_storyline_tree($node, $parent_id = "0") {
 	  foreach ($node as $category_id => $children) {
 			$category = get_category($category_id);
-			echo '<div id="category_' . $parent_id . '/' . $category_id . '" class="cp-category-info">';
+			echo '<div id="category_' . $parent_id . '-' . $category_id . '" class="cp-category-info">';
 				echo '<span>' . $category->name . '</span>';
 				if (is_array($children)) {
 					echo '<div class="cp-children">';
-						$this->_render_admin_storyline_tree($children, $parent_id . '/' . $category_id);
+						$this->_render_admin_storyline_tree($children, $parent_id . '-' . $category_id);
 					echo '</div>';
 				}
 			echo '</div>';
@@ -235,9 +235,6 @@ class ComicPressAdmin {
    * Update ComicPress options.
    */
   function handle_update_comicpress_options($info) {
-    foreach (array('helpers') as $type) {
-      $this->comicpress->comicpress_options[$type] = array();
-    }
     foreach ($this->comicpress->comicpress_options as $option => $value) {
       if (isset($info[$option])) {
         switch ($option) {
@@ -281,11 +278,6 @@ class ComicPressAdmin {
 						}
             break;
           // @codeCoverageIgnoreStart
-          case 'helpers':
-            foreach ($info[$option] as $type => $set) {
-              $this->comicpress->comicpress_options[$option][$type] = true;
-            }
-            break;
 					case 'storyline_order':
 						$storyline = new ComicPressStoryline();
 						$storyline->normalize($info[$option]);
@@ -326,6 +318,18 @@ class ComicPressAdmin {
         }
       }
     }
+  }
+
+  function handle_update_get_new_image_type_editor($info) {
+  	$type = substr(md5(rand()), 0, 6);
+  	$info = array(
+  		'dimensions' => '100x100',
+  		'default' => false,
+  		'name' => 'New Type'
+  	);
+
+  	require_once('partials/_image-type-editor.inc');
+  	exit(0);
   }
 
   /**

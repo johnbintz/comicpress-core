@@ -8,7 +8,13 @@
 
 .cp-category-info span {
 	cursor: move;
-	color: #004
+	color: #33a;
+	font-size: 18px;
+	line-height: 22px
+}
+
+.cp-category-info span:hover {
+	color: #46d;
 }
 
 #ordering-zoom-slider-holder {
@@ -93,4 +99,11 @@
 	border: solid #aaa 1px;
 	font-weight: bold;
 	color: #aaa
+}
+
+#add-new-image-type {
+	font-size: 16px;
+	line-height: 16px;
+	display: block;
+	margin-bottom: 10px;
 }

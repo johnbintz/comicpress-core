@@ -3,10 +3,10 @@ var ComicImageTypes = {};
 
 (function() {
 	Storyline.get_order = function() {
-		var order = []
+		var order = [];
 		$$('#storyline-sorter .cp-category-info').each(function(info) {
-			var matches = info.id.match(/category_([0-9\/]+)/);
-			if (matches) { order.push(matches[1]); }
+			var matches = info.id.match(/category_([0-9\-]+)/);
+			if (matches) { order.push(matches[1].replace(/\-/g,'/')); }
 		});
 		$$('input[name*=storyline_order]').pop().value = order.join(',');
 	};
@@ -33,6 +33,20 @@ var ComicImageTypes = {};
 				});
 			});
 		});
+
+		Storyline.get_order();
+	};
+
+	ComicImageTypes.setup_checkboxes = function() {
+		var checkboxes = $$('input[name*=default][name*=image_types]');
+		checkboxes.each(function(c) {
+			c.stopObserving('change');
+			c.observe('change', function(e) {
+				checkboxes.each(function(ch) {
+					if (e.target != ch) { ch.checked = false; }
+				});
+			});
+		});
 	};
 
 	ComicImageTypes.setup = function() {
@@ -41,7 +55,7 @@ var ComicImageTypes = {};
 			if (closer) {
 				closer.observe('click', function(e) {
 					Event.stop(e);
-					if (confirm('Are you sure? Your templates may break after deleting this image type')) {
+					if (confirm('Are you sure? Your templates may break after deleting this image type.')) {
 						new Effect.Fade(ith, {
 							from: 1,
 							to: 0,
@@ -54,14 +68,7 @@ var ComicImageTypes = {};
 			}
 		});
 
-		var checkboxes = $$('input[name*=default][name*=image_types]');
-		checkboxes.each(function(c) {
-			c.observe('change', function(e) {
-				checkboxes.each(function(ch) {
-					if (e.target != ch) { ch.checked = false; }
-				});
-			});
-		});
+		ComicImageTypes.setup_checkboxes();
 
 		$('add-new-image-type').observe('click', function(e) {
 			Event.stop(e);
@@ -69,9 +76,12 @@ var ComicImageTypes = {};
 				method: 'get',
 				parameters: {
 					'cp[_nonce]': ComicPressAdmin.nonce,
-					'cp[
+					'cp[action]': 'get-new-image-type-editor'
 				},
-				insertion: 'bottom'
+				insertion: 'bottom',
+				onComplete: function() {
+					ComicImageTypes.setup_checkboxes();
+				}
 			});
 		});
 	};
