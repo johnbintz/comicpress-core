@@ -234,36 +234,44 @@ class ComicPressAdmin {
    * Update ComicPress options.
    */
   function handle_update_comicpress_options($info) {
-    foreach (array('helpers', 'options') as $type) {
+    foreach (array('helpers') as $type) {
       $this->comicpress->comicpress_options[$type] = array();
     }
     foreach ($this->comicpress->comicpress_options as $option => $value) {
       if (isset($info[$option])) {
         switch ($option) {
-          case 'comic_dimensions':
-          case 'rss_dimensions':
-          case 'archive_dimensions':
-          case 'mini_dimensions':
-            if (is_array($info[$option])) {
-              $dim_parts = array();
-              $is_valid = true;
-              foreach (array('width', 'height') as $field) {
-                $requested_dim = trim($info[$option][$field]);
-                if ($requested_dim == "") {
-                  $dim_parts[] = $requested_dim;
-                } else {
-                  if ((int)$requested_dim == $requested_dim) {
-                    $dim_parts[] = $requested_dim;
-                  } else {
-                    $is_valid = false; break;
-                  }
-                }
-              }
-
-              if ($is_valid) {
-                $this->comicpress->comicpress_options[$option] = implode("x", $dim_parts);
-              }
-            }
+          case 'image_types':
+						if (is_array($info['image_types'])) {
+	          	$this->comicpress->comicpress_options['image_types'] = array();
+	          	$defined_default = null;
+							foreach ($info['image_types'] as $type => $image_info) {
+								if (is_array($image_info)) {
+									foreach ($image_info as $field => $field_value) {
+										$new_value = array();
+										switch ($field) {
+											case "default":	$defined_default = $type; break;
+											case "dimensions":
+												if (is_array($field_value)) {
+													if (count(array_intersect(array('width', 'height'), array_keys($field_value))) == 2) {
+														$new_value['dimensions'] = "{$field_value['width']}x{$field_value['height']}";
+													}
+												}
+												break;
+										}
+										$this->comicpress->comicpress_options['image_types'][$type] = $new_value;
+									}
+								}
+							}
+						}
+						if (is_null($defined_default)) {
+							$defined_default = array_keys($this->comicpress->comicpress_options['image_types']);
+							if (!empty($defined_default)) { $defined_default = reset($defined_default); }
+						}
+						if (!is_null($defined_default)) {
+							if (isset($this->comicpress->comicpress_options['image_types'][$defined_default])) {
+								$this->comicpress->comicpress_options['image_types'][$defined_default]['default'] = true;
+							}
+						}
             break;
           // @codeCoverageIgnoreStart
           case 'helpers':

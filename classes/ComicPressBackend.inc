@@ -22,7 +22,7 @@ class ComicPressBackend {
 	function generate_from_id($id) {
 		$comicpress = ComicPress::get_instance();
 		foreach ($comicpress->backends as $backend) {
-			$result = $backend->generate_from_id($id);
+			$result = call_user_func(array($backend, 'generate_from_id'), $id);
 			if ($result !== false) {
 				return $result;
 			}

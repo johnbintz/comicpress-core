@@ -26,33 +26,60 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
 
   function providerTestHandleUpdateComicPressOptions() {
     return array(
-      array(
-        array('comic_dimensions' => '150x150'),
-        array('cp' => array(
-          'comic_dimensions' => 'test'
-        )),
-        array('comic_dimensions' => '150x150')
-      ),
-      array(
-        array('comic_dimensions' => '150x150'),
-        array('cp' => array(
-          'comic_dimensions' => array(
-            'width' => '150',
-            'height' => ''
-          )
-        )),
-        array('comic_dimensions' => '150x')
-      ),
-      array(
-        array('comic_dimensions' => '150x150'),
-        array('cp' => array(
-          'comic_dimensions' => array(
-            'width' => '150.1',
-            'height' => ''
-          )
-        )),
-        array('comic_dimensions' => '150x150')
-      ),
+    	array(
+    		array(
+    			'image_types' => array(
+	    			'comic' => array('default' => true, 'dimensions' => '500x50')
+	    		)
+	    	),
+	    	array(
+	    		'image_types' => array(
+	    			'comic' => array('default' => 'yes', 'dimensions' => array('width' => '100', 'height' => '100'))
+	    		)
+	    	),
+	    	array(
+    			'image_types' => array(
+	    			'comic' => array('default' => true, 'dimensions' => '100x100')
+	    		)
+  			)
+    	),
+    	array(
+    		array(
+    			'image_types' => array(
+	    			'comic' => array('default' => true, 'dimensions' => '500x50')
+	    		)
+	    	),
+	    	array(
+	    		'image_types' => array(
+	    			'comic' => array('dimensions' => array('width' => '500', 'height' => '50')),
+	    			'archive' => array('default' => 'yes', 'dimensions' => array('width' => '100', 'height' => '100')),
+	    	)
+	    	),
+	    	array(
+    			'image_types' => array(
+	    			'comic' => array('dimensions' => '500x50'),
+	    			'archive' => array('default' => true, 'dimensions' => '100x100'),
+	    		)
+  			)
+    	),
+    	array(
+    		array(
+    			'image_types' => array(
+	    			'comic' => array('default' => true, 'dimensions' => '500x50'),
+	    			'archive' => array('dimensions' => '100x100'),
+	    		)
+	    	),
+	    	array(
+	    		'image_types' => array(
+	    			'archive' => array('default' => 'yes', 'dimensions' => array('width' => '100', 'height' => '100')),
+	    	)
+	    	),
+	    	array(
+    			'image_types' => array(
+	    			'archive' => array('default' => true, 'dimensions' => '100x100'),
+	    		)
+  			)
+    	),
     );
   }
 
@@ -61,20 +88,9 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
    */
   function testHandleUpdateComicPressOptions($original, $change, $new) {
     $this->admin->comicpress = $this->getMock('ComicPress', array('save', 'init'));
-    $this->admin->comicpress->comicpress_options = array(
-      'comic_dimensions' => '760x',
-      'rss_dimensions' => '350x',
-      'archive_dimensions' => '125x'
-    );
     $this->admin->comicpress->comicpress_options = array_merge($this->admin->comicpress->comicpress_options, $original);
 
-    add_category(2, (object)array('name' => 'test'));
-
-    $_POST = $change;
-
-    if (isset($_POST['cp'])) {
-	    $this->admin->handle_update_comicpress_options($_POST['cp']);
-    }
+    $this->admin->handle_update_comicpress_options($change);
 
     foreach ($new as $key => $value) {
       $this->assertEquals($value, $this->admin->comicpress->comicpress_options[$key]);
