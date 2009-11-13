@@ -98,7 +98,7 @@ class ComicPressBackendAttachmentTest extends PHPUnit_Framework_TestCase {
   	  $return = false;
   	}
 
-  	$this->assertEquals($return, $this->ba->generate_from_id($id));
+  	$this->assertEquals($return, call_user_func(array('ComicPressBackendAttachment', 'generate_from_id'), $id));
   }
 
   function testGetInfo() {

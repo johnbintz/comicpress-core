@@ -77,8 +77,8 @@ class ComicPressBackendAttachment extends ComicPressBackend {
   }
 
   function generate_from_id($id) {
-  	if (strpos($id, $this->root_id . '-') === 0) {
-  		$id = str_replace($this->root_id . '-', '', $id);
+  	if (strpos($id, 'attachment-') === 0) {
+  		$id = str_replace('attachment-', '', $id);
   		if (is_numeric($id)) {
   			$post = get_post($id);
   			if (!empty($post)) {
