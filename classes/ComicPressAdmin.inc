@@ -246,20 +246,26 @@ class ComicPressAdmin {
 	          	$defined_default = null;
 							foreach ($info['image_types'] as $type => $image_info) {
 								if (is_array($image_info)) {
+									$new_value = array();
+									$new_type = $type;
 									foreach ($image_info as $field => $field_value) {
-										$new_value = array();
 										switch ($field) {
-											case "default":	$defined_default = $type; break;
-											case "dimensions":
+											case 'default':	$defined_default = $type; break;
+											case 'dimensions':
 												if (is_array($field_value)) {
 													if (count(array_intersect(array('width', 'height'), array_keys($field_value))) == 2) {
 														$new_value['dimensions'] = "{$field_value['width']}x{$field_value['height']}";
 													}
 												}
 												break;
+											case 'name': $new_value['name'] = (string)$field_value; break;
+											case 'short_name': $new_type = $field_value; break;
 										}
-										$this->comicpress->comicpress_options['image_types'][$type] = $new_value;
 									}
+									if ($type != $new_type) {
+									  unset($this->comicpress->comicpress_options['image_types'][$new_type]);
+									}
+									$this->comicpress->comicpress_options['image_types'][$new_type] = $new_value;
 								}
 							}
 						}
@@ -297,6 +303,16 @@ class ComicPressAdmin {
       require_once(ABSPATH."/wp-includes/js/tinymce/plugins/spellchecker/classes/utils/JSON.php");
       $j = new Moxiecode_JSON();
       return $j->decode($string);
+    }
+  }
+
+	function _json_encode($data) {
+    if (function_exists('json_encode')) {
+      return json_decode($data);
+    } else {
+      require_once(ABSPATH."/wp-includes/js/tinymce/plugins/spellchecker/classes/utils/JSON.php");
+      $j = new Moxiecode_JSON();
+      return $j->encode($data);
     }
   }
 

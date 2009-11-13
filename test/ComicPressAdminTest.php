@@ -34,12 +34,12 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
 	    	),
 	    	array(
 	    		'image_types' => array(
-	    			'comic' => array('default' => 'yes', 'dimensions' => array('width' => '100', 'height' => '100'))
+	    			'comic' => array('default' => 'yes', 'name' => 'Test', 'dimensions' => array('width' => '100', 'height' => '100'))
 	    		)
 	    	),
 	    	array(
     			'image_types' => array(
-	    			'comic' => array('default' => true, 'dimensions' => '100x100')
+	    			'comic' => array('default' => true, 'name' => 'Test', 'dimensions' => '100x100')
 	    		)
   			)
     	),
@@ -98,6 +98,23 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
 	    		)
   			)
     	),
+    	array(
+    		array(
+    			'image_types' => array(
+	    			'comic' => array('default' => true, 'dimensions' => '500x50'),
+	    		)
+	    	),
+	    	array(
+	    		'image_types' => array(
+	    			'comic' => array('short_name' => 'newcomic', 'dimensions' => array('width' => '100', 'height' => '100')),
+	    	)
+	    	),
+	    	array(
+    			'image_types' => array(
+	    			'newcomic' => array('default' => true, 'dimensions' => '100x100'),
+	    		)
+  			)
+    	)
     );
   }
 

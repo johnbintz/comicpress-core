@@ -155,7 +155,7 @@ class ComicPress {
 
     foreach (get_declared_classes() as $class) {
     	if (preg_match('#^ComicPressBackend.+$#', $class) > 0) {
-    		$this->backends[] = new $class();
+    		$this->backends[] = $class;
     	}
     }
   }

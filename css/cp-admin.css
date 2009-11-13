@@ -70,3 +70,27 @@
   display: block;
   margin: 8px 0 0 8px;
 }
+
+.image-type-holder {
+	border: solid #aaa 1px;
+	margin: 10px 0;
+	padding: 5px;
+}
+
+.image-type-holder table {
+	width: 90%
+}
+
+.image-type-editor-name input {
+	font-size: 1.5em;
+	width: 100%
+}
+
+.delete-image-type {
+	float: right;
+	display: inline;
+	padding: 3px;
+	border: solid #aaa 1px;
+	font-weight: bold;
+	color: #aaa
+}
