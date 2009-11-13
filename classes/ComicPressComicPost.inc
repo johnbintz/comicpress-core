@@ -92,48 +92,6 @@ class ComicPressComicPost {
   }
   // @codeCoverageIgnoreEnd
 
-  /**
-   * Change the ordering of comic images in the associated post.
-   * @param array $order The new requested order.
-   */
-  function change_comic_image_ordering($requested_new_order) {
-    $orderings = get_post_meta($this->post->ID, 'comic_ordering', true);
-    if (!is_array($orderings)) { $orderings = array(); }
-
-    $new_order = array();
-
-    $requested_new_order = (array)$requested_new_order;
-
-    foreach ($orderings as $type => $current_order) {
-      $new_order[$type] = array();
-      $sort_by_position = array();
-      $position = 0;
-      foreach ($requested_new_order[$type] as $id) {
-        if (!isset($sort_by_position[$position])) {
-          $sort_by_position[$position] = array();
-        }
-        $sort_by_position[$position][] = $id;
-        $position++;
-      }
-      ksort($sort_by_position);
-      $requested_order = array();
-      foreach ($sort_by_position as $position => $ids) {
-        sort($ids);
-        $requested_order = array_merge($requested_order, $ids);
-      }
-
-      $requested_order = array_merge($requested_order, array_diff($current_order, $requested_order));
-
-      foreach ($requested_order as $requested_comic) {
-        if (in_array($requested_comic, $current_order)) {
-          $new_order[$type][] = $requested_comic;
-        }
-      }
-    }
-
-    update_post_meta($this->post->ID, 'comic_ordering', $new_order);
-  }
-
   function find_parents() {
   	$parents = array();
   	$post_categories = wp_get_post_categories($this->post->ID);
