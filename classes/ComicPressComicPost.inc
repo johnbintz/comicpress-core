@@ -36,9 +36,7 @@ class ComicPressComicPost {
       foreach ($current_ordering as $key => $properties) {
       	$all_current_ids[$key] = true;
       	if (isset($properties['children'])) {
-      		foreach ($properties['children'] as $type => $kids) {
-      			$all_current_ids = array_merge($all_current_ids, $kids);
-      		}
+      		foreach (array_values($properties['children']) as $kid) { $all_current_ids[$kid] = true; }
       	}
       }
 			$all_current_ids = array_keys($all_current_ids);
@@ -59,12 +57,9 @@ class ComicPressComicPost {
       	} else {
       		foreach ($current_ordering as $key => $properties) {
       			if (isset($properties['children'])) {
-	      			foreach ($properties['children'] as $type => $kids) {
-	      				if (isset($kids[$attachment_id])) { unset($kids[$attachment_id]);	}
-	      				if (empty($kids)) {
-	      				  unset($properties['children'][$type]);
-	      				} else {
-	      				  $properties['children'][$type] = $kids;
+	      			foreach ($properties['children'] as $type => $kid) {
+	      				if (!in_array($kid, $attachment_ids)) {
+	      					unset($properties['children'][$type]);
 	      				}
 	      			}
 	      			if (empty($properties['children'])) {
@@ -161,6 +156,32 @@ class ComicPressComicPost {
   	}
 
   	return $parents;
+  }
+
+  function update_post_media_data($info) {
+  	$ordering = array();
+  	foreach ($info as $image) {
+  		if (isset($image['id'])) {
+  			$data = array(
+  				'enabled' => false
+  			);
+  			foreach ($image as $field => $value) {
+  				switch ($field) {
+  					case 'enabled': $data['enabled'] = true; break;
+  					case 'children':
+  						$any_entered = false;
+  						foreach ($value as $type => $attached_id) {
+  							if (!empty($attached_id)) { $any_entred = true; break; }
+  						}
+  						if ($any_entered) {	$data['children'] = $value; }
+  						break;
+  				}
+  			}
+  			$ordering[$image['id']] = $data;
+  		}
+  	}
+  	update_post_meta($this->post->ID, 'image-ordering', $ordering);
+  	return $ordering;
   }
 }
 

@@ -288,6 +288,26 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
 
     $this->admin->handle_update();
   }
+
+  function providerTestGetEditableAttachmentList() {
+  	return array(
+  		array(
+  		  array('attachment-1' => array('enabled' => false), 'attachment-2' => array('enabled' => true)),
+  		  array('attachment-1' => array('enabled' => false), 'attachment-2' => array('enabled' => true)),
+  		),
+  		array(
+  		  array('attachment-1' => array('enabled' => false, 'children' => array('rss' => 'attachment-3')), 'attachment-2' => array('enabled' => true)),
+  		  array('attachment-1' => array('enabled' => false, 'children' => array('rss' => 'attachment-3')), 'attachment-2' => array('enabled' => true), 'attachment-3' => array('enabled' => true)),
+  		),
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestGetEditableAttachmentList
+   */
+  function testGetEditableAttachmentList($list, $expected_result) {
+  	$this->assertEquals($expected_result, $this->admin->get_editable_attachment_list($list));
+  }
 }
 
 ?>

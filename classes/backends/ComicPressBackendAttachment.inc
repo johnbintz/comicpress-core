@@ -4,6 +4,7 @@ require_once(dirname(__FILE__) . '/../ComicPressBackend.inc');
 
 class ComicPressBackendAttachment extends ComicPressBackend {
 	var $root_id = 'attachment';
+	var $source_name = "Post attachment";
 
 	function generate_from_post($post) {
 		$result = array();

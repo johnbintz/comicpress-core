@@ -29,18 +29,13 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
       ),
       array(
         array('attachment-1'),
-        array('attachment-1' => array('enabled' => true, 'children' => array('rss' => array('attachment-2' => true)))),
+        array('attachment-1' => array('enabled' => true, 'children' => array('rss' => 'attachment-2'))),
         array('attachment-1' => array('enabled' => true))
       ),
       array(
-        array('attachment-1', 'attachment-2'),
-        array('attachment-1' => array('enabled' => true, 'children' => array('rss' => array('attachment-2' => true, 'attachment-3' => true)))),
-        array('attachment-1' => array('enabled' => true, 'children' => array('rss' => array('attachment-2' => true))))
-      ),
-      array(
         array('attachment-1', 'attachment-2', 'attachment-3'),
-        array('attachment-1' => array('enabled' => false, 'children' => array('rss' => array('attachment-2' => true)))),
-        array('attachment-1' => array('enabled' => false, 'children' => array('rss' => array('attachment-2' => true))), 'attachment-3' => array('enabled' => true))
+        array('attachment-1' => array('enabled' => false, 'children' => array('rss' => 'attachment-2'))),
+        array('attachment-1' => array('enabled' => false, 'children' => array('rss' => 'attachment-2')), 'attachment-3' => array('enabled' => true))
       ),
     );
   }
@@ -112,6 +107,32 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
     $this->p->change_comic_image_ordering($revised_ordering);
 
     $this->assertEquals($expected_result, get_post_meta(1, 'comic_ordering', true));
+  }
+
+  function providerTestUpdatePostMediaData() {
+  	return array(
+  		array(
+  			array(
+  				array(
+  					'id' => 'attachment-1',
+  					'enabled' => 'yes',
+  					'children' => array('rss' => '', 'archive' => '')
+  				)
+  			),
+  			array(
+ 					'attachment-1' => array('enabled' => true)
+  			)
+  		)
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestUpdatePostMediaData
+   */
+  function testUpdatePostMediaData($updated_ordering, $expected_meta) {
+  	$this->p->post = (object)array('ID' => 1);
+  	$this->assertEquals($expected_meta, $this->p->update_post_media_data($updated_ordering));
+  	$this->assertEquals($expected_meta, get_post_meta(1, 'image-ordering', true));
   }
 
   function providerTestFindParents() {

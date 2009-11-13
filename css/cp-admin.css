@@ -107,3 +107,19 @@
 	display: block;
 	margin-bottom: 10px;
 }
+
+.comic-ordering-show-associations {
+	font-size: 14px;
+	color: #777
+}
+
+.cp-comic-info {
+	float: left;
+	display: inline;
+	margin-bottom: 5px;
+}
+
+.comic-ordering-associations {
+	border: solid #aaa 1px;
+	padding: 5px;
+}

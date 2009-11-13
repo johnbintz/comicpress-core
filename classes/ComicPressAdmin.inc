@@ -174,6 +174,18 @@ class ComicPressAdmin {
     $media_upload_iframe_src = "media-upload.php?post_id=$uploading_iframe_ID";
     $image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src&amp;type=image&amp;TB_iframe=true");
 
+    $comicpress = ComicPress::get_instance();
+
+    $available_attachments = array();
+		foreach ($this->get_editable_attachment_list($ordering) as $id => $info) {
+			$result = ComicPressBackend::generate_from_id($id);
+			if (!empty($result)) {
+				$attachment_info = $result->get_info();
+
+				$available_attachments[] = array('id' => $id, 'name' => basename($attachment_info['file']), 'type' => $result->source_name, 'attachment' => $attachment_info, 'ordering' => $info);
+			}
+		}
+
     if ($is_ajax === true) {
       include(dirname(__FILE__) . '/partials/_comic-image-ordering-sorters.inc');
     } else {
@@ -181,6 +193,18 @@ class ComicPressAdmin {
     }
   }
   // @codeCoverageIgnoreEnd
+
+  function get_editable_attachment_list($ordering) {
+  	foreach ($ordering as $id => $info) {
+  		if (isset($info['children'])) {
+  			foreach (array_values($info['children']) as $new_id) {
+  				$ordering[$new_id] = array('enabled' => true);
+  			}
+  		}
+  	}
+
+  	return $ordering;
+  }
 
   /**
    * Create a dimension selector.
@@ -301,7 +325,7 @@ class ComicPressAdmin {
 
 	function _json_encode($data) {
     if (function_exists('json_encode')) {
-      return json_decode($data);
+      return json_encode($data);
     } else {
       require_once(ABSPATH."/wp-includes/js/tinymce/plugins/spellchecker/classes/utils/JSON.php");
       $j = new Moxiecode_JSON();
