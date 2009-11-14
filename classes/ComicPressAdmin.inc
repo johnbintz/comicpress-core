@@ -338,7 +338,7 @@ class ComicPressAdmin {
       if (is_numeric($_POST['post_ID'])) {
         if ($post = get_post($_POST['post_ID'])) {
           $comic_post = new ComicPressComicPost($post);
-          $comic_post->change_comic_image_ordering($this->_json_decode(stripslashes($_POST['cp']['comic_order'])));
+          $comic_post->update_post_media_data($this->_json_decode(stripslashes($_POST['cp']['comic_order'])));
         }
       }
     }

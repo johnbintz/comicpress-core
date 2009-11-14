@@ -11,42 +11,46 @@
 </em></p>
 <?php if (!empty($ordering)) { ?>
 	<div id="comic-ordering">
-		<?php foreach ($ordering as $id => $info) {
+		<?php foreach ($ordering as $id => $attachment_info) {
 			$result = ComicPressBackend::generate_from_id($id);
 			if (!empty($result)) {
 				$info = $result->get_info(); ?>
 				<div class="cp-comic-attachment" id="attachment_<?php echo $id ?>">
-					<img src="<?php echo $result->url() ?>" border="0" height="<?php echo $zoom_level ?>" />
-					<div class="cp-comic-info">
-						<p>
-							<input type="checkbox" name="cp[attachments][<?php echo $id ?>][visible]" value="yes" /> <?php _e('Allow this image to be shown', 'comicpress') ?>
-						</p>
-						<?php if (isset($info['file'])) { ?>
-							<p><strong><?php echo $result->source_name ?>:</strong> <?php echo basename($info['file']) ?></p>
-						<?php } ?>
-						<?php if (isset($info['width']) && isset($info['height'])) { ?>
+					<div style="overflow: hidden">
+						<img src="<?php echo $result->url() ?>" border="0" height="<?php echo $zoom_level ?>" />
+						<div class="cp-comic-info">
 							<p>
-								<strong><?php _e('Size:', 'comicpress') ?></strong>
-								<?php printf('%dx%d', $info['width'], $info['height'] ) ?>
+								<label>
+									<input type="checkbox" name="cp[attachments][<?php echo $id ?>][visible]" value="yes" <?php echo ($attachment_info['enabled']) ? 'checked="checked"' : '' ?>/> <?php _e('Allow this image to be shown', 'comicpress') ?>
+								</label>
 							</p>
-						<?php } ?>
-						<?php	if (count($comicpress->comicpress_options['image_types']) > 1) { ?>
-							<a class="comic-ordering-show-associations" href="#"><?php _e('Edit associations', 'comicpress') ?></a>
-							<div class="comic-ordering-associations">
-								<ul>
-									<?php foreach ($comicpress->comicpress_options['image_types'] as $type => $info) { ?>
-										<?php if (!$info['default']) { ?>
-											<li>
-											  <strong><?php echo $info['name'] ?>:</strong>
-											  <select name="cp[attachments][<?php echo $id ?>][<?php echo $type ?>]"></select>
-											</li>
+							<?php if (isset($info['file'])) { ?>
+								<p><strong><?php echo $result->source_name ?>:</strong> <?php echo basename($info['file']) ?></p>
+							<?php } ?>
+							<?php if (isset($info['width']) && isset($info['height'])) { ?>
+								<p>
+									<strong><?php _e('Size:', 'comicpress') ?></strong>
+									<?php printf('%dx%d', $info['width'], $info['height'] ) ?>
+								</p>
+							<?php } ?>
+							<?php	if (count($comicpress->comicpress_options['image_types']) > 1) { ?>
+								<a class="comic-ordering-show-associations" href="#"><?php _e('Edit associations', 'comicpress') ?></a>
+								<div class="comic-ordering-associations">
+									<ul>
+										<?php foreach ($comicpress->comicpress_options['image_types'] as $type => $info) { ?>
+											<?php if (!$info['default']) { ?>
+												<li>
+												  <strong><?php echo $info['name'] ?>:</strong>
+												  <select name="cp[attachments][<?php echo $id ?>][<?php echo $type ?>]"></select>
+												</li>
+											<?php } ?>
 										<?php } ?>
-									<?php } ?>
-								</ul>
-							</div>
-						<?php } ?>
+									</ul>
+								</div>
+							<?php } ?>
+						</div>
+						<br style="clear: both" />
 					</div>
-					<br style="clear: both" />
 				</div>
 			<?php } ?>
 		<?php } ?>

@@ -119,19 +119,21 @@ class ComicPressComicPost {
   function update_post_media_data($info) {
   	$ordering = array();
   	foreach ($info as $image) {
+  		$image = (array)$image;
   		if (isset($image['id'])) {
   			$data = array(
   				'enabled' => false
   			);
   			foreach ($image as $field => $value) {
   				switch ($field) {
-  					case 'enabled': $data['enabled'] = true; break;
+  					case 'enabled': $data['enabled'] = $value; break;
   					case 'children':
-  						$any_entered = false;
-  						foreach ($value as $type => $attached_id) {
-  							if (!empty($attached_id)) { $any_entred = true; break; }
+  						foreach ((array)$value as $type => $attached_id) {
+  							if (!empty($attached_id)) {
+  								if (!isset($data['children'])) { $data['children'] = array(); }
+  								$data['children'][$type] = $attached_id;
+  							}
   						}
-  						if ($any_entered) {	$data['children'] = $value; }
   						break;
   				}
   			}

@@ -66,7 +66,15 @@
 }
 
 .cp-comic-attachment {
-  cursor: move
+  cursor: move;
+  background-color: #ffd7d7;
+  margin-bottom: 10px;
+  border-bottom: solid #aaa 1px;
+  padding-bottom: 10px
+}
+
+.enabled {
+	background-color: transparent
 }
 
 #ordering-refresh {
@@ -122,4 +130,5 @@
 .comic-ordering-associations {
 	border: solid #aaa 1px;
 	padding: 5px;
+	width: 100%
 }
