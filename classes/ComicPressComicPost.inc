@@ -143,6 +143,19 @@ class ComicPressComicPost {
   	update_post_meta($this->post->ID, 'image-ordering', $ordering);
   	return $ordering;
   }
+
+  function get_attachments_with_children() {
+  	$attachments_with_children = array();
+		foreach ($this->normalize_ordering() as $id => $info) {
+			if ($info['enabled']) {
+				$attachments_with_children[$id] = array();
+				if (isset($info['children'])) {
+					$attachments_with_children[$id] = $info['children'];
+				}
+			}
+		}
+		return $attachments_with_children;
+  }
 }
 
 ?>

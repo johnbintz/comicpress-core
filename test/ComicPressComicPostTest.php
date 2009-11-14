@@ -172,6 +172,46 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
 
     $this->assertEquals(array('test'), $this->p->get_attachments());
   }
+
+  function providerTestGetAttachmentsWithChildren() {
+  	return array(
+  		array(
+  			array(
+  				'test-1' => array('enabled' => true),
+  				'test-2' => array('enabled' => true),
+    			'test-3' => array('enabled' => false),
+    			'test-4' => array('enabled' => false),
+  			),
+  			array(
+  				'test-1' => array(),
+  				'test-2' => array()
+  			)
+  		),
+  		array(
+  			array(
+  				'test-1' => array('enabled' => true, 'children' => array('rss' => 'test-3')),
+  				'test-2' => array('enabled' => false, 'children' => array('rss' => 'test-4')),
+  			),
+  			array(
+  				'test-1' => array('rss' => 'test-3'),
+  			)
+  		),
+
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestGetAttachmentsWithChildren
+   */
+  function testGetAttachmentsWithChildren($normalized_ordering, $expected_result) {
+  	$p = $this->getMock('ComicPressComicPost', array('normalize_ordering'));
+
+		$p->post = (object)array('ID' => 1);
+
+		$p->expects($this->once())->method('normalize_ordering')->will($this->returnValue($normalized_ordering));
+
+		$this->assertEquals($expected_result, $p->get_attachments_with_children());
+  }
 }
 
 ?>
