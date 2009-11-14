@@ -33,6 +33,11 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
         array('attachment-1' => array('enabled' => true))
       ),
       array(
+        array('attachment-1', 'attachment-2'),
+        array('attachment-1' => array('enabled' => true, 'children' => array('rss' => 'attachment-2', 'comic' => 'attachment-3'))),
+        array('attachment-1' => array('enabled' => true, 'children' => array('rss' => 'attachment-2')))
+      ),
+      array(
         array('attachment-1', 'attachment-2', 'attachment-3'),
         array('attachment-1' => array('enabled' => false, 'children' => array('rss' => 'attachment-2'))),
         array('attachment-1' => array('enabled' => false, 'children' => array('rss' => 'attachment-2')), 'attachment-3' => array('enabled' => true))
