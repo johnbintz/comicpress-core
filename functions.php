@@ -2,6 +2,7 @@
 
 // load all of the comic & non-comic category information
 add_action('init', '__comicpress_init');
+add_action('template_redirect', '__comicpress_template_redirect', 100);
 
 function __comicpress_init() {
   global $comicpress, $wp_query;
@@ -32,6 +33,10 @@ function __comicpress_init() {
 
   $comicpress_filters = new ComicPressFilters();
   $comicpress_filters->init();
+}
+
+function __comicpress_template_redirect() {
+	ob_start();
 }
 
 function F($name, $path, $override_post = null) {
@@ -146,12 +151,13 @@ function RT($which, $restrictions = null, $override_post = null) {
 }
 
 function M($override_post = null) {
-	global $post, $__attachments, $__ordering;
+	global $post, $__attachments;
 	$post_to_use = !is_null($override_post) ? $override_post : $post;
 
 	$comic_post = new ComicPressComicPost($post_to_use);
-	$__attachments = $comic_post->get_attachments();
-	$__ordering = $comic_post->normalize_ordering();
+	$__attachments = $comic_post->get_attachments_with_children(true);
+
+	return $__attachments;
 }
 
 /**
@@ -196,6 +202,3 @@ function comicpress_list_storyline_categories($args = "") {
   if ($style == "list") { $output .= "</ul></li>"; }
   echo $output;
 }
-
-ob_start();
-?>
