@@ -24,6 +24,7 @@ class ComicPressComicPost {
   /**
    * Normalize the ordering of attachments in this post.
    * If images have beed added or removed, intelligently update the metadata.
+   * TODO Allow skipping of normalization if performance is needed
    */
   function normalize_ordering() {
   	$attachments = $this->get_attachments();
