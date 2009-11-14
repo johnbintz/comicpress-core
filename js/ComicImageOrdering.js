@@ -74,57 +74,59 @@ ComicImageOrdering.build_response = function() {
 };
 
 ComicImageOrdering.setup = function() {
-	Sortable.create($('comic-ordering'), {
-		tag: 'div',
-		handle: 'div',
-		onUpdate: function() {
-			ComicImageOrdering.build_dropdowns();
-			ComicImageOrdering.build_response();
-		}
-	});
+	if ($('comic-ordering')) {
+		Sortable.create($('comic-ordering'), {
+			tag: 'div',
+			handle: 'div',
+			onUpdate: function() {
+				ComicImageOrdering.build_dropdowns();
+				ComicImageOrdering.build_response();
+			}
+		});
 
-	ComicImageOrdering.available_attachments.each(function(a) {
-		ComicImageOrdering.ids_with_children[a.id] = (a.ordering.children) ? a.ordering.children : {};
-	});
+		ComicImageOrdering.available_attachments.each(function(a) {
+			ComicImageOrdering.ids_with_children[a.id] = (a.ordering.children) ? a.ordering.children : {};
+		});
 
-	$$('#comic-ordering .cp-comic-attachment').each(function(att) {
-		var id = att.id.replace(/^attachment_/,'');
-		att.select('select').each(function(sel) {
-			var type = sel.name.replace(/^.*\[([^\]]+)\]$/, '$1');
+		$$('#comic-ordering .cp-comic-attachment').each(function(att) {
+			var id = att.id.replace(/^attachment_/,'');
+			att.select('select').each(function(sel) {
+				var type = sel.name.replace(/^.*\[([^\]]+)\]$/, '$1');
 
-			sel.observe('change', function(e) {
+				sel.observe('change', function(e) {
+					Event.stop(e);
+
+					var requested_child = $F(e.target);
+					if (requested_child) {
+						ComicImageOrdering.ids_with_children[id][type] = requested_child;
+					} else {
+						delete ComicImageOrdering.ids_with_children[id][type];
+					}
+
+					ComicImageOrdering.build_dropdowns();
+					ComicImageOrdering.build_response();
+				});
+			});
+
+			var associations_box = att.select('.comic-ordering-associations').pop();
+			associations_box[($H(ComicImageOrdering.ids_with_children[id]).keys().length == 0) ? 'hide' : 'show']();
+
+			att.select('.comic-ordering-show-associations').pop().observe('click', function(e) {
 				Event.stop(e);
+				associations_box.toggle();
+			});
+		});
 
-				var requested_child = $F(e.target);
-				if (requested_child) {
-					ComicImageOrdering.ids_with_children[id][type] = requested_child;
-				} else {
-					delete ComicImageOrdering.ids_with_children[id][type];
-				}
-
+		$$('#comic-ordering input[type=checkbox]').each(function(ch) {
+			ch.observe('change', function() {
 				ComicImageOrdering.build_dropdowns();
 				ComicImageOrdering.build_response();
 			});
 		});
 
-		var associations_box = att.select('.comic-ordering-associations').pop();
-		associations_box[($H(ComicImageOrdering.ids_with_children[id]).keys().length == 0) ? 'hide' : 'show']();
-
-		att.select('.comic-ordering-show-associations').pop().observe('click', function(e) {
-			Event.stop(e);
-			associations_box.toggle();
-		});
-	});
-
-	$$('#comic-ordering input[type=checkbox]').each(function(ch) {
-		ch.observe('change', function() {
-			ComicImageOrdering.build_dropdowns();
-			ComicImageOrdering.build_response();
-		});
-	});
-
-	ComicImageOrdering.build_dropdowns();
-	ComicImageOrdering.build_response();
+		ComicImageOrdering.build_dropdowns();
+		ComicImageOrdering.build_response();
+	}
 };
 
 Event.observe(window, 'load', function() {
