@@ -75,6 +75,18 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
     }
   }
 
+  function testNormalizeOrderingSkipChecks() {
+  	$p = $this->getMock('ComicPressComicPost', array('get_attachments'));
+
+  	$p->expects($this->once())->method('get_attachments')->will($this->returnValue(array('test', 'test2')));
+
+  	$p->post = (object)array('ID' => 1);
+  	update_post_meta(1, 'image-ordering', array('test' => array('enabled' => true)));
+
+  	$this->assertEquals(array('test' => array('enabled' => true)), $p->normalize_ordering(true));
+  	$this->assertEquals(array('test' => array('enabled' => true)), get_post_meta(1, 'image-ordering', true));
+  }
+
   function providerTestUpdatePostMediaData() {
   	return array(
   		array(

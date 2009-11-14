@@ -24,13 +24,17 @@ class ComicPressComicPost {
   /**
    * Normalize the ordering of attachments in this post.
    * If images have beed added or removed, intelligently update the metadata.
-   * TODO Allow skipping of normalization if performance is needed
+   * @param boolean $skip_checks If true, only return the post metadata, assuming that everything is correct. Do not use anywhere in the admin interface!
+   * @return array The normalized data, which is also written to the post's metadata if $skip_checks is false.
    */
-  function normalize_ordering() {
+  function normalize_ordering($skip_checks = false) {
   	$attachments = $this->get_attachments();
     if (is_array($attachments)) {
       $new_ordering = array();
       $current_ordering = get_post_meta($this->post->ID, 'image-ordering', true);
+
+      if ($skip_checks) { return $current_ordering; }
+
 			if (!is_array($current_ordering)) { $current_ordering = array(); }
 
       $all_current_ids = array();
