@@ -14,6 +14,9 @@
 
   foreach (M() as $image) {
   	echo $image->embed();
+  	echo $image->embed('comic');
+   	echo $image->embed('rss');
+   	echo $image->embed('archive');
   }
 
   RT('next');	the_title();  echo '<br />';

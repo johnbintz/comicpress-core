@@ -146,11 +146,12 @@ function RT($which, $restrictions = null, $override_post = null) {
 }
 
 function M($override_post = null) {
-	global $post;
+	global $post, $__attachments, $__ordering;
 	$post_to_use = !is_null($override_post) ? $override_post : $post;
 
 	$comic_post = new ComicPressComicPost($post_to_use);
-	return $comic_post->get_attachments();
+	$__attachments = $comic_post->get_attachments();
+	$__ordering = $comic_post->normalize_ordering();
 }
 
 /**
