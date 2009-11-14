@@ -3,7 +3,7 @@
 	<?php
 		printf(
 			__('To upload new images, use the %s.', 'comicpress'),
-			'<a href="' . $image_upload_iframe_src . '" class="thickbox" onclick="return false;">' . __('Image Uploader', 'comicpress') . '</a>'
+			'<a href="' . esc_attr($image_upload_iframe_src) . '" class="thickbox" onclick="return false;">' . __('Image Uploader', 'comicpress') . '</a>'
 		)
 	?>
 	<?php _e('Click the Refesh button underneath the zoom slider if you\'ve changed the images attached to this post.', 'comicpress') ?>
@@ -15,22 +15,22 @@
 			$result = ComicPressBackend::generate_from_id($id);
 			if (!empty($result)) {
 				$info = $result->get_info(); ?>
-				<div class="cp-comic-attachment" id="attachment_<?php echo $id ?>">
+				<div class="cp-comic-attachment" id="attachment_<?php echo esc_attr($id) ?>">
 					<div style="overflow: hidden">
-						<img src="<?php echo $result->url() ?>" border="0" height="<?php echo $zoom_level ?>" />
+						<img src="<?php echo esc_attr($result->url()) ?>" border="0" height="<?php echo esc_attr($zoom_level) ?>" />
 						<div class="cp-comic-info">
 							<p>
 								<label>
-									<input type="checkbox" name="cp[attachments][<?php echo $id ?>][visible]" value="yes" <?php echo ($attachment_info['enabled']) ? 'checked="checked"' : '' ?>/> <?php _e('Allow this image to be shown', 'comicpress') ?>
+									<input type="checkbox" name="cp[attachments][<?php echo esc_attr($id) ?>][visible]" value="yes" <?php echo ($attachment_info['enabled']) ? 'checked="checked"' : '' ?>/> <?php _e('Allow this image to be shown', 'comicpress') ?>
 								</label>
 							</p>
 							<?php if (isset($info['file'])) { ?>
-								<p><strong><?php echo $result->source_name ?>:</strong> <?php echo basename($info['file']) ?></p>
+								<p><strong><?php echo esc_html($result->source_name) ?>:</strong> <?php echo esc_html(basename($info['file'])) ?></p>
 							<?php } ?>
 							<?php if (isset($info['width']) && isset($info['height'])) { ?>
 								<p>
 									<strong><?php _e('Size:', 'comicpress') ?></strong>
-									<?php printf('%dx%d', $info['width'], $info['height'] ) ?>
+									<?php echo esc_html(sprintf('%dx%d', $info['width'], $info['height'])) ?>
 								</p>
 							<?php } ?>
 							<?php	if (count($comicpress->comicpress_options['image_types']) > 1) { ?>
@@ -40,8 +40,8 @@
 										<?php foreach ($comicpress->comicpress_options['image_types'] as $type => $info) { ?>
 											<?php if (!$info['default']) { ?>
 												<li>
-												  <strong><?php echo $info['name'] ?>:</strong>
-												  <select name="cp[attachments][<?php echo $id ?>][<?php echo $type ?>]"></select>
+												  <strong><?php echo esc_html($info['name']) ?>:</strong>
+												  <select name="cp[attachments][<?php echo esc_attr($id) ?>][<?php echo esc_attr($type) ?>]"></select>
 												</li>
 											<?php } ?>
 										<?php } ?>
@@ -58,8 +58,8 @@
 <?php } ?>
 
 <script type="text/javascript">
-	ComicImageOrdering.slider_value = <?php echo 190 - $zoom_level ?>;
-	ComicImageOrdering.available_attachments = <?php echo $this->_json_encode($available_attachments) ?>;
+	ComicImageOrdering.slider_value = <?php echo esc_js(190 - $zoom_level) ?>;
+	ComicImageOrdering.available_attachments = <?php echo esc_js($this->_json_encode($available_attachments)) ?>;
 
 	ComicImageOrdering.setup();
 </script>

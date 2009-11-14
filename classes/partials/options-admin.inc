@@ -1,7 +1,7 @@
 <div class="wrap">
 	<h2><?php _e('ComicPress Config', 'comicpress') ?></h2>
 	<form method="post" action="">
-		<input type="hidden" name="cp[_nonce]" value="<?php echo $nonce ?>" />
+		<input type="hidden" name="cp[_nonce]" value="<?php echo esc_attr($nonce) ?>" />
 		<h3><?php _e('Global Options', 'comicpress') ?></h3>
 		<table class="widefat fixed">
 			<tr>

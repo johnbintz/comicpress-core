@@ -3,11 +3,11 @@
 	<table cellspacing="0">
 		<tr class="image-type-editor-name">
 			<th scope="row" width="30%">Name:</th>
-			<td width="70%"><input type="text" name="cp[image_types][<?php echo $type ?>][name]" value="<?php echo $info['name'] ?>" /></td>
+			<td width="70%"><input type="text" name="cp[image_types][<?php echo esc_attr($type) ?>][name]" value="<?php echo esc_attr($info['name']) ?>" /></td>
 		</tr>
 		<tr class="image-type-editor-short-name">
 			<th scope="row">Short name <em>(used in template tags):</em></th>
-			<td><input type="text" name="cp[image_types][<?php echo $type ?>][short_name]" value="<?php echo $type ?>" /></td>
+			<td><input type="text" name="cp[image_types][<?php echo esc_attr($type) ?>][short_name]" value="<?php echo esc_attr($type) ?>" /></td>
 		</tr>
 		<tr class="image-type-editor-default">
 			<th scope="row">Default image type?</th>
@@ -22,8 +22,8 @@
 			<th scope="row">Dimensions</th>
 			<td>
 				<?php list($width, $height) = explode("x", $info['dimensions']) ?>
-				<input type="text" name="cp[image_types][<?php echo $type ?>][dimensions][width]" value="<?php echo $width ?>" size="5" /> x
-				<input type="text" name="cp[image_types][<?php echo $type ?>][dimensions][height]" value="<?php echo $height ?>" size="5" />
+				<input type="text" name="cp[image_types][<?php echo esc_attr($type) ?>][dimensions][width]" value="<?php echo esc_attr($width) ?>" size="5" /> x
+				<input type="text" name="cp[image_types][<?php echo esc_attr($type) ?>][dimensions][height]" value="<?php echo esc_attr($height) ?>" size="5" />
 				<br />
 				<em>(<?php _e('Leave a dimension blank to allow WordPress to calculate that dimension while scaling', 'comicpress') ?>)</em>
 			</td>
