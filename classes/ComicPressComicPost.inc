@@ -10,7 +10,7 @@ class ComicPressComicPost {
 
   /**
    * TODO normalize the attachments
-   * @return unknown_type
+   * @return array The raw list of attached files for this post.
    */
   function get_attachments() {
   	$comicpress = ComicPress::get_instance();
@@ -93,6 +93,10 @@ class ComicPressComicPost {
   }
   // @codeCoverageIgnoreEnd
 
+  /**
+   * Find all the parent categories of this post.
+   * @return array The parents in ascending child->parent relationship order.
+   */
   function find_parents() {
   	$parents = array();
   	$post_categories = wp_get_post_categories($this->post->ID);
@@ -117,6 +121,11 @@ class ComicPressComicPost {
   	return $parents;
   }
 
+  /**
+   * Update the ordering information for the post.
+   * @param array $info The new ordering information.
+   * @return array The reworked ordering.
+   */
   function update_post_media_data($info) {
   	$ordering = array();
   	foreach ($info as $image) {
@@ -145,6 +154,10 @@ class ComicPressComicPost {
   	return $ordering;
   }
 
+  /**
+   * Rework normalized attachments for a simpler embed format.
+   * @return array The simplified, normalized attachments.
+   */
   function get_attachments_with_children() {
   	$attachments_with_children = array();
 		foreach ($this->normalize_ordering() as $id => $info) {
