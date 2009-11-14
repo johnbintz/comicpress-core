@@ -160,11 +160,12 @@ class ComicPressComicPost {
 
   /**
    * Rework normalized attachments for a simpler embed format.
+   * @param boolean $skip_checks If true, skip the normalization checks in normalize_ordering(). Don't use in the admin interface.
    * @return array The simplified, normalized attachments.
    */
-  function get_attachments_with_children() {
+  function get_attachments_with_children($skip_checks = false) {
   	$attachments_with_children = array();
-		foreach ($this->normalize_ordering() as $id => $info) {
+		foreach ($this->normalize_ordering($skip_checks) as $id => $info) {
 			if ($info['enabled']) {
 				$attachments_with_children[$id] = array();
 				if (isset($info['children'])) {
