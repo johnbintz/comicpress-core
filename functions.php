@@ -129,7 +129,9 @@ function R($which, $restrictions = null, $override_post = null) {
 
 	$storyline = new ComicPressStoryline();
 
-	$categories = $storyline->build_from_restrictions(__prep_R($restrictions));
+	$restrictions = __prep_R($restrictions, $post_to_use);
+
+	$categories = $storyline->build_from_restrictions($restrictions);
 
 	$dbi = ComicPressDBInterface::get_instance();
 
