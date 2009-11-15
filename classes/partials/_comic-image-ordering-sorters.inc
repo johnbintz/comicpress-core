@@ -59,7 +59,7 @@
 
 <script type="text/javascript">
 	ComicImageOrdering.slider_value = <?php echo esc_js(190 - $zoom_level) ?>;
-	ComicImageOrdering.available_attachments = <?php echo esc_js($this->_json_encode($available_attachments)) ?>;
+	ComicImageOrdering.available_attachments = <?php echo $this->_json_encode($available_attachments) ?>;
 
 	ComicImageOrdering.setup();
 </script>
