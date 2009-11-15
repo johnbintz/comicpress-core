@@ -12,11 +12,29 @@ class ComicPressDBInterface {
 
 	function _get_categories_to_exclude($categories = null) {
 		if (is_array($categories)) {
-			return array_diff(get_all_category_ids(), $categories);
+			return array_values(array_diff(get_all_category_ids(), $categories));
 		} else {
 			return array();
 		}
 	}
+
+	function _prepare_wp_query() {
+		global $wp_query;
+
+		$this->is_single = $wp_query->is_single;
+		$this->in_the_loop = $wp_query->in_the_loop;
+
+		$wp_query->is_single = $wp_query->in_the_loop = true;
+	}
+
+	function _reset_wp_query() {
+		global $wp_query;
+
+		$wp_query->is_single = $this->is_single;
+		$wp_query->in_the_loop = $this->in_the_loop;
+	}
+
+	// @codeCoverageIgnoreStart
 
 	/**
 	 * Find the terminal post in a specific category.
@@ -73,22 +91,6 @@ class ComicPressDBInterface {
 		return empty($result) ? false : $result;
 	}
 
-	function _prepare_wp_query() {
-		global $wp_query;
-
-		$this->is_single = $wp_query->is_single;
-		$this->in_the_loop = $wp_query->in_the_loop;
-
-		$wp_query->is_single = $wp_query->in_the_loop = true;
-	}
-
-	function _reset_wp_query() {
-		global $wp_query;
-
-		$wp_query->is_single = $this->is_single;
-		$wp_query->in_the_loop = $this->in_the_loop;
-	}
-
 	/**
 	 * Get the previous comic from the current one.
 	 */
@@ -98,6 +100,8 @@ class ComicPressDBInterface {
 	 * Get the next comic from the current one.
 	 */
 	function get_next_post($categories = null, $override_post = null) { return $this->get_adjacent_post($categories, true, $override_post); }
+
+	// @codeCoverageIgnoreEnd
 }
 
 ?>
