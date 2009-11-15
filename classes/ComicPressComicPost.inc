@@ -167,10 +167,11 @@ class ComicPressComicPost {
   	$attachments_with_children = array();
 		foreach ($this->normalize_ordering($skip_checks) as $id => $info) {
 			if ($info['enabled']) {
-				$attachments_with_children[$id] = array();
+				$attachment = array('id' => $id);
 				if (isset($info['children'])) {
-					$attachments_with_children[$id] = $info['children'];
+					$attachment['children'] = $info['children'];
 				}
+				$attachments_with_children[] = $attachment;
 			}
 		}
 		return $attachments_with_children;

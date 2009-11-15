@@ -195,8 +195,8 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
     			'test-4' => array('enabled' => false),
   			),
   			array(
-  				'test-1' => array(),
-  				'test-2' => array()
+  				array('id' => 'test-1'),
+  				array('id' => 'test-2')
   			)
   		),
   		array(
@@ -205,7 +205,7 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
   				'test-2' => array('enabled' => false, 'children' => array('rss' => 'test-4')),
   			),
   			array(
-  				'test-1' => array('rss' => 'test-3'),
+  				array('id' => 'test-1', 'children' => array('rss' => 'test-3')),
   			)
   		),
 
