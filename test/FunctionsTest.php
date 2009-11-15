@@ -40,4 +40,74 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 			'test-1' => array('enabled' => true, 'children' => array('rss' => 'test-2'))
 		), get_post_meta($post_to_test->ID, 'image-ordering', true));
 	}
+
+	function testProtect() {
+		global $post, $wp_query, $__post, $__wp_query;
+
+		$__post = null;
+		$__wp_query = null;
+
+		$post = "test";
+		$wp_query = "test2";
+
+		Protect();
+
+		$this->assertEquals($post, $__post);
+		$this->assertEquals($wp_query, $__wp_query);
+	}
+
+	function testRestore() {
+		global $post, $__post;
+
+		$post = 'not';
+		$__post = 'test';
+
+		Restore();
+
+		$this->assertEquals($__post, $post);
+	}
+
+	function testUnprotect() {
+		global $post, $__post, $wp_query, $__wp_query;
+
+		$__post = $__wp_query = 'test';
+		$post = $wp_query = 'not';
+
+		Unprotect();
+
+		$this->assertEquals('test', $post);
+		$this->assertEquals('test', $wp_query);
+
+		$this->assertTrue(is_null($__post));
+		$this->assertTrue(is_null($__wp_query));
+	}
+
+	function providerTestPrepR() {
+		$post = (object)array('ID' => 1);
+
+		return array(
+			array(
+				array(), array()
+			),
+			array(
+				'from_post', array('from_post' => $post)
+			),
+			array(
+				array('test' => 'test'), array('test' => 'test')
+			),
+			array(
+				array('test' => '__post'), array('test' => $post)
+			),
+			array(
+				array('test' => array('test')), array('test' => array('test'))
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestPrepR
+	 */
+	function testPrepR($restrictions, $expected_result) {
+		$this->assertEquals($expected_result, __prep_R($restrictions, (object)array('ID' => 1)));
+	}
 }
