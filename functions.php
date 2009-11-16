@@ -2,7 +2,6 @@
 
 // load all of the comic & non-comic category information
 add_action('init', '__comicpress_init');
-add_action('template_redirect', '__comicpress_template_redirect', 100);
 
 // @codeCoverageIgnoreStart
 
@@ -35,10 +34,6 @@ function __comicpress_init() {
 
   $comicpress_filters = new ComicPressFilters();
   $comicpress_filters->init();
-}
-
-function __comicpress_template_redirect() {
-	ob_start();
 }
 
 function F($name, $path, $override_post = null) {
@@ -190,47 +185,4 @@ function EM($attachment_info, $which = 'default', $action = 'embed') {
 			}
 		}
 	}
-}
-
-/**
- * Display the list of Storyline categories.
- */
-function comicpress_list_storyline_categories($args = "") {
-  global $category_tree;
-
-  $defaults = array(
-    'style' => 'list', 'title_li' => __('Storyline')
-  );
-
-  $r = wp_parse_args($args, $defaults);
-
-  extract($r);
-
-  $categories_by_id = get_all_category_objects_by_id();
-
-  $output = '';
-  if ($style == "list") { $output .= '<li class="categories storyline">'; }
-  if ($title_li && ($style == "list")) { $output .= $title_li; }
-  if ($style == "list") { $output .= "<ul>"; }
-  $current_depth = 0;
-  foreach ($category_tree as $node) {
-    $parts = explode("/", $node);
-    $category_id = end($parts);
-    $target_depth = count($parts) - 2;
-    if ($target_depth > $current_depth) {
-      $output .= str_repeat("<li><ul>", ($target_depth - $current_depth));
-    }
-    if ($target_depth < $current_depth) {
-      $output .= str_repeat("</ul></li>", ($current_depth - $target_depth));
-    }
-    $output .= '<li><a href="' . get_category_link($category_id) . '">';
-    $output .= $categories_by_id[$category_id]->cat_name;
-    $output .= "</a></li>";
-    $current_depth = $target_depth;
-  }
-  if ($current_depth > 0) {
-    $output .= str_repeat("</ul></li>", $current_depth);
-  }
-  if ($style == "list") { $output .= "</ul></li>"; }
-  echo $output;
 }
