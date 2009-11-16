@@ -9,7 +9,6 @@ class ComicPressComicPost {
   }
 
   /**
-   * TODO normalize the attachments
    * @return array The raw list of attached files for this post.
    */
   function get_attachments() {
@@ -164,16 +163,33 @@ class ComicPressComicPost {
    * @return array The simplified, normalized attachments.
    */
   function get_attachments_with_children($skip_checks = false) {
-  	$attachments_with_children = array();
-		foreach ($this->normalize_ordering($skip_checks) as $id => $info) {
-			if ($info['enabled']) {
-				$attachment = array('id' => $id);
-				if (isset($info['children'])) {
-					$attachment['children'] = $info['children'];
+		$comicpress = ComicPress::get_instance();
+		$default_type = $comicpress->get_default_image_type();
+
+		$normalized_children = $this->normalize_ordering($skip_checks);
+
+  	$remove_from_list = array();
+		foreach ($normalized_children as $id => $info) {
+  		if (isset($info['children'])) {
+  			$remove_from_list = array_merge($remove_from_list, array_values($info['children']));
+  		}
+		}
+
+		$attachments_with_children = array();
+		foreach ($normalized_children as $id => $info) {
+			if (!in_array($id, $remove_from_list)) {
+				if ($info['enabled']) {
+					$attachment = array('default' => $id);
+					if (is_string($default_type)) { $attachment[$default_type] = $id; }
+					if (isset($info['children'])) {
+						$attachment = array_merge($attachment, $info['children']);
+						$remove_from_list = array_merge($remove_from_list, array_values($info['children']));
+					}
+					$attachments_with_children[] = $attachment;
 				}
-				$attachments_with_children[] = $attachment;
 			}
 		}
+
 		return $attachments_with_children;
   }
 }

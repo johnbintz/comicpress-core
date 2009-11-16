@@ -284,6 +284,34 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   		$this->assertTrue($value === get_option($option));
   	}
   }
+
+  function providerTestGetDefaultImageType() {
+  	return array(
+  		array(false, false),
+  		array(array(), false),
+  		array(
+  			array(
+  				'comic' => array('default' => false)
+  			),
+  			false
+  		),
+  		array(
+  			array(
+  				'comic' => array('default' => true)
+  			),
+  			'comic'
+  		),
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestGetDefaultImageType
+   */
+  function testGetDefaultImageType($image_types, $expected_result) {
+  	$this->cp->comicpress_options['image_types'] = $image_types;
+
+  	$this->assertEquals($expected_result, $this->cp->get_default_image_type());
+  }
 }
 
 ?>

@@ -27,6 +27,7 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 		$backend->expects($this->once())->method('generate_from_post')->with($post_to_test)->will($this->returnValue(array('test-1', 'test-2', 'test-3')));
 		$comicpress = ComicPress::get_instance();
 		$comicpress->backends = array($backend);
+		$comicpress->comicpress_options['image_types'] = array();
 
 		update_post_meta($post_to_test->ID, 'image-ordering', array(
 			'test-1' => array('enabled' => true, 'children' => array('rss' => 'test-2'))
@@ -34,7 +35,9 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 
 		$result = M($post_to_use);
 
-		$this->assertEquals(array('test-1' => array('rss' => 'test-2')), $result);
+		$this->assertEquals(array(
+			array('default' => 'test-1', 'rss' => 'test-2')
+		), $result);
 		$this->assertEquals($result, $__attachments);
 		$this->assertEquals(array(
 			'test-1' => array('enabled' => true, 'children' => array('rss' => 'test-2'))
@@ -109,5 +112,63 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testPrepR($restrictions, $expected_result) {
 		$this->assertEquals($expected_result, __prep_R($restrictions, (object)array('ID' => 1)));
+	}
+
+	function providerTestEM() {
+		return array(
+			array(array(), 'embed', 'default', false, false),
+			array(
+				array('default' => 'test-1'),
+				'embed',
+				'default',
+				'test-1',
+				'embed'
+			),
+			array(
+				array('default' => 'test-1'),
+				'cats',
+				'default',
+				'test-1',
+				false
+			),
+			array(
+				array('default' => 'test-1'),
+				'embed',
+				'comic',
+				false,
+				false
+			),
+			array(
+				array('default' => 'test-1', 'comic' => 'test-2'),
+				'embed',
+				'comic',
+				'test-2',
+				'embed'
+			),
+
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestEM
+	 */
+	function testEM($info, $action, $which, $will_get_id, $expected_result) {
+		$backend = $this->getMock('ComicPressFakeBackend', array('generate_from_id', 'embed', 'url'));
+		if (is_string($will_get_id)) {
+			$backend->expects($this->once())->method('generate_from_id')->with($will_get_id)->will($this->returnValue($backend));
+
+			if (method_exists($backend, $action)) {
+				$backend->expects($this->once())->method($action)->will($this->returnValue($expected_result));
+			} else {
+				$backend->expects($this->never())->method($action);
+			}
+		} else {
+			$backend->expects($this->never())->method('generate_from_id');
+		}
+
+		$comicpress = ComicPress::get_instance();
+		$comicpress->backends = array($backend);
+
+		$this->assertEquals($expected_result, EM($info, $which, $action));
 	}
 }

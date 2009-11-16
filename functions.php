@@ -174,6 +174,24 @@ function M($override_post = null) {
 	return $__attachments;
 }
 
+function EM($attachment_info, $which = 'default', $action = 'embed') {
+	if (substr($action, 0, 1) != '_') {
+		$args = func_get_args();
+
+		if (isset($attachment_info[$which])) {
+			if (($attachment = ComicPressBackend::generate_from_id($attachment_info[$which])) !== false) {
+				if (method_exists($attachment, $action)) {
+					return call_user_func_array(array($attachment, $action), array_merge(array($which), array_slice($args, 3)));
+				}
+
+				switch ($action) {
+					case 'object': return $attachment;
+				}
+			}
+		}
+	}
+}
+
 /**
  * Display the list of Storyline categories.
  */

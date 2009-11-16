@@ -95,18 +95,20 @@ class ComicPress {
   }
 
   function editor_max_image_size($current_max, $size) {
-  	if (isset($this->comicpress_options['image_types'][$size])) {
-  		if (isset($this->comicpress_options['image_types'][$size]['dimensions'])) {
-	  		list($width, $height) = explode('x', $this->comicpress_options['image_types'][$size]['dimensions']);
-  			$current_max = array(intval($width), intval($height));
-  	}
+  	if (isset($this->comicpress_options['image_types'])) {
+	  	if (isset($this->comicpress_options['image_types'][$size])) {
+	  		if (isset($this->comicpress_options['image_types'][$size]['dimensions'])) {
+		  		list($width, $height) = explode('x', $this->comicpress_options['image_types'][$size]['dimensions']);
+	  			$current_max = array(intval($width), intval($height));
+		  	}
+	  	}
   	}
   	return $current_max;
   }
 
   function normalize_image_size_options() {
   	$protected_options = apply_filters('comicpress_protected_image_size_options', array('thumbnail', 'medium', 'large'));
-  	foreach (get_alloptions() as $option => $value) {
+  	foreach (wp_load_alloptions() as $option => $value) {
   		if (strpos($option, '_size_w') !== false) {
   			$size = str_replace('_size_w', '', $option);
   			if (!in_array($size, $protected_options)) {
@@ -121,6 +123,9 @@ class ComicPress {
   		foreach ($this->comicpress_options['image_types'] as $type => $info) {
 	  		if (isset($info['dimensions'])) {
 	  			list($width, $height) = explode('x', $info['dimensions']);
+  				foreach (array('_size_w', '_size_h', '_crop') as $suffix) {
+  					delete_option("${type}${suffix}");
+  				}
 	  			update_option("${type}_size_w", intval($width));
 	  			update_option("${type}_size_h", intval($height));
 	  			update_option("${type}_crop", 0);
@@ -137,21 +142,10 @@ class ComicPress {
   function init() {
     $this->load();
 
-    if (current_user_can('edit_themes')) {
-      if (!empty($this->comicpress_options['helpers'])) {
-        add_action('wp_footer', array(&$this, 'announce_activated_helpers'));
-      }
-    }
-
     add_filter('intermediate_image_sizes', array(&$this, 'intermediate_image_sizes'));
 		add_filter('editor_max_image_size', array(&$this, 'editor_max_image_size'), 10, 2);
 
-    foreach (array('comic', 'rss', 'archive', 'mini') as $size) {
-      list($w, $h) = explode("x", $this->comicpress_options["${size}_dimensions"]);
-      update_option("${size}_size_w", $w);
-      update_option("${size}_size_h", $h);
-      update_option("${size}_crop", 0);
-    }
+		$this->normalize_image_size_options();
 
     foreach (get_declared_classes() as $class) {
     	if (preg_match('#^ComicPressBackend.+$#', $class) > 0) {
@@ -229,6 +223,19 @@ class ComicPress {
 					return $target;
 				}
 			}
+		}
+		return false;
+	}
+
+	function get_default_image_type() {
+		if (isset($this->comicpress_options['image_types'])) {
+		  if (is_array($this->comicpress_options['image_types'])) {
+		  	foreach ($this->comicpress_options['image_types'] as $type => $properties) {
+		  		if ($properties['default'] === true) {
+		  			return $type;
+		  		}
+		  	}
+		  }
 		}
 		return false;
 	}

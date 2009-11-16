@@ -3,6 +3,7 @@
 require_once('PHPUnit/Framework.php');
 require_once('MockPress/mockpress.php');
 require_once('ComicPressAdmin.inc');
+require_once('ComicPress.inc');
 
 class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
   function setUp() {

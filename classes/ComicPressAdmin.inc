@@ -103,13 +103,17 @@ class ComicPressAdmin {
   function setup_comic_metadata_buttons($form_fields, $post) {
     global $pagenow;
 
-    $comicpress_management = get_post_meta($post->ID, 'comicpress_management', true);
+    $comicpress_info = get_post_meta($post->ID, 'comicpress', true);
+    $is_managed = false;
+    if (isset($comicpress_info['managed'])) {
+    	$is_managed = $comicpress_info['managed'];
+    }
 
     if ($pagenow !== "media.php") {
       $form_fields['auto_attach'] = array(
         'label' => __("Let ComicPress Manage?", 'comicpress'),
         'input' => 'html',
-        'html' => '<label><input type="checkbox" name="attachments[' . $post->ID . '][comicpress_management]" value="yes" ' . ($comicpress_management ? 'checked="checked"' : '') . '/> '
+        'html' => '<label><input type="checkbox" name="attachments[' . $post->ID . '][comicpress_management]" value="yes" ' . ($is_managed ? 'checked="checked"' : '') . '/> '
                 . __('Let ComicPress treat this image as a comic media file', 'comicpress')
                 . '</label>'
                 . '<input type="hidden" name="cp[_nonce]" value="' . wp_create_nonce('comicpress')  . '" />'
@@ -250,8 +254,8 @@ class ComicPressAdmin {
         }
       }
       update_post_meta($post_id, 'comicpress', array(
-        'managed' => isset($settings['comicpress_management']
-      )));
+        'managed' => isset($settings['comicpress_management'])
+     	));
     }
   }
 
@@ -290,6 +294,7 @@ class ComicPressAdmin {
 									$this->comicpress->comicpress_options['image_types'][$new_type] = $new_value;
 								}
 							}
+							$this->comicpress->normalize_image_size_options();
 						}
 						if (is_null($defined_default)) {
 							$defined_default = array_keys($this->comicpress->comicpress_options['image_types']);

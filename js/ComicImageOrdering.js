@@ -58,17 +58,15 @@ ComicImageOrdering.build_dropdowns = function() {
 ComicImageOrdering.build_response = function() {
 	var output = [];
 	$('comic-ordering').select('.cp-comic-attachment').each(function(att) {
-		if (att.visible) {
-			var data = {};
-			data.id = att.id.replace(/^attachment_/,'');
-			data.enabled = att.select('input[type=checkbox]').pop().checked;
-			data.children = {};
-			att.select('select').each(function(sel) {
-				var type = sel.name.replace(/^.*\[([^\]]+)\]$/, '$1');
-				data.children[type] = $F(sel);
-			});
-			output.push(data);
-		}
+		var data = {};
+		data.id = att.id.replace(/^attachment_/,'');
+		data.enabled = att.select('input[type=checkbox]').pop().checked;
+		data.children = {};
+		att.select('select').each(function(sel) {
+			var type = sel.name.replace(/^.*\[([^\]]+)\]$/, '$1');
+			data.children[type] = $F(sel);
+		});
+		output.push(data);
 	});
 	$('cp-comic-order').value = Object.toJSON(output);
 };

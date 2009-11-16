@@ -11,7 +11,9 @@ class ComicPressBackend {
 		}
 
 		foreach ($extras as $field => $value) {
-			$extras[] = "${field}=\"${value}\" ";
+			if (!empty($value)) {
+				$extras[] = "${field}=\"${value}\" ";
+			}
 			unset($extras[$field]);
 		}
 

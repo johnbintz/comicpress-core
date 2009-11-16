@@ -45,18 +45,24 @@ class ComicPressBackendAttachmentTest extends PHPUnit_Framework_TestCase {
 
   function providerTestDims() {
     return array(
-      array(false, false),
-      array(true, false),
-      array(array(), false),
-      array(array('url', 300, 200, false), array('width' => 300, 'height' => 200))
+      array(false, array()),
+      array(true, array()),
+      array(array(), array()),
+      array(array('dimensions' => '300x200'), array('width' => 300, 'height' => 200))
     );
   }
 
   /**
    * @dataProvider providerTestDims
    */
-  function testDims($image_downsize_result, $expected_result) {
-    _set_image_downsize_result(1, 'comic', $image_downsize_result);
+  function testDims($image_options, $expected_result) {
+  	$comicpress = ComicPress::get_instance();
+  	$comicpress->comicpress_options = array(
+  		'image_types' => array(
+  			'comic' => $image_options
+  		)
+  	);
+
     $this->assertEquals($expected_result, $this->ba->dims('comic'));
   }
 
@@ -82,8 +88,9 @@ class ComicPressBackendAttachmentTest extends PHPUnit_Framework_TestCase {
   		array(null, false),
   		array(1, false),
   		array('attachment-1', true),
-  		array('attachment-2', false)
-  	);
+  		array('attachment-2', false),
+  		array('attachment-3', false),
+  		);
   }
 
   /**
@@ -91,6 +98,9 @@ class ComicPressBackendAttachmentTest extends PHPUnit_Framework_TestCase {
    */
   function testGenerateFromID($id, $is_successful) {
   	wp_insert_post(array('ID' => 1));
+  	wp_insert_post(array('ID' => 3));
+
+  	update_post_meta(1, 'comicpress', array('managed' => true));
 
   	if ($is_successful) {
   		$return = new ComicPressBackendAttachment((object)array('ID' => 1));

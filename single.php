@@ -13,10 +13,10 @@
   echo 'Current: '; Restore(); the_title(); echo '<br />';
 
   foreach (M() as $image) {
-  	echo 'Default: '; echo $image->embed();
-  	echo 'Comic: '; echo $image->embed('comic');
-   	echo 'RSS: '; echo $image->embed('rss');
-   	echo 'Archive: '; echo $image->embed('archive');
+  	echo 'Default: '; echo EM($image);
+  	echo 'Comic: '; echo EM($image, 'comic');
+   	echo 'RSS: '; echo EM($image, 'rss');
+   	echo 'Archive: '; echo EM($image, 'archive');
   }
 
   echo 'Chronologically next: '; RT('next');	the_title();  echo '<br />';

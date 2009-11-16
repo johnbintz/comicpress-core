@@ -195,17 +195,19 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
     			'test-4' => array('enabled' => false),
   			),
   			array(
-  				array('id' => 'test-1'),
-  				array('id' => 'test-2')
+  				array('comic' => 'test-1', 'default' => 'test-1'),
+  				array('comic' => 'test-2', 'default' => 'test-2')
   			)
   		),
   		array(
   			array(
   				'test-1' => array('enabled' => true, 'children' => array('rss' => 'test-3')),
   				'test-2' => array('enabled' => false, 'children' => array('rss' => 'test-4')),
+  				'test-3' => array('enabled' => true),
+  				'test-4' => array('enabled' => true),
   			),
   			array(
-  				array('id' => 'test-1', 'children' => array('rss' => 'test-3')),
+  				array('comic' => 'test-1', 'rss' => 'test-3', 'default' => 'test-1'),
   			)
   		),
 
@@ -216,6 +218,12 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
    * @dataProvider providerTestGetAttachmentsWithChildren
    */
   function testGetAttachmentsWithChildren($normalized_ordering, $expected_result) {
+  	$comicpress = ComicPress::get_instance();
+  	$comicpress->comicpress_options['image_types'] = array(
+  		'comic' => array('default' => true),
+  		'rss' => array('default' => false)
+  	);
+
   	$p = $this->getMock('ComicPressComicPost', array('normalize_ordering'));
 
 		$p->post = (object)array('ID' => 1);
