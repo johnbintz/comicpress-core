@@ -1,40 +1,6 @@
 <?php
 
-// load all of the comic & non-comic category information
-add_action('init', '__comicpress_init');
-
-// @codeCoverageIgnoreStart
-
-function __comicpress_init() {
-  global $comicpress, $wp_query;
-
-  if (current_user_can('edit_files')) {
-    wp_cache_flush();
-  }
-
-  $classes_search = array(
-    '/classes/',
-    '/classes/backends/'
-  );
-
-  foreach ($classes_search as $path) {
-    foreach (glob(dirname(__FILE__) . $path . '*.inc') as $file) {
-      if (is_file($file)) {
-        require_once($file);
-      }
-    }
-  }
-
-  $comicpress = ComicPress::get_instance();
-  $comicpress->init();
-
-  $comicpress_admin = new ComicPressAdmin();
-  $comicpress_admin->init();
-  $comicpress_admin->handle_update();
-
-  $comicpress_filters = new ComicPressFilters();
-  $comicpress_filters->init();
-}
+// Global template functions for ComicPress
 
 function F($name, $path, $override_post = null) {
 	global $post;
@@ -44,17 +10,6 @@ function F($name, $path, $override_post = null) {
 	$comicpress = ComicPress::get_instance();
 	return $comicpress->find_file($name, $path, $comic_post->find_parents());
 }
-
-/**
- * Finish rendering this template and shove the output into application.php.
- */
-function finish_comicpress() {
-	$content = ob_get_clean();
-
-	include(F('application.php', ''));
-}
-
-// @codeCoverageIgnoreEnd
 
 /**
  * Protect global $post and $wp_query.
