@@ -9,7 +9,7 @@ class ComicPressFilters {
       'the_content'                        => 1,
       'show_media'                         => 3
     ) as $filter => $param_count) {
-      add_filter($filter, array(&$__comicpress_filters, $filter), 10, $param_count);
+      add_filter($filter, array(&$this, $filter), 10, $param_count);
     }
 
   }
