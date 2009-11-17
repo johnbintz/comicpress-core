@@ -10,13 +10,9 @@ Event.observe(window, 'load', function() {
       if (b) { b[(t.value == 'none') ? 'show' : 'hide'](); }
     }
 
-    item.select('input[name*=comic_image_type]').each(function(radio) {
-      radio.observe('click', function(e) { show_insert(radio); });
-    });
-    
-    var type = item.select('input[name*=comic_image_type][checked]').pop();
+    var type = item.select('input[name*=comicpress_management][checked]').pop();
     if (type) {
-      item.select('.filename.new').pop().insert({bottom: new Element('strong').update(type.parentNode.innerHTML.stripTags())});
+      item.select('.filename.new').pop().insert({bottom: new Element('div').addClassName('comicpress-is-managing')});
       show_insert(type);
     }
   });

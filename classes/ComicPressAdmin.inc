@@ -83,6 +83,7 @@ class ComicPressAdmin {
 		}
 
 		if (strpos($pagenow, "-upload") !== false) {
+			wp_enqueue_style('cp-admin', plugin_dir_url(dirname(__FILE__)) . '/css/cp-admin.css');
 			wp_enqueue_script('cp-media', plugin_dir_url(dirname(__FILE__)) . '/js/MediaUpload.js', array('prototype'));
 		}
 	}

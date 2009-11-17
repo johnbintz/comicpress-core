@@ -27,13 +27,8 @@
 							<?php if (isset($info['file'])) { ?>
 								<p><strong><?php echo esc_html($result->source_name) ?>:</strong> <?php echo esc_html(basename($info['file'])) ?></p>
 							<?php } ?>
-							<?php if (isset($info['width']) && isset($info['height'])) { ?>
-								<p>
-									<strong><?php _e('Size:', 'comicpress') ?></strong>
-									<?php echo esc_html(sprintf('%dx%d', $info['width'], $info['height'])) ?>
-								</p>
-							<?php } ?>
 							<?php	if (count($comicpress->comicpress_options['image_types']) > 1) { ?>
+
 								<a class="comic-ordering-show-associations" href="#"><?php _e('Edit associations', 'comicpress') ?></a>
 								<div class="comic-ordering-associations">
 									<ul>

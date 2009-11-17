@@ -68,9 +68,11 @@
 .cp-comic-attachment {
   cursor: move;
   background-color: #ffd7d7;
-  margin-bottom: 10px;
-  border-bottom: solid #aaa 1px;
-  padding-bottom: 10px
+  padding: 10px;
+  border: solid #DFDFDF 1px;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  margin-bottom: 10px
 }
 
 .enabled {
@@ -129,11 +131,11 @@
 
 .comic-ordering-associations {
 	border: solid #aaa 1px;
-	padding: 5px;
-	width: 100%
+	padding: 0.25em;
 }
 
-.comicpress-admin h3 {
+.comicpress-admin h3,
+.comic-ordering-show-associations {
 	border: solid #464646 1px;
 	padding: 0.25em;
 	background: #6D6D6D;
@@ -145,11 +147,23 @@
 	-moz-border-radius-topright: 5px;
 	margin-bottom: 0;
 	cursor: hand;
-	cursor: pointer
+	cursor: pointer;
+	display: block;
+	text-decoration: none;
+	font-size: 13px;
+	font-weight: bold;
 }
 
 .comicpress-holder {
 	border: solid #464646 1px;
 	border-top: none;
 	padding: 0.5em
+}
+
+.comicpress-is-managing {
+	width: 16px;
+	height: 36px;
+	background: url(../images/comicpress-icon.png) left center no-repeat;
+	float: right;
+	display: inline
 }

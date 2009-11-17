@@ -111,7 +111,7 @@ ComicImageOrdering.setup = function() {
 
 			att.select('.comic-ordering-show-associations').pop().observe('click', function(e) {
 				Event.stop(e);
-				associations_box.toggle();
+				new Effect[associations_box.visible() ? 'BlindUp' : 'BlindDown'](associations_box, { duration: 0.25 });
 			});
 		});
 
