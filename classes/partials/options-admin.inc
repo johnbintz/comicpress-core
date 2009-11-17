@@ -2,6 +2,8 @@
 	<h2><?php _e('ComicPress Config', 'comicpress') ?></h2>
 	<form method="post" action="">
 		<input type="hidden" name="cp[_nonce]" value="<?php echo esc_attr($nonce) ?>" />
+		<input type="hidden" name="cp[action]" value="comicpress-options" />
+		<input type="hidden" name="cp[_action_nonce]" value="<?php echo esc_attr($action_nonce) ?>" />
 		<h3><?php _e('Global Options', 'comicpress') ?></h3>
 		<table class="widefat fixed">
 			<tr>
@@ -33,7 +35,7 @@
 			</tr>
 		</table>
 		<div style="text-align: center; margin-top: 10px;">
-			<input class="button" type="submit" value="<?php _e('Submit Updated ComicPress Options', 'comicpress') ?>" />
+			<input class="button-primary" type="submit" value="<?php _e('Submit Updated ComicPress Options', 'comicpress') ?>" />
 		</div>
 	</form>
 </div>
