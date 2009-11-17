@@ -68,6 +68,7 @@ class ComicPressAdmin {
 		global $plugin_page, $pagenow, $post;
 
 		add_theme_page(__("ComicPress", 'comicpress'), __('ComicPress', 'comicpress'), 'edit_themes', 'comicpress/render_admin', array(&$this, 'render_admin'));
+		add_theme_page(__("ComicPress Docs", 'comicpress'), __('ComicPress', 'comicpress'), 'edit_themes', 'comicpress/comicpress_docs', array(&$this, 'render_documentation'));
 
 		if (strpos($pagenow, "post") === 0) {
 			add_meta_box("comic-image-ordering", __("Comic Image Ordering", 'comicpress'), array(&$this, 'render_comic_image_ordering'), "post", "normal", "low");
@@ -138,11 +139,17 @@ class ComicPressAdmin {
 		include(dirname(__FILE__) . '/partials/options-admin.inc');
 	}
 
+	function render_documentation() {
+		$default_langauge = 'en_US';
+
+		$current_language = get_locale();
+	}
+
 	function _render_admin_storyline_tree($node, $parent_id = "0") {
 		foreach ($node as $category_id => $children) {
 			$category = get_category($category_id);
 			echo '<div id="category_' . $parent_id . '-' . $category_id . '" class="cp-category-info">';
-				echo '<span>' . $category->name . '</span>';
+				echo '<span>' . esc_html($category->name) . ' <span class="slug">(slug: ' . esc_html($category->slug) . ')</span></span>';
 				if (is_array($children)) {
 					echo '<div class="cp-children">';
 						$this->_render_admin_storyline_tree($children, $parent_id . '-' . $category_id);
@@ -352,7 +359,12 @@ class ComicPressAdmin {
 			if (is_numeric($_POST['post_ID'])) {
 				if ($post = get_post($_POST['post_ID'])) {
 					$comic_post = new ComicPressComicPost($post);
-					$comic_post->update_post_media_data($this->_json_decode(stripslashes($_POST['cp']['comic_order'])));
+					$data = $this->_json_decode(stripslashes($_POST['cp']['comic_order']));
+					if (!empty($data)) {
+						if (is_array($data)) {
+							$comic_post->update_post_media_data($data);
+						}
+					}
 				}
 			}
 		}

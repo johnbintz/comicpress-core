@@ -42,6 +42,12 @@ class ComicPressBackendAttachment extends ComicPressBackend {
 
 		$dims = array();
 		if (isset($comicpress->comicpress_options['image_types'])) {
+			if ($size == 'default') {
+				foreach ($comicpress->comicpress_options['image_types'] as $type => $info) {
+					if ($info['default']) { $size = $type; break; }
+				}
+			}
+
 			if (isset($comicpress->comicpress_options['image_types'][$size])) {
 				if (isset($comicpress->comicpress_options['image_types'][$size]['dimensions'])) {
 					$dims = array_combine(array('width', 'height'), explode("x", $comicpress->comicpress_options['image_types'][$size]['dimensions']));

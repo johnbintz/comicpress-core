@@ -1,0 +1,37 @@
+<h1>Template Tags</h1>
+
+<h2>Protect(), Unprotect(), and Restore()</h2>
+
+<p>
+  By design, WordPress stores information on the current post and page query in what are known as <strong>global variables</strong>.
+  In order for ComicPress to be able to work properly, it needs to be able to work with posts that are not part of the current page's Loop.
+  The best example is on the Home page of a standard webbomic, where the latest comic is pulled in above the list of current blog posts.
+  Programmtically, it can be tricky to keep track of and manage these variables. ComicPress can handle all of this for you using the Protect(),
+  Unprotect(), and Restore() functions.
+</p>
+
+<p>
+	For example, if you want to display the latest comic at the top of your home page, above your blog posts, you would use Protect() and Restore() like this:
+</p>
+
+<pre>
+	get_header();
+
+
+</pre>
+
+<p>
+  These are also available as action hooks, to keep your theme safe when ComicPress Core is deactivated:
+</p>
+
+<pre>
+
+</pre>
+
+<h2>R() and RT()</h2>
+
+<p>R() and RT() find posts that are in relation to the current or provided post.</p>
+
+<ul>
+	<li><strong>child_of</strong>: The given category plus any children.</li>
+</ul>

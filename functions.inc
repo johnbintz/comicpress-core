@@ -1,5 +1,22 @@
 <?php
 
+foreach (array(
+	'F' => 3,
+	'Protect' => 0,
+	'Restore' => 0,
+	'Unprotect' => 0,
+	'R' => 3,
+	'RT' => 3,
+	'M' => 1,
+	'EM' => 3
+) as $function => $param_count) {
+	if ($param_count == 0) {
+		add_action("comicpress-${function}", $function, 10);
+	} else {
+		add_filter("comicpress-${function}", $function, 10, $param_count);
+	}
+}
+
 // Global template functions for ComicPress
 
 function F($name, $path, $override_post = null) {
@@ -105,6 +122,7 @@ function RT($which, $restrictions = null, $override_post = null) {
 	  $post_to_use = (!empty($__post)) ? $__post : $post;
 	}
 
+	$post = false;
 	if (($new_post = R($which, $restrictions, $post_to_use)) !== false) {
 		$post = $new_post;
 		setup_postdata($post);
