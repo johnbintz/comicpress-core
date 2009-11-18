@@ -1,0 +1,237 @@
+<h1>Storyline Post Template Tags</h1>
+
+<h2>R() and RT()</h2>
+
+<p>
+	<code>R()</code> and <code>RT()</code> find posts that are relative to the current or provided post.
+	<code>R()</code> returns the found post, while <code>RT()</code> sets up the post so that you can use
+	standard WordPress template tags on the found posts as if it was part of the current Loop:
+</p>
+
+<pre class="prettyprint lang-php">
+// use a post programmatically
+$previous_post = R('previous');
+echo get_the_permalink($previous_post->ID);
+
+// use template tags with a post
+Protect(); // save the current Loop post
+RT('previous');
+the_permalink();
+Restore(); // restore the saved Loop post
+</pre>
+
+<h3>Basic Interactive Usage Sample</h3>
+
+<div style="overflow: hidden">
+	<p><em>Mouse over each template tag on the right to see what post it will return relative to the <strong>Current Post</strong>.</em></p>
+
+	<div id="comicpress-relative-post-highlighter">
+		<ul>
+			<li><code class="highlight-1">R('first')</code></li>
+			<li><code class="highlight-1">R('first', 'blog')</code></li>
+			<li><code class="highlight-2">R('first', 'comic')</code></li>
+			<li><code class="highlight-3">R('previous', 'blog')</code></li>
+			<li><code class="highlight-4">R('previous', 'comic')</code></li>
+			<li><code class="highlight-5">R('previous')</code></li>
+			<li><code class="highlight-6">R('current')</code></li>
+			<li><code class="highlight-7">R('next')</code></li>
+			<li><code class="highlight-8">R('next', 'comic')</code></li>
+			<li><code class="highlight-9">R('next', 'blog')</code></li>
+			<li><code class="highlight-10">R('last', 'comic')</code></li>
+			<li><code class="highlight-11">R('last', 'blog')</code></li>
+			<li><code class="highlight-11">R('last')</code></li>
+		</ul>
+	</div>
+
+	<table id="comicpress-relative-posts" cellspacing="0">
+		<tr>
+			<th>Post Name</th>
+			<th>Post Date</th>
+			<th>Post Category</th>
+		</tr>
+		<tr>
+			<td>First in Blog</td>
+			<td>2009-01-01</td>
+			<td>Blog</td>
+		</tr>
+		<tr>
+			<td>First in Comic</td>
+			<td>2009-01-02</td>
+			<td>Comic</td>
+		</tr>
+		<tr>
+			<td>Previous in Blog</td>
+			<td>2009-01-03</td>
+			<td>Blog</td>
+		</tr>
+		<tr>
+			<td>Previous in Comic</td>
+			<td>2009-01-04</td>
+			<td>Comic</td>
+		</tr>
+		<tr>
+			<td>A Previous Extra Post</td>
+			<td>2009-01-05</td>
+			<td>Extra</td>
+		</tr>
+		<tr>
+			<td><strong>Current Post</strong></td>
+			<td><strong>2009-01-06</strong></td>
+			<td><strong>Comic</strong></td>
+		</tr>
+		<tr>
+			<td>A Next Extra Post</td>
+			<td>2009-01-07</td>
+			<td>Extra</td>
+		</tr>
+		<tr>
+			<td>Next in Comic</td>
+			<td>2009-01-08</td>
+			<td>Comic</td>
+		</tr>
+		<tr>
+			<td>Next in Blog</td>
+			<td>2009-01-09</td>
+			<td>Blog</td>
+		</tr>
+		<tr>
+			<td>Last in Comic</td>
+			<td>2009-01-10</td>
+			<td>Comic</td>
+		</tr>
+		<tr>
+			<td>Last in Blog</td>
+			<td>2009-01-11</td>
+			<td>Blog</td>
+		</tr>
+	</table>
+	<br style="clear: both" />
+</div>
+
+<script type="text/javascript">
+	$$('body').pop().observe('mouseover', function(e) {
+		var all_rows = $$('#comicpress-relative-posts tr');
+		all_rows.invoke('removeClassName', 'highlighted');
+
+		var target = e.findElement('#comicpress-relative-post-highlighter *[class*=highlight]');
+		if (target) {
+			target.className.replace(/highlight-/, '').split(',').each(function(row) {
+				all_rows[row].addClassName('highlighted');
+			});
+		}
+	});
+</script>
+
+<h3>R() and RT() options</h3>
+
+<p>
+	Both <code>R()</code> and <code>RT()</code> accept up to three parameters:
+</p>
+
+<pre class="prettyprint lang-php">
+// find the relative of all posts in the database
+R('previous');
+
+// only search the comic category and its children
+R('previous', 'comic');
+
+// only search the children of the comic category
+R('previous', array('child_of' => 'comic', '!only' => 'comic'));
+
+// get the previos post relative to the provided post
+R('previous', null, $other_post);
+</pre>
+
+<p>
+  The second parameter, the <strong>restrictions</strong>, takes either a string or an array:
+</p>
+
+<h4>Valid strings</h4>
+
+<ul>
+	<li><strong><em>a category slug</em></strong>: Search for matching posts in the provided category and its children.</li>
+	<li><strong>from_post</strong>: Search for matching posts in the category this post belongs to.</li>
+</ul>
+
+<h4>Valid array keys and values</h4>
+
+<p>
+	If you want a more sophisticated search, you can provide an array that, with each match, will add the matching categories to the search list.
+	You can preface any of the keys with an exclamation point to remove matches from the list.
+</p>
+
+<ul>
+	<li><strong>child_of</strong> =&gt; <em>category slug</em>: Search for matching posts in the provided category and its children.</li>
+	<li><strong>only</strong> =&gt; <em>category slug</em>: Search only the provided category.</li>
+	<li><strong>root_of</strong> =&gt; <em>post ID or object</em>: Find the root category the post belongs to and search for posts from that category and in all children.</li>
+	<li><strong>from_post</strong> =&gt; <em>post ID or object</em>: Search for matching posts in the category this post belongs to.</li>
+	<li><strong>previous</strong> =&gt; <em>category slug</em>: Search for matching posts in the category before the provided category as defined in the storyline structure.</li>
+	<li><strong>next</strong> =&gt; <em>category slug</em>: Search for matching posts in the category after the provided category as defined in the storyline structure.</li>
+	<li><strong>level</strong> =&gt; <em>storyline level</em>: Search for posts in the categories defined at this level in the storyline structure, with level 1 being the topmost categories, level 2 being their direct children, etc.</i>
+</ul>
+
+<h2>Protect(), Unprotect(), and Restore()</h2>
+
+<p>
+  In order for <em>ComicPress Core</em> to be able to work properly, it needs to be able to work with posts that are not part of the current page's Loop.
+  WordPress stores information on the current page's Loop in what are known as <strong>global variables</strong>.
+  Programmtically, it can be tricky to keep track of and manage these variables. <em>ComicPress Core</em> handles all of this for you using the <code>Protect()</code>,
+  <code>Unprotect()</code>, and <code>Restore()</code> functions.
+</p>
+
+<p>
+  For example, you have a comics category with the slug <strong>comic</strong>.
+  If you want to display the latest comic at the top of your home page, above your blog posts, you would use <code>Protect()</code> and <code>Unprotect()</code> like this:
+</p>
+
+<pre class="prettyprint lang-php">
+Protect();
+
+if (RT('last', 'comic')) {
+  foreach (M() as $image) { echo EM('embed'); }
+  ?&gt;
+    &lt;h2&gt;&lt;?php the_title() ?&gt;&lt;/h2&gt;
+  &lt;?php
+}
+
+Unprotect();
+</pre>
+
+<p>
+	If you're using <code>RT()</code> tags to modify the current post, and need to work with the saved post, use <code>Restore()</code>:
+</p>
+
+<pre class="prettyprint lang-php">
+get_header();
+
+Protect();
+
+RT('last', 'comic');
+echo 'The last comic title: '; echo the_title();
+
+Restore();
+echo 'The current post title: '; echo the_title();
+
+RT('first', 'comic');
+echo 'The first comic title: '; echo the_title();
+
+Unprotect();
+echo 'The current post title: '; echo the_title();
+</pre>
+
+<p>
+  These are also available as action and filter hooks, to keep your theme safe when <em>ComicPress Core</em> is deactivated as an alternative to <code>function_exists()</code>:
+</p>
+
+<pre class="prettyprint lang-php">
+do_action('comicpress-Protect');
+
+if (apply_filters('comicpress-RT', 'last', array('child_of' => 'comic'))) {
+  foreach (M() as $image) { echo EM('embed'); }
+  ?&gt;
+    &lt;h2&gt;&lt;?php the_title() ?&gt;&lt;/h2&gt;
+  &lt;?php
+}
+
+do_action('comicpress-Unprotect');
+</pre>

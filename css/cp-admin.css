@@ -193,7 +193,8 @@ a.selected {
 
 #comicpress-relative-posts {
 	border: solid #464646 1px;
-	border-bottom: none
+	border-bottom: none;
+	width: 65%
 }
 
 #comicpress-relative-posts th,
@@ -206,6 +207,16 @@ a.selected {
 	background-color: #b5bdf5
 }
 
+#comicpress-relative-post-highlighter {
+	float: right;
+	display: inline;
+	width: 30%
+}
+
+#comicpress-relative-post-highlighter p {
+	margin-top: 0
+}
+
 #comicpress-relative-post-highlighter code {
 	font-size: 14px;
 	cursor: help
@@ -213,4 +224,10 @@ a.selected {
 
 tr.highlighted td {
 	background-color: #ffff30
+}
+
+.cp-documentation ul {
+  list-style-type: inherit;
+  margin: inherit;
+  padding: inherit
 }

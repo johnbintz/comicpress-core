@@ -410,7 +410,7 @@ class ComicPressStoryline {
     return $this;
   }
 
-  function _find_children($parent) {
+  function _ensure_numeric_category($parent) {
   	if (!is_numeric($parent)) {
   		foreach (get_all_category_ids() as $id) {
   			$category = get_category($id);
@@ -419,6 +419,11 @@ class ComicPressStoryline {
   			}
   		}
   	}
+  	return $parent;
+  }
+
+  function _find_children($parent) {
+  	$parent = $this->_ensure_numeric_category($parent);
   	if (is_numeric($parent)) {
 	    $children = array($parent);
 	    do {
@@ -557,38 +562,50 @@ class ComicPressStoryline {
 		}
 
 		if (!$include_all) {
-			foreach ($restrictions as $type => $list) {
-				if (substr($type, 0, 1) == "!") {
-				  $method_root = 'exclude';
-					$method_type = substr($type, 1);
+			foreach ($restrictions as $_type => $_list) {
+				if (!is_string($_type) && is_array($_list)) {
+					$all_checks = array($_list);
 				} else {
-					$method_root = 'include';
-					$method_type = $type;
+					$all_checks = array(
+						array($_type, $_list)
+					);
 				}
 
-				if (!is_array($list)) { $list = array($list); }
+				foreach ($all_checks as $info) {
+					list($type, $list) = $info;
 
-				foreach ($list as $restriction) {
-					$method = '';
-					$args = array($restriction);
-					switch ($method_type) {
-						case 'child_of': $method = 'children'; break;
-						case 'root_of': $method = 'post_root'; break;
-						case 'from_post': $method = 'post_category'; break;
-						case 'previous':
-							$method = 'adjacent';
-							$args[] = false;
-							break;
-						case 'next':
-							$method = 'adjacent';
-							$args[] = true;
-							break;
-						default:
-							$method = $method_type; break;
+					if (substr($type, 0, 1) == "!") {
+					  $method_root = 'exclude';
+						$method_type = substr($type, 1);
+					} else {
+						$method_root = 'include';
+						$method_type = $type;
 					}
-					if (!empty($method)) {
-						array_unshift($args, "_find_${method}");
-						call_user_func_array(array($this, "_${method_root}"), $args);
+
+					if (!is_array($list)) { $list = array($list); }
+
+					foreach ($list as $restriction) {
+						$method = '';
+						$args = array($restriction);
+						switch ($method_type) {
+							case 'child_of': $method = 'children'; break;
+							case 'root_of': $method = 'post_root'; break;
+							case 'from_post': $method = 'post_category'; break;
+							case 'previous':
+								$method = 'adjacent';
+								$args[] = false;
+								break;
+							case 'next':
+								$method = 'adjacent';
+								$args[] = true;
+								break;
+							default:
+								$method = $method_type; break;
+						}
+						if (!empty($method)) {
+							array_unshift($args, "_find_${method}");
+							call_user_func_array(array($this, "_${method_root}"), $args);
+						}
 					}
 				}
 			}

@@ -568,6 +568,14 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 			array(
 				array('next' => 3),
 				array(4)
+			),
+			array(
+				array(
+					array('only', 1),
+					array('only', 2),
+					array('!only', 2),
+				),
+				array(1)
 			)
 		);
 	}
@@ -656,6 +664,25 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
    */
   function testEnsurePostID($thing, $expected_result) {
   	$this->assertEquals($expected_result, $this->css->_ensure_post_id($thing));
+  }
+
+  function providerTestEnsureNumericCategory() {
+  	return array(
+  		array(false, false),
+  		array(0, 0),
+  		array(1, 1),
+  		array('comic', 'comic'),
+  		array('test', 1)
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestEnsureNumericCategory
+   */
+  function testEnsureNumericCategory($string, $expected_id) {
+  	add_category(1, (object)array('slug' => 'test'));
+
+  	$this->assertEquals($expected_id, $this->css->_ensure_numeric_category($string));
   }
 }
 
