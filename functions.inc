@@ -66,6 +66,14 @@ function __prep_R($restrictions, $post_to_use) {
 			case 'from_post':
 				$restrictions = array('from_post' => $post_to_use);
 				break;
+			default:
+				foreach (get_all_category_ids() as $id) {
+					$category = get_category($id);
+					if (strtolower($category->slug) == strtolower($restrictions)) {
+						$restrictions = array('child_of' => $category->slug);
+						break;
+					}
+				}
 		}
 	}
 

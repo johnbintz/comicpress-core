@@ -1,37 +1,143 @@
 <h1>Template Tags</h1>
 
+<h2>R() and RT()</h2>
+
+<p>R() and RT() find posts that are relative to the current or provided post.</p>
+
+<table id="comicpress-relative-posts" cellspacing="0">
+	<tr>
+		<th>Post Name</th>
+		<th>Post Date</th>
+		<th>Post Category</th>
+	</tr>
+	<tr>
+		<td>First in Blog</td>
+		<td>2009-01-01</td>
+		<td>Blog</td>
+	</tr>
+	<tr>
+		<td>First in Comic</td>
+		<td>2009-01-02</td>
+		<td>Comic</td>
+	</tr>
+	<tr>
+		<td>Previous in Blog</td>
+		<td>2009-01-03</td>
+		<td>Blog</td>
+	</tr>
+	<tr>
+		<td>Previous in Comic</td>
+		<td>2009-01-04</td>
+		<td>Comic</td>
+	</tr>
+	<tr>
+		<td>A Previous Extra Post</td>
+		<td>2009-01-05</td>
+		<td>Extra</td>
+	</tr>
+	<tr>
+		<td><strong>Current Post</strong></td>
+		<td><strong>2009-01-06</strong></td>
+		<td><strong>Comic</strong></td>
+	</tr>
+	<tr>
+		<td>A Next Extra Post</td>
+		<td>2009-01-07</td>
+		<td>Extra</td>
+	</tr>
+	<tr>
+		<td>Next in Comic</td>
+		<td>2009-01-08</td>
+		<td>Comic</td>
+	</tr>
+	<tr>
+		<td>Next in Blog</td>
+		<td>2009-01-09</td>
+		<td>Blog</td>
+	</tr>
+	<tr>
+		<td>Last in Comic</td>
+		<td>2009-01-10</td>
+		<td>Comic</td>
+	</tr>
+	<tr>
+		<td>Last in Blog</td>
+		<td>2009-01-11</td>
+		<td>Blog</td>
+	</tr>
+</table>
+
+<div id="comicpress-relative-post-highlighter">
+	<ul>
+		<li><code class="highlight-1">R('first')</code></li>
+		<li><code class="highlight-2">R('first', array('child_of' => 'comic'))</code></li>
+	</ul>
+</div>
+
+<script type="text/javascript">
+	$$('body').pop().observe('mouseover', function(e) {
+		var all_rows = $$('#comicpress-relative-posts tr');
+		all_rows.invoke('removeClassName', 'highlighted');
+
+		var target = e.findElement('#comicpress-relative-post-highlighter *[class*=highlight]');
+		if (target) {
+			target.className.replace(/highlight-/, '').split(',').each(function(row) {
+				top.console.log(row);
+				all_rows[row].addClassName('highlighted');
+			});
+		}
+	});
+</script>
+
+<ul>
+  <li><strong>child_of</strong>: The given category plus any children.</li>
+</ul>
+
 <h2>Protect(), Unprotect(), and Restore()</h2>
 
 <p>
-  By design, WordPress stores information on the current post and page query in what are known as <strong>global variables</strong>.
-  In order for ComicPress to be able to work properly, it needs to be able to work with posts that are not part of the current page's Loop.
-  The best example is on the Home page of a standard webbomic, where the latest comic is pulled in above the list of current blog posts.
-  Programmtically, it can be tricky to keep track of and manage these variables. ComicPress can handle all of this for you using the Protect(),
+  By design, WordPress stores information on the current page's Loop in what are known as <strong>global variables</strong>.
+  In order for <em>ComicPress Core</em> to be able to work properly, it needs to be able to work with posts that are not part of the current page's Loop.
+  The best example is on the Home page of a standard webcomic, where the latest comic is displayed above the list of current blog posts.
+  Programmtically, it can be tricky to keep track of and manage these variables. <em>ComicPress Core</em> handles all of this for you using the Protect(),
   Unprotect(), and Restore() functions.
 </p>
 
 <p>
-	For example, if you want to display the latest comic at the top of your home page, above your blog posts, you would use Protect() and Restore() like this:
+  For example, you have a comics category with the slug <strong>comic</strong>.
+  If you want to display the latest comic at the top of your home page, above your blog posts, you would use Protect() and Restore() like this:
 </p>
 
-<pre>
-	get_header();
+<pre class="prettyprint lang-php">
+get_header();
 
+Protect();
 
+if (RT('last', array('child_of' => 'comic'))) {
+  foreach (M() as $image) { echo EM('embed'); }
+  ?&gt;
+    &lt;h2&gt;&lt;?php the_title() ?&gt;&lt;/h2&gt;
+  &lt;?php
+}
+
+Unprotect();
 </pre>
 
 <p>
-  These are also available as action hooks, to keep your theme safe when ComicPress Core is deactivated:
+  These are also available as action and filter hooks, to keep your theme safe when <em>ComicPress Core</em> is deactivated as an alternative to function_exists():
 </p>
 
-<pre>
+<pre class="prettyprint lang-php">
+get_header();
 
+do_action('comicpress-Protect');
+
+if (apply_filters('comicpress-RT', 'last', array('child_of' => 'comic'))) {
+  foreach (M() as $image) { echo EM('embed'); }
+  ?&gt;
+    &lt;h2&gt;&lt;?php the_title() ?&gt;&lt;/h2&gt;
+  &lt;?php
+}
+
+do_action('comicpress-Unprotect');
 </pre>
-
-<h2>R() and RT()</h2>
-
-<p>R() and RT() find posts that are in relation to the current or provided post.</p>
-
-<ul>
-	<li><strong>child_of</strong>: The given category plus any children.</li>
-</ul>

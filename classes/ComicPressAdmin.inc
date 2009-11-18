@@ -68,7 +68,7 @@ class ComicPressAdmin {
 		global $plugin_page, $pagenow, $post;
 
 		add_theme_page(__("ComicPress", 'comicpress'), __('ComicPress', 'comicpress'), 'edit_themes', 'comicpress/render_admin', array(&$this, 'render_admin'));
-		add_theme_page(__("ComicPress Docs", 'comicpress'), __('ComicPress', 'comicpress'), 'edit_themes', 'comicpress/comicpress_docs', array(&$this, 'render_documentation'));
+		add_theme_page(__("ComicPress Documentation", 'comicpress'), __('ComicPress Docs', 'comicpress'), 'edit_themes', 'comicpress/comicpress_docs', array(&$this, 'render_documentation'));
 
 		if (strpos($pagenow, "post") === 0) {
 			add_meta_box("comic-image-ordering", __("Comic Image Ordering", 'comicpress'), array(&$this, 'render_comic_image_ordering'), "post", "normal", "low");
@@ -81,6 +81,13 @@ class ComicPressAdmin {
 			wp_enqueue_style('cp-admin', plugin_dir_url(dirname(__FILE__)) . '/css/cp-admin.css');
 			wp_enqueue_script('cp-admin', plugin_dir_url(dirname(__FILE__)) . '/js/Storyline.js', array('prototype', 'scriptaculous'));
 			add_action('admin_footer', array(&$this, 'admin_footer'));
+		}
+
+		if ($plugin_page == 'comicpress/comicpress_docs') {
+			wp_enqueue_style('cp-admin', plugin_dir_url(dirname(__FILE__)) . '/css/cp-admin.css');
+			wp_enqueue_script('prettify', plugin_dir_url(dirname(__FILE__)) . '/js/prettify/prettify.js');
+			wp_enqueue_style('prettify', plugin_dir_url(dirname(__FILE__)) . '/js/prettify/prettify.css');
+			wp_enqueue_script('scriptaculous-effects');
 		}
 
 		if (strpos($pagenow, "-upload") !== false) {
@@ -140,9 +147,37 @@ class ComicPressAdmin {
 	}
 
 	function render_documentation() {
-		$default_langauge = 'en_US';
+		$path = false;
+		foreach (array(get_locale(), 'en_US') as $locale) {
+			if (is_dir(plugin_dir_path(dirname(__FILE__)) . 'docs/' . $locale)) {
+				$path = plugin_dir_path(dirname(__FILE__)) . 'docs/' . $locale;
+			}
+		}
 
-		$current_language = get_locale();
+		if (!empty($path)) {
+			$all_docs = array();
+			if (($dh = opendir($path)) !== false) {
+				while (($file = readdir($dh)) !== false) {
+					$content = file($path . '/' . $file);
+					$title = false;
+					foreach ($content as $line) {
+						if (preg_match('#<h1>(.*)</h1>#', $line, $matches) > 0) {
+							list($all, $title) = $matches;
+
+							$id = preg_replace('#[^a-z0-9]+#', '_', strtolower($title));
+							$content = implode('', $content);
+
+							$all_docs[$id] = compact('title', 'content');
+						}
+					}
+				}
+				closedir($dh);
+			}
+
+			ksort($all_docs);
+
+			include(dirname(__FILE__) . '/partials/documentation-viewer.inc');
+		}
 	}
 
 	function _render_admin_storyline_tree($node, $parent_id = "0") {
@@ -461,5 +496,3 @@ class ComicPressAdmin {
 	}
 	// @codeCoverageIgnoreEnd
 }
-
-?>

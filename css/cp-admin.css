@@ -172,3 +172,45 @@
   font-style: italic;
   color: #444
 }
+
+.cp-documentation {
+  padding: 10px;
+  background-color: white;
+  border: solid #464646 1px;
+}
+
+.cp-documentation h1 {
+  margin: 0 0 0.5em
+}
+
+#comicpress-doc-titles {
+	margin: 1em 0
+}
+
+a.selected {
+	font-weight: bold
+}
+
+#comicpress-relative-posts {
+	border: solid #464646 1px;
+	border-bottom: none
+}
+
+#comicpress-relative-posts th,
+#comicpress-relative-posts td {
+	padding: 0.2em 0.75em;
+	border-bottom: solid #464646 1px;
+}
+
+#comicpress-relative-posts th {
+	background-color: #b5bdf5
+}
+
+#comicpress-relative-post-highlighter code {
+	font-size: 14px;
+	cursor: help
+}
+
+tr.highlighted td {
+	background-color: #ffff30
+}

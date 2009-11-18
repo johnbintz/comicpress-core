@@ -104,6 +104,9 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 			array(
 				array('test' => array('test')), array('test' => array('test'))
 			),
+			array(
+				'my-category', array('child_of' => 'my-category')
+			)
 		);
 	}
 
@@ -111,6 +114,8 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider providerTestPrepR
 	 */
 	function testPrepR($restrictions, $expected_result) {
+		add_category(1, (object)array('slug' => 'my-category'));
+
 		$this->assertEquals($expected_result, __prep_R($restrictions, (object)array('ID' => 1)));
 	}
 

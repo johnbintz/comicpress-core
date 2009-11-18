@@ -131,7 +131,6 @@ class ComicPressComicPost {
    */
   function update_post_media_data($info) {
   	$ordering = array();
-  	var_dump($info);
   	foreach ($info as $image) {
   		$image = (array)$image;
   		if (isset($image['id'])) {
