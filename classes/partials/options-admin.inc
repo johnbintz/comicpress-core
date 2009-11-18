@@ -37,16 +37,3 @@
 		</div>
 	</form>
 </div>
-<script type="text/javascript">
-	$$('.comicpress-admin h3').each(function(h3) {
-		h3.observe('click', function(e) {
-			Event.stop(e);
-			var area = $(e.target).nextSiblings().shift();
-			if (area) {
-				new Effect[area.visible() ? 'BlindUp' : 'BlindDown'](area, {
-					duration: 0.25
-				});
-			}
-		});
-	});
-</script>
