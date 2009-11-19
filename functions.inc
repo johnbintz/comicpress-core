@@ -7,8 +7,12 @@ foreach (array(
 	'Unprotect' => 0,
 	'R' => 3,
 	'RT' => 3,
+	'RL' => 2,
+	'In_R' => 2,
 	'M' => 1,
-	'EM' => 3
+	'EM' => 3,
+	'SL' => 1,
+	'SC' => 2,
 ) as $function => $param_count) {
 	if ($param_count == 0) {
 		add_action("comicpress-${function}", $function, 10);
@@ -32,6 +36,7 @@ function F($name, $path, $override_post = null) {
 
 /**
  * Protect global $post and $wp_query.
+ * @param object $use_this_post If provided, after saving the current post, set up this post for template tag use.
  */
 function Protect($use_this_post = null) {
 	global $post, $wp_query, $__post, $__wp_query;
@@ -67,6 +72,13 @@ function Unprotect() {
 	$__post = $__wp_query = null;
 }
 
+/**
+ * Prepare the restrictions for R functions.
+ * This does some pre-processing before the R functions send the restrictions off to get_${which}_post.
+ * @param array $restrictions The restrictions to use to find categories.
+ * @param object $override_post The post to use for restrictions that reference a post automatically.
+ * @return array The list of restrictions to use.
+ */
 function __prep_R($restrictions, $post_to_use) {
 	if (is_string($restrictions)) {
 		switch ($restrictions) {
@@ -105,6 +117,13 @@ function __prep_R($restrictions, $post_to_use) {
 
 // @codeCoverageIgnoreStart
 
+/**
+ * Find a post relative to the provided post.
+ * @param string $which The relative direction to search. Choices: first, last, next, previous
+ * @param array $restrictions The restrictions to use to find categories.
+ * @param object $override_post The post to check. If not provided, use the Loop post saved by Protect().
+ * @return object|false The found post, or false if not found.
+ */
 function R($which, $restrictions = null, $override_post = null) {
 	global $post;
 	$post_to_use = !is_null($override_post) ? $override_post : $post;
@@ -125,6 +144,13 @@ function R($which, $restrictions = null, $override_post = null) {
   return $new_post;
 }
 
+/**
+ * Find a post relative to the provided post and, if found, force the Loop to use this post for template tags.
+ * @param string $which The relative direction to search. Choices: first, last, next, previous
+ * @param array $restrictions The restrictions to use to find categories.
+ * @param object $override_post The post to check. If not provided, use the Loop post saved by Protect().
+ * @return object|false The found post that is now being used for template tags, or false if not found.
+ */
 function RT($which, $restrictions = null, $override_post = null) {
 	global $post, $__post;
 	if (!empty($override_post)) {
@@ -143,6 +169,12 @@ function RT($which, $restrictions = null, $override_post = null) {
 
 // @codeCoverageIgnoreEnd
 
+/**
+ * Get the list of categories that match the provided restrictions.
+ * @param array $restrictions The restrictions to use to find categories.
+ * @param object $override_post The post to check. If not provided, use the current Loop post.
+ * @return array The list of categories that match the provided restrictions.
+ */
 function RL($restrictions = null, $override_post = null) {
 	global $post;
 	$post_to_use = !is_null($override_post) ? $override_post : $post;
@@ -154,6 +186,12 @@ function RL($restrictions = null, $override_post = null) {
 	return $storyline->build_from_restrictions($restrictions);
 }
 
+/**
+ * Check if the provided post is in any of the categories matched by the restrictions.
+ * @param array $restrictions The restrictions to use to find categories.
+ * @param object $override_post The post to check. If not provided, use the current Loop post.
+ * @return boolean True if the post is in the list of categories matched by the restrictions.
+ */
 function In_R($restrictions = null, $override_post = null) {
 	global $post;
 	$post_to_use = !is_null($override_post) ? $override_post : $post;
@@ -171,6 +209,11 @@ function In_R($restrictions = null, $override_post = null) {
 	return false;
 }
 
+/**
+ * Retrieve post attachment info to be used with EM().
+ * @param object $override_post The post to retrieve attachment info for. If not provided, use the current Loop post.
+ * @return array The list of attachment info.
+ */
 function M($override_post = null) {
 	global $post, $__attachments;
 	$post_to_use = !is_null($override_post) ? $override_post : $post;
@@ -181,6 +224,13 @@ function M($override_post = null) {
 	return $__attachments;
 }
 
+/**
+ * Call a function on the backend specified by the provided attachment info.
+ * @param array $attachment_info The post attachment info from M().
+ * @param string $which The subattachment short name to reference.
+ * @param string $action The method to call on the backend.
+ * @return object The result from the backend.
+ */
 function EM($attachment_info, $which = 'default', $action = 'embed') {
 	if (substr($action, 0, 1) != '_') {
 		$args = func_get_args();
@@ -199,12 +249,25 @@ function EM($attachment_info, $which = 'default', $action = 'embed') {
 	}
 }
 
+/**
+ * Return the raw storyline structure.
+ * @return array The astoryline structure from ComicPressStoryline
+ */
 function SL() {
 	$storyline = new ComicPressStoryline();
 	$storyline->read_from_options();
 	return $storyline->_structure;
 }
 
+/**
+ * Get a category relative to the provided category.
+ * If no category is provided, use the current post's category.
+ * Relative measures can be one of: current, previous, lext, level, parent
+ * If no relative measure is provided, the current category is returned.
+ * @param string $which The relative measure to use.
+ * @param object $relative_to The post object to be relative to.
+ * @return object|false The relative category object, or false if not found.
+ */
 function SC($which = 'current', $relative_to = null) {
 	global $post;
 
