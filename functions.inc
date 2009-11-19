@@ -152,6 +152,21 @@ function RL($restrictions = null, $override_post = null) {
 
 // @codeCoverageIgnoreEnd
 
+function In_R($restrictions = null, $override_post = null) {
+	global $post;
+	$post_to_use = !is_null($override_post) ? $override_post : $post;
+
+	$post_categories = wp_get_post_categories($post_to_use->ID);
+	if (is_array($post_categories)) {
+		$category_id = reset($post_categories);
+		if (is_numeric($category_id)) {
+			return in_array($category_id, RL($restrictions, $post_to_use));
+		}
+	}
+
+	return false;
+}
+
 function M($override_post = null) {
 	global $post, $__attachments;
 	$post_to_use = !is_null($override_post) ? $override_post : $post;

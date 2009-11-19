@@ -223,4 +223,8 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 			$this->assertEquals($expected_result, $result->term_id);
 		}
 	}
+
+	function testIs_R() {
+		$this->markTestIncomplete();
+	}
 }

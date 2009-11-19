@@ -186,6 +186,11 @@ class ComicPressComicPost {
 							$attachment = array_merge($attachment, $info['children']);
 							$remove_from_list = array_merge($remove_from_list, array_values($info['children']));
 						}
+						foreach ($comicpress->comicpress_options['image_types'] as $type => $info) {
+							if (!isset($attachment[$type])) {
+								$attachment[$type] = $attachment[$default_type];
+							}
+						}
 						$attachments_with_children[] = $attachment;
 					}
 				}
