@@ -1,12 +1,8 @@
 <p><em>
 	<?php _e('Drag and drop the comic files below to change the order in which they\'ll appear.', 'comicpress') ?>
-	<?php
-		printf(
-			__('To upload new images, use the %s.', 'comicpress'),
-			'<a href="' . esc_attr($image_upload_iframe_src) . '" class="thickbox" onclick="return false;">' . __('Image Uploader', 'comicpress') . '</a>'
-		)
-	?>
+	<?php	_e('To upload new images, use the Image Uploader at the top of the post page.', 'comicpress') ?>
 	<?php _e('Click the Refesh button underneath the zoom slider if you\'ve changed the images attached to this post.', 'comicpress') ?>
+	<em><?php _e('Image not appearing? Make sure you <strong>attached it to the parent post</strong>.', 'comicpress') ?></em>
 </em></p>
 <?php if (!empty($ordering)) { ?>
 	<div id="comic-ordering">

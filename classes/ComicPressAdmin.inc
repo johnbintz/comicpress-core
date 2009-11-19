@@ -114,7 +114,7 @@ class ComicPressAdmin {
 	 * Modify the Media Gallery for ComicPress use.
 	 */
 	function setup_comic_metadata_buttons($form_fields, $post) {
-		global $pagenow;
+		global $pagenow, $post_id;
 
 		$comicpress_info = get_post_meta($post->ID, 'comicpress', true);
 		$is_managed = false;
@@ -130,7 +130,7 @@ class ComicPressAdmin {
 							. '</label>'
 
 							. '<input type="hidden" name="cp[_nonce]" value="' . wp_create_nonce('comicpress')  . '" />'
-							. '<input type="hidden" name="attachments[' . $post->ID . '][post_parent]" value="' . $post->post_parent  . '" />'
+							. '<input type="hidden" name="attachments[' . $post->ID . '][post_parent]" value="' . esc_attr($_REQUEST['post_id'])  . '" />'
 		);
 
 		if ($pagenow !== "media.php") {
