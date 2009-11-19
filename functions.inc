@@ -31,11 +31,16 @@ function F($name, $path, $override_post = null) {
 /**
  * Protect global $post and $wp_query.
  */
-function Protect() {
+function Protect($use_this_post = null) {
 	global $post, $wp_query, $__post, $__wp_query;
 
 	$__post = $post;
 	$__wp_query = $wp_query;
+
+	if (!is_null($use_this_post)) {
+		$post = $use_this_post;
+		setup_postdata($post);
+	}
 }
 
 /**
@@ -102,11 +107,7 @@ function R($which, $restrictions = null, $override_post = null) {
 	global $post;
 	$post_to_use = !is_null($override_post) ? $override_post : $post;
 
-	$storyline = new ComicPressStoryline();
-
-	$restrictions = __prep_R($restrictions, $post_to_use);
-
-	$categories = $storyline->build_from_restrictions($restrictions);
+	$categories = RL($restrictions, $post_to_use);
 
 	$dbi = ComicPressDBInterface::get_instance();
 
@@ -136,6 +137,17 @@ function RT($which, $restrictions = null, $override_post = null) {
 		setup_postdata($post);
 	}
 	return $post;
+}
+
+function RL($restrictions = null, $override_post = null) {
+	global $post;
+	$post_to_use = !is_null($override_post) ? $override_post : $post;
+
+	$storyline = new ComicPressStoryline();
+
+	$restrictions = __prep_R($restrictions, $post_to_use);
+
+	return $storyline->build_from_restrictions($restrictions);
 }
 
 // @codeCoverageIgnoreEnd

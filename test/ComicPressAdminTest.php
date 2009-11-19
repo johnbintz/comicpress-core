@@ -173,7 +173,8 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
         ),
         array(
           'post_parent' => "2",
-          'comicpress_management' => "yes"
+          'comicpress_management' => "yes",
+        	'change_parent' => "yes"
         ),
         array(
           'post' => array(

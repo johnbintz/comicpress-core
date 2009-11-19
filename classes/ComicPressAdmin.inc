@@ -122,15 +122,24 @@ class ComicPressAdmin {
 			$is_managed = $comicpress_info['managed'];
 		}
 
+		$form_fields['comicpress_management'] = array(
+			'label' => __("Let ComicPress Manage?", 'comicpress'),
+			'input' => 'html',
+			'html' => '<label><input type="checkbox" name="attachments[' . esc_attr($post->ID) . '][comicpress_management]" value="yes" ' . ($is_managed ? 'checked="checked"' : '') . '/> '
+							. __('Let ComicPress treat this image as a comic media file', 'comicpress')
+							. '</label>'
+
+							. '<input type="hidden" name="cp[_nonce]" value="' . wp_create_nonce('comicpress')  . '" />'
+							. '<input type="hidden" name="attachments[' . $post->ID . '][post_parent]" value="' . $post->post_parent  . '" />'
+		);
+
 		if ($pagenow !== "media.php") {
-			$form_fields['auto_attach'] = array(
-				'label' => __("Let ComicPress Manage?", 'comicpress'),
+			$form_fields['attach_parent'] = array(
+				'label' => __("Change parent?", 'comicpress'),
 				'input' => 'html',
-				'html' => '<label><input type="checkbox" name="attachments[' . $post->ID . '][comicpress_management]" value="yes" ' . ($is_managed ? 'checked="checked"' : '') . '/> '
-								. __('Let ComicPress treat this image as a comic media file', 'comicpress')
+				'html' => '<label><input type="checkbox" name="attachments[' . esc_attr($post->ID) . '][change_parent]" value="yes" /> '
+								. __('Attach this image to the current post being edited?', 'comicpress')
 								. '</label>'
-								. '<input type="hidden" name="cp[_nonce]" value="' . wp_create_nonce('comicpress')  . '" />'
-								. '<input type="hidden" name="attachments[' . $post->ID . '][post_parent]" value="' . $post->post_parent  . '" />'
 			);
 		}
 
@@ -209,42 +218,46 @@ class ComicPressAdmin {
 		$uploading_iframe_ID = (int) (0 == $post_ID ? $temp_ID : $post_ID);
 		if (is_numeric($override_post)) { $uploading_iframe_ID = $override_post; }
 
-		$comic_post = new ComicPressComicPost(get_post($uploading_iframe_ID));
-		$ordering = $comic_post->normalize_ordering();
+		if ($uploading_iframe_ID > 0) {
+			$comic_post = new ComicPressComicPost(get_post($uploading_iframe_ID));
+			$ordering = $comic_post->normalize_ordering();
 
-		$nonce = wp_create_nonce('comicpress');
-		$action_nonce = wp_create_nonce('comicpress-comic-ordering');
-		$zoom_level = 40;
-		$current_user = wp_get_current_user();
-		if (!empty($current_user)) {
-			$comicpress_meta = get_usermeta($current_user->ID, 'comicpress-settings');
-			if (is_array($comicpress_meta)) {
-				if (isset($comicpress_meta['zoom_level'])) {
-					$zoom_level = floor($comicpress_meta['zoom_level']);
+			$nonce = wp_create_nonce('comicpress');
+			$action_nonce = wp_create_nonce('comicpress-comic-ordering');
+			$zoom_level = 40;
+			$current_user = wp_get_current_user();
+			if (!empty($current_user)) {
+				$comicpress_meta = get_usermeta($current_user->ID, 'comicpress-settings');
+				if (is_array($comicpress_meta)) {
+					if (isset($comicpress_meta['zoom_level'])) {
+						$zoom_level = floor($comicpress_meta['zoom_level']);
+					}
 				}
 			}
-		}
 
-		// from wp-admin/includes/media.php O_o
-		$media_upload_iframe_src = "media-upload.php?post_id=$uploading_iframe_ID";
-		$image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src&amp;type=image&amp;TB_iframe=true");
+			// from wp-admin/includes/media.php O_o
+			$media_upload_iframe_src = "media-upload.php?post_id=$uploading_iframe_ID";
+			$image_upload_iframe_src = apply_filters('image_upload_iframe_src', "$media_upload_iframe_src&amp;type=image&amp;TB_iframe=true");
 
-		$comicpress = ComicPress::get_instance();
+			$comicpress = ComicPress::get_instance();
 
-		$available_attachments = array();
-		foreach ($this->get_editable_attachment_list($ordering) as $id => $info) {
-			$result = ComicPressBackend::generate_from_id($id);
-			if (!empty($result)) {
-				$attachment_info = $result->get_info();
+			$available_attachments = array();
+			foreach ($this->get_editable_attachment_list($ordering) as $id => $info) {
+				$result = ComicPressBackend::generate_from_id($id);
+				if (!empty($result)) {
+					$attachment_info = $result->get_info();
 
-				$available_attachments[] = array('id' => $id, 'name' => basename($attachment_info['file']), 'type' => $result->source_name, 'attachment' => $attachment_info, 'ordering' => $info);
+					$available_attachments[] = array('id' => $id, 'name' => basename($attachment_info['file']), 'type' => $result->source_name, 'attachment' => $attachment_info, 'ordering' => $info);
+				}
 			}
-		}
 
-		if ($is_ajax === true) {
-			include(dirname(__FILE__) . '/partials/_comic-image-ordering-sorters.inc');
+			if ($is_ajax === true) {
+				include(dirname(__FILE__) . '/partials/_comic-image-ordering-sorters.inc');
+			} else {
+				include(dirname(__FILE__) . '/partials/_comic-image-ordering.inc');
+			}
 		} else {
-			include(dirname(__FILE__) . '/partials/_comic-image-ordering.inc');
+			_e('You\'ll need to save your post as a draft or publish it before you can order comic images.', 'comicpress');
 		}
 	}
 	// @codeCoverageIgnoreEnd
@@ -297,7 +310,7 @@ class ComicPressAdmin {
 	 */
 	function handle_update_attachments() {
 		foreach ($_POST['attachments'] as $post_id => $settings) {
-			if (isset($settings['comicpress_management'])) {
+			if (isset($settings['change_parent'])) {
 				$media_post = get_post($post_id);
 				if (isset($media_post->post_parent)) {
 					$media_post->post_parent = $settings['post_parent'];

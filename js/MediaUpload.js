@@ -7,7 +7,7 @@ Event.observe(window, 'load', function() {
 
     var show_insert = function(t) {
       var b = item.select('input[name*=send]').pop();
-      if (b) { b[(t.value == 'none') ? 'show' : 'hide'](); }
+      if (b) { b[(t.checked) ? 'hide' : 'show'](); }
     }
 
     var type = item.select('input[name*=comicpress_management][checked]').pop();
@@ -15,5 +15,8 @@ Event.observe(window, 'load', function() {
       item.select('.filename.new').pop().insert({bottom: new Element('div').addClassName('comicpress-is-managing')});
       show_insert(type);
     }
+
+    item.select('input[name*=comicpress_management]').invoke('observe', 'change', function(e) { show_insert(e.target); });
+
   });
 });

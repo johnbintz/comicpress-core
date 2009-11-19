@@ -7,7 +7,6 @@
 		)
 	?>
 	<?php _e('Click the Refesh button underneath the zoom slider if you\'ve changed the images attached to this post.', 'comicpress') ?>
-
 </em></p>
 <?php if (!empty($ordering)) { ?>
 	<div id="comic-ordering">
