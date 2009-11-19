@@ -5,6 +5,10 @@ require_once('MockPress/mockpress.php');
 require_once(dirname(__FILE__) . '/../functions.inc');
 
 class FunctionsTest extends PHPUnit_Framework_TestCase {
+	function setUp() {
+		_reset_wp();
+	}
+
 	function providerTestM() {
 		return array(
 			array(null),
@@ -175,5 +179,13 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 		$comicpress->backends = array($backend);
 
 		$this->assertEquals($expected_result, EM($info, $which, $action));
+	}
+
+	function testSL() {
+		$s = new ComicPressStoryline();
+		$s->set_flattened_storyline('0/1,0/2,0/2/3');
+		$s->read_from_options();
+
+		$this->assertEquals($s->_structure, SL());
 	}
 }

@@ -1,3 +1,58 @@
-<h1>Uploading Comic Files</h1>
+<h1>Uploading and Managing Comic Files</h1>
+
+<h2>Comic Image Types</h2>
+
+<p>
+	<img src="../images/comic-image-types.png" alt="Comic Image Types" class="alignright" />
+
+	On webcomic websites, the comic image or images for a post typically have additional images associated to them &mdash; images for the archive pages, for nagivation, and for RSS feeds are common.
+
+	These images usually have set widths and/or heights so that they fit in with the layout of each page.
+
+	You can set these dimensions, as well as other important properties, on the <em>ComicPress</em> theme options page under <strong>Comic Image Types.</strong>
+
+	In a default <em>ComicPress Core</em> install, the following properies of each image are modifyable:
+</p>
+
+<ul>
+	<li><strong>Name:</strong> The name of the image type when it's referred to within WordPress.</li>
+	<li><strong>Short name:</strong> When using the <code>EM()</code> tag, the string used to access that particular image of a comic.</li>
+	<li><strong>Default image type:</strong> If you don't provide a string to the first parameter of <code>EM()</code>, this is the image to show. There must always be a default image.</li>
+	<li><strong>Dimensions:</strong> The width and/or height to set this image to when shown on screen. If set before uploading images, the standard WordPress thumbnail generation mechanism will automatically generate images of these sizes for you.</li>
+</ul>
+
+<p>
+	Other backends &mdash; ways of accessing different data sources beyond post attachments &mdash; may provide additional options in the future.
+</p>
+
+<p>
+	You can add an infinite number of image types to your site, but you need at least one to be able to use ComicPress, even if you never embed any images.
+</p>
+
+<br style="clear: both" />
 
 <h2>WordPress Media Uploader Integration</h2>
+
+<p>
+	<img src="../images/comicpress-media-uploader.png" alt="ComicPress Media Uploader" class="alignright" />
+
+	<em>ComicPress Core</em>'s standard method of storing comic images uses the <strong>Media Uploader</strong> under <em>Edit Post</em>.
+	This is the way you normally upload images for inserting into your posts, except now, you have an additional option to enable so that
+	ComicPress knows to treat an uploaded image as a comic image.
+</p>
+
+<p>
+	After uploading an image, check <strong>Let ComicPress treat this image as a comic media file</strong>. This will enable ComicPress management of the file.
+</p>
+
+<p>
+	<code>&lt;img title&gt;</code> hovertext, a common way to add an additional punchline or comment to a comic, can be added on the <strong>Caption</strong> line.
+	If not empty, it will automatically be inserted in the correct way into the image tag.
+</p>
+
+<p>
+	When done, click <strong>Save changes</strong> rather than <em>Insert into Post</em>.
+	<strong>Save changes</strong> will not close the popup window, so you can upload multiple images in one session.
+</p>
+
+<br style="clear: both" />

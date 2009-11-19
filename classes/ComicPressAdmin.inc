@@ -17,6 +17,8 @@ class ComicPressAdmin {
 			add_filter('comicpress_display_attached_images', array(&$this, 'comicpress_display_attached_images'), 10, 2);
 		}
 
+		add_filter('comicpress_core_version', array(&$this, 'comicpress_core_version'));
+
 		$this->comic_image_types = array(
 			'none'    => __('Not a comic', 'comicpress'),
 			'comic'   => __('Comic', 'comicpress'),
@@ -30,6 +32,8 @@ class ComicPressAdmin {
 			add_action('wp_head', array(&$this, 'display_messages'));
 		}
 	}
+
+	function comicpress_core_version($version = '') { return '1.0';	}
 
 	function comicpress_attached_image($content, $attachment_id, $index) {
 		$content .= '<label class="comic-image-ordering">'
@@ -166,6 +170,8 @@ class ComicPressAdmin {
 
 							$id = preg_replace('#[^a-z0-9]+#', '_', strtolower($title));
 							$content = implode('', $content);
+
+							$content = str_replace('src="', 'src="' . plugin_dir_url($path . '/' . $file), $content);
 
 							$all_docs[$id] = compact('title', 'content');
 						}

@@ -167,3 +167,9 @@ function EM($attachment_info, $which = 'default', $action = 'embed') {
 		}
 	}
 }
+
+function SL() {
+	$storyline = new ComicPressStoryline();
+	$storyline->read_from_options();
+	return $storyline->_structure;
+}
