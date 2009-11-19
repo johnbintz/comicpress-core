@@ -142,6 +142,7 @@ class ComicPressStoryline {
 
   function _get_field($field, $id) {
     if (isset($this->_structure)) {
+    	$id = $this->_ensure_numeric_category($id);
       if (isset($this->_structure[$id])) {
         if (isset($this->_structure[$id][$field])) {
           return $this->_structure[$id][$field];
@@ -157,8 +158,9 @@ class ComicPressStoryline {
   function next($id)     { return $this->_get_field('next', $id); }
   // @codeCoverageIgnoreEnd
 
-  function valid($id)    {
-    if (isset($this->_structure[$id])) {
+  function valid($id) {
+    $id = $this->_ensure_numeric_category($id);
+  	if (isset($this->_structure[$id])) {
       return array_keys($this->_structure[$id]);
     }
     return false;

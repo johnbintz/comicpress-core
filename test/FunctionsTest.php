@@ -188,4 +188,37 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals($s->_structure, SL());
 	}
+
+	function providerTestSC() {
+		return array(
+			array('next', 1, 2),
+			array('next', null, 3),
+			array('next', 4, false),
+			array('test', 4, false),
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestSC
+	 */
+	function testSC($which, $relative_to, $expected_result) {
+		global $post;
+
+		$post = (object)array('ID' => 1);
+		wp_set_post_categories(1, array(2));
+
+		$s = new ComicPressStoryline();
+		$s->set_flattened_storyline('0/1,0/2,0/2/3,0/2/4');
+
+		for ($i = 1; $i <= 4; ++$i) {
+			add_category($i, (object)array('slug' => 'test-' . $i));
+		}
+
+		$result = SC($which, $relative_to);
+		if ($expected_result === false) {
+			$this->assertTrue(false === $result);
+		} else {
+			$this->assertEquals($expected_result, $result->term_id);
+		}
+	}
 }

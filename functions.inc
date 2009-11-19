@@ -173,3 +173,32 @@ function SL() {
 	$storyline->read_from_options();
 	return $storyline->_structure;
 }
+
+function SC($which, $relative_to = null) {
+	global $post;
+
+	$storyline = new ComicPressStoryline();
+	$storyline->read_from_options();
+
+	if (is_null($relative_to)) {
+		if (is_object($post)) {
+			if (isset($post->ID)) {
+				$categories = wp_get_post_categories($post->ID);
+				if (is_array($categories)) {
+					$relative_to = reset($categories);
+				}
+			}
+		}
+	}
+
+	if (!is_null($relative_to)) {
+		if ($result = $storyline->_get_field($which, $relative_to)) {
+			$category = get_category($result);
+			if (!empty($category)) {
+				return $category;
+			}
+		}
+	}
+
+	return false;
+}
