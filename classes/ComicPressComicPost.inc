@@ -168,27 +168,29 @@ class ComicPressComicPost {
 
 		$normalized_children = $this->normalize_ordering($skip_checks);
 
-  	$remove_from_list = array();
-		foreach ($normalized_children as $id => $info) {
-  		if (isset($info['children'])) {
-  			$remove_from_list = array_merge($remove_from_list, array_values($info['children']));
-  		}
-		}
-
 		$attachments_with_children = array();
-		foreach ($normalized_children as $id => $info) {
-			if (!in_array($id, $remove_from_list)) {
-				if ($info['enabled']) {
-					$attachment = array('default' => $id);
-					if (is_string($default_type)) { $attachment[$default_type] = $id; }
-					if (isset($info['children'])) {
-						$attachment = array_merge($attachment, $info['children']);
-						$remove_from_list = array_merge($remove_from_list, array_values($info['children']));
+  	if (is_array($normalized_children)) {
+  		$remove_from_list = array();
+  		foreach ($normalized_children as $id => $info) {
+	  		if (isset($info['children'])) {
+	  			$remove_from_list = array_merge($remove_from_list, array_values($info['children']));
+	  		}
+			}
+
+			foreach ($normalized_children as $id => $info) {
+				if (!in_array($id, $remove_from_list)) {
+					if ($info['enabled']) {
+						$attachment = array('default' => $id);
+						if (is_string($default_type)) { $attachment[$default_type] = $id; }
+						if (isset($info['children'])) {
+							$attachment = array_merge($attachment, $info['children']);
+							$remove_from_list = array_merge($remove_from_list, array_values($info['children']));
+						}
+						$attachments_with_children[] = $attachment;
 					}
-					$attachments_with_children[] = $attachment;
 				}
 			}
-		}
+  	}
 
 		return $attachments_with_children;
   }

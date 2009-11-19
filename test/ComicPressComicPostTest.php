@@ -210,7 +210,7 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
   				array('comic' => 'test-1', 'rss' => 'test-3', 'default' => 'test-1'),
   			)
   		),
-
+  		array(false, array())
   	);
   }
 
