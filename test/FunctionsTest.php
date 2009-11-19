@@ -195,6 +195,8 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 			array('next', null, 3),
 			array('next', 4, false),
 			array('test', 4, false),
+			array('current', 1, 1),
+			array('current', null, 2),
 		);
 	}
 

@@ -174,7 +174,7 @@ function SL() {
 	return $storyline->_structure;
 }
 
-function SC($which, $relative_to = null) {
+function SC($which = 'current', $relative_to = null) {
 	global $post;
 
 	$storyline = new ComicPressStoryline();
@@ -192,7 +192,12 @@ function SC($which, $relative_to = null) {
 	}
 
 	if (!is_null($relative_to)) {
-		if ($result = $storyline->_get_field($which, $relative_to)) {
+		if ($which == 'current') {
+			$result = $relative_to;
+		} else {
+			$result = $storyline->_get_field($which, $relative_to);
+		}
+		if ($result !== false) {
 			$category = get_category($result);
 			if (!empty($category)) {
 				return $category;
