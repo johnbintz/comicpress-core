@@ -48,7 +48,17 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 		), get_post_meta($post_to_test->ID, 'image-ordering', true));
 	}
 
-	function testProtect() {
+	function providerTestProtect() {
+		return array(
+			array(null, 'test'),
+			array('test3', 'test3')
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestProtect
+	 */
+	function testProtect($post_to_use, $expected_post) {
 		global $post, $wp_query, $__post, $__wp_query;
 
 		$__post = null;
@@ -57,9 +67,10 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 		$post = "test";
 		$wp_query = "test2";
 
-		Protect();
+		Protect($post_to_use);
 
-		$this->assertEquals($post, $__post);
+		$this->assertEquals($__post, 'test');
+		$this->assertEquals($expected_post, $post);
 		$this->assertEquals($wp_query, $__wp_query);
 	}
 
@@ -224,7 +235,27 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 		}
 	}
 
-	function testIs_R() {
-		$this->markTestIncomplete();
+	function providerTestIn_R() {
+		return array(
+			array(array(1), true),
+			array(array(5), false),
+			array(array(1,5), false),
+			array(array('test'), false)
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestIn_R
+	 */
+	function testIn_R($categories, $expected_result) {
+		global $post;
+
+		$post = (object)array('ID' => 1);
+		wp_set_post_categories(1, $categories);
+
+		$s = new ComicPressStoryline();
+		$s->set_flattened_storyline('0/1,0/2,0/2/3,0/2/4');
+
+		$this->assertEquals($expected_result, In_R());
 	}
 }

@@ -231,6 +231,40 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
     }
   }
 
+  function testHandleUpdateCallAttachments() {
+  	$admin = $this->getMock('ComicPressAdmin', array('handle_update_attachments', 'handle_update_test'));
+
+  	$admin->expects($this->once())->method('handle_update_attachments');
+  	$admin->expects($this->never())->method('handle_update_test');
+
+  	$_REQUEST = array(
+  		'cp' => array(
+  			'_nonce' => wp_create_nonce('comicpress')
+  		)
+  	);
+
+  	$_POST = array('attachments' => 'test');
+
+  	$admin->handle_update();
+  }
+
+  function testHandleUpdateCallMethod() {
+  	$admin = $this->getMock('ComicPressAdmin', array('handle_update_attachments', 'handle_update_test_method'));
+
+  	$admin->expects($this->never())->method('handle_update_attachments');
+  	$admin->expects($this->once())->method('handle_update_test_method');
+
+  	$_REQUEST = array(
+  		'cp' => array(
+  			'_nonce' => wp_create_nonce('comicpress'),
+  			'action' => 'test-method',
+  			'_action_nonce' => wp_create_nonce('comicpress-test-method')
+  		)
+  	);
+
+  	$admin->handle_update();
+  }
+
   function providerTestUpdateZoomSliderMeta() {
     return array(
       array(false),

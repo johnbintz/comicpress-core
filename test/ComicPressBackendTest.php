@@ -5,6 +5,10 @@ require_once('MockPress/mockpress.php');
 require_once('ComicPressBackend.inc');
 
 class ComicPressBackendTest extends PHPUnit_Framework_TestCase {
+	function setUp() {
+		_reset_wp();
+	}
+
   function providerTestEmbedImage() {
     return array(
       array(

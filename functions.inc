@@ -19,6 +19,7 @@ foreach (array(
 
 // Global template functions for ComicPress
 
+// @codeCoverageIgnoreStart
 function F($name, $path, $override_post = null) {
 	global $post;
 
@@ -27,6 +28,7 @@ function F($name, $path, $override_post = null) {
 	$comicpress = ComicPress::get_instance();
 	return $comicpress->find_file($name, $path, $comic_post->find_parents());
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Protect global $post and $wp_query.
@@ -139,6 +141,8 @@ function RT($which, $restrictions = null, $override_post = null) {
 	return $post;
 }
 
+// @codeCoverageIgnoreEnd
+
 function RL($restrictions = null, $override_post = null) {
 	global $post;
 	$post_to_use = !is_null($override_post) ? $override_post : $post;
@@ -150,17 +154,17 @@ function RL($restrictions = null, $override_post = null) {
 	return $storyline->build_from_restrictions($restrictions);
 }
 
-// @codeCoverageIgnoreEnd
-
 function In_R($restrictions = null, $override_post = null) {
 	global $post;
 	$post_to_use = !is_null($override_post) ? $override_post : $post;
 
 	$post_categories = wp_get_post_categories($post_to_use->ID);
 	if (is_array($post_categories)) {
-		$category_id = reset($post_categories);
-		if (is_numeric($category_id)) {
-			return in_array($category_id, RL($restrictions, $post_to_use));
+		if (count($post_categories) == 1) {
+			$category_id = reset($post_categories);
+			if (is_numeric($category_id)) {
+				return in_array($category_id, RL($restrictions, $post_to_use));
+			}
 		}
 	}
 
@@ -226,10 +230,13 @@ function SC($which = 'current', $relative_to = null) {
 		}
 		if ($result !== false) {
 			$category = get_category($result);
+			// sanity check
+			// @codeCoverageIgnoreStart
 			if (!empty($category)) {
 				return $category;
 			}
 		}
+		// @codeCoverageIgnoreEnd
 	}
 
 	return false;
