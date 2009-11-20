@@ -430,15 +430,17 @@ class ComicPressStoryline {
 	    $children = array($parent);
 	    do {
 	      $found_children = false;
-	      foreach ($this->_structure as $category_id => $info) {
-	        if (!in_array($category_id, $children)) {
-	        	if (isset($info['parent'])) {
-		          if (in_array($info['parent'], $children)) {
-		            $children[] = $category_id;
-		            $found_children = true;
-		          }
-	        	}
-	        }
+	      if (is_array($this->_structure)) {
+		      foreach ($this->_structure as $category_id => $info) {
+		        if (!in_array($category_id, $children)) {
+		        	if (isset($info['parent'])) {
+			          if (in_array($info['parent'], $children)) {
+			            $children[] = $category_id;
+			            $found_children = true;
+			          }
+		        	}
+		        }
+		      }
 	      }
 	    // @codeCoverageIgnoreStart
 	    } while ($found_children);

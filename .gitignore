@@ -5,3 +5,5 @@
 .settings/
 coverage/
 .DS_Store
+*.pot
+

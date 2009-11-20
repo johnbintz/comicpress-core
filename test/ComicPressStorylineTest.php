@@ -384,6 +384,11 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals(array(2,3,4), $this->css->_find_children($search));
   }
 
+  function testFindChildrenEmptyStructure() {
+  	$this->css->_structure = false;
+  	$this->assertEquals(array(2), $this->css->_find_children(2));
+  }
+
   function testFindLevelOrAbove() {
     $this->css->_structure = array(
       '1' => array('next' => 2, 'level' => 1),
