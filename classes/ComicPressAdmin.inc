@@ -171,18 +171,20 @@ class ComicPressAdmin {
 			$all_docs = array();
 			if (($dh = opendir($path)) !== false) {
 				while (($file = readdir($dh)) !== false) {
-					$content = file($path . '/' . $file);
-					$title = false;
-					foreach ($content as $line) {
-						if (preg_match('#<h1>(.*)</h1>#', $line, $matches) > 0) {
-							list($all, $title) = $matches;
+					if (is_file($path . '/' . $file)) {
+						$content = file($path . '/' . $file);
+						$title = false;
+						foreach ($content as $line) {
+							if (preg_match('#<h1>(.*)</h1>#', $line, $matches) > 0) {
+								list($all, $title) = $matches;
 
-							$id = preg_replace('#[^a-z0-9]+#', '_', strtolower($title));
-							$content = implode('', $content);
+								$id = preg_replace('#[^a-z0-9]+#', '_', strtolower($title));
+								$content = implode('', $content);
 
-							$content = str_replace('src="', 'src="' . plugin_dir_url($path . '/' . $file), $content);
+								$content = str_replace('src="', 'src="' . plugin_dir_url($path . '/' . $file), $content);
 
-							$all_docs[$id] = compact('title', 'content');
+								$all_docs[$id] = compact('title', 'content');
+							}
 						}
 					}
 				}
