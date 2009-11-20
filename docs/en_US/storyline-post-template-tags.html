@@ -1,5 +1,10 @@
 <h1>Storyline Post Template Tags</h1>
 
+<p>
+	<em>ComicPress Core</em> provides a number of functions that allow you to traverse the storyline structure created from your blog's categories.
+	Technical details about these template tags can be found in the <code>functions.inc</code> file within your <em>ComicPress Core</em> installation.
+</p>
+
 <h2>R() and RT()</h2>
 
 <p>
@@ -11,11 +16,11 @@
 <pre class="prettyprint lang-php">
 // use a post programmatically
 $previous_post = R('previous');
-echo get_the_permalink($previous_post->ID);
+echo get_permalink($previous_post);
 
 // use template tags with a post
 Protect(); // save the current Loop post
-RT('previous');
+$previous_post = RT('previous'); // RT() returns the post, too
 the_permalink();
 Restore(); // restore the saved Loop post
 </pre>
@@ -161,12 +166,12 @@ R('previous', null, $other_post);
 </p>
 
 <ul>
-  <li><strong>child_of</strong> =&gt; <em>category slug</em>: Search for matching posts in the provided category and its children.</li>
-  <li><strong>only</strong> =&gt; <em>category slug</em>: Search only the provided category.</li>
+  <li><strong>child_of</strong> =&gt; <em>category ID or slug</em>: Search for matching posts in the provided category and its children.</li>
+  <li><strong>only</strong> =&gt; <em>category ID or slug</em>: Search only the provided category.</li>
   <li><strong>root_of</strong> =&gt; <em>post ID or object</em>: Find the root category the post belongs to and search for posts from that category and in all children.</li>
   <li><strong>from_post</strong> =&gt; <em>post ID or object</em>: Search for matching posts in the category this post belongs to.</li>
-  <li><strong>previous</strong> =&gt; <em>category slug</em>: Search for matching posts in the category before the provided category as defined in the storyline structure.</li>
-  <li><strong>next</strong> =&gt; <em>category slug</em>: Search for matching posts in the category after the provided category as defined in the storyline structure.</li>
+  <li><strong>previous</strong> =&gt; <em>category ID or slug</em>: Search for matching posts in the category before the provided category as defined in the storyline structure.</li>
+  <li><strong>next</strong> =&gt; <em>category ID or slug</em>: Search for matching posts in the category after the provided category as defined in the storyline structure.</li>
   <li><strong>level</strong> =&gt; <em>storyline level</em>: Search for posts in the categories defined at this level in the storyline structure, with level 1 being the topmost categories, level 2 being their direct children, etc.</i>
 </ul>
 
