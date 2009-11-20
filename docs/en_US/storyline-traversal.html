@@ -1,0 +1,31 @@
+<h1>Storyline Traversal Template Tags</h1>
+
+<p>
+  <em>ComicPress Core</em> provides functions for traversing the storyline categories themselves.
+  These are used to find the adjacent (previous, next, parent) categories of a particular category, and to
+  find how deep in the hierarchy a category is located.
+</p>
+
+<h2>SL() and SC()</h2>
+
+<p>
+  <code>SL()</code> and <code>SC()</code> give you access to the current storyline category information.
+  <code>SL()</code> lists all of the categories, in order, with the necessary metadata to traverse and understand the structure.
+  <code>SC()</code> lets you quickly traverse the storyline, returning category objects as it goes.
+</p>
+
+<pre class="prettyprint lang-php">
+foreach (SL() as $category_id => $info) {
+  $category = get_category($category_id);
+  printf('Category %d is %d levels deep', $category->name, $info['level']);
+}
+
+// by default, SC() returns categories relative to the current post
+$next = SC('next');
+$previous = SC('previous');
+$parent = SC('parent');
+
+// or you can provide a category to be relative to
+$next_from_three = SC('next', 3);
+$previous_to_chapter_four = SC('previous', 'chapter-four');
+</pre>

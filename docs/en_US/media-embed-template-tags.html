@@ -1,14 +1,14 @@
 <h1>Media Embedding Template Tags</h1>
 
 <p>
-	<em>ComicPress Core</em> provides a handful of template tags to access the media attached to each post.
+  <em>ComicPress Core</em> provides a handful of template tags to access the media attached to each post.
 </p>
 
 <h2>M()</h2>
 
 <p>
-	<code>M()</code> retrieves the attachment info from the current post.
-	Attachment info is returned as an array of IDs that the various backends can identify and work with:
+  <code>M()</code> retrieves the attachment info from the current post.
+  Attachment info is returned as an array of IDs that the various backends can identify and work with:
 </p>
 
 <pre class="prettyprint lang-php">
@@ -18,6 +18,20 @@ foreach (M() as $image) { echo EM($image); }
 // we have a post and want its media
 $first_post = R('first');
 foreach (M($first_post) as $image) { echo EM($image); }
+</pre>
 
-var_dump(M());
+<h2>EM()</h2>
+
+<p>
+  <code>EM()</code> returns information about a particular attached media.
+  The typical usage is to get the necessary HTML for embedding the specificed media, but other information can be retrieved:
+</p>
+
+<pre class="prettyprint lang-php">
+// we're in a Loop, so grab the current post's media and embed it
+foreach (M() as $image) {
+  echo EM($image); // embed code for the default media, &lt;img /&gt; tags for images
+  echo EM($image, 'archive'); // embed code for the archive media
+  $attachment = EM($image, null, 'object'); // the ComicPressBackend object for the default image
+}
 </pre>

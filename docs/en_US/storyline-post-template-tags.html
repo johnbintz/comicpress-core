@@ -1,8 +1,8 @@
 <h1>Storyline Post Template Tags</h1>
 
 <p>
-	<em>ComicPress Core</em> provides a number of functions that allow you to traverse the storyline structure created from your blog's categories.
-	Technical details about these template tags can be found in the <code>functions.inc</code> file within your <em>ComicPress Core</em> installation.
+  <em>ComicPress Core</em> provides a number of functions that allow you to traverse the storyline structure created from your blog's categories.
+  Technical details about these template tags can be found in the <code>functions.inc</code> file within your <em>ComicPress Core</em> installation.
 </p>
 
 <h2>R() and RT()</h2>
@@ -239,28 +239,4 @@ if (apply_filters('comicpress-RT', 'last', array('child_of' => 'comic'))) {
 }
 
 do_action('comicpress-Unprotect');
-</pre>
-
-<h2>SL() and SC()</h2>
-
-<p>
-  <code>SL()</code> and <code>SC()</code> give you access to the current storyline category information.
-  <code>SL()</code> lists all of the categories, in order, with the necessary metadata to traverse and understand the structure.
-  <code>SC()</code> lets you quickly traverse the storyline, returning category objects as it goes.
-</p>
-
-<pre class="prettyprint lang-php">
-foreach (SL() as $category_id => $info) {
-  $category = get_category($category_id);
-  printf('Category %d is %d levels deep', $category->name, $info['level']);
-}
-
-// by default, SC() returns categories relative to the current post
-$next = SC('next');
-$previous = SC('previous');
-$parent = SC('parent');
-
-// or you can provide a category to be relative to
-$next_from_three = SC('next', 3);
-$previous_to_chapter_four = SC('previous', 'chapter-four');
 </pre>

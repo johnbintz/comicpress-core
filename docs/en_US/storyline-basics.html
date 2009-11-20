@@ -1,0 +1,77 @@
+<h1>Storyline Basics</h1>
+
+<p>
+  A word before you go any further: For <em>ComicPress Core</em> to work properly, <strong>posts can only be in one category!</strong>
+  <em>ComicPress Core</em> will reject any post in more than one category. If you want to put your posts in additional taxonomies, <strong>use tags</strong>.
+</p>
+
+<h2>Child Category Ordering</h2>
+
+<p>
+  A <strong>storyline</strong> in <em>ComicPress Core</em> parlance is a set of ordered, structured categories.
+  By default, categories in WordPress maintain only parent to child relationships &mdash; a category knows if it has a parent, and what that parent is. See the category list below:
+</p>
+
+<ul>
+  <li><strong>My Comics</strong> has no parent. It's at the root of the hierarchy.</li>
+  <ul>
+    <li><strong>My Funny Comic</strong> has a parent. It's the <em>My Comics</em> category.</li>
+    <ul>
+      <li><strong>Chapter One</strong> has a parent. It's the <em>My Funny Comic</em> category.</li>
+    </ul>
+    <li><strong>My Serious Comic</strong> has a parent. It's the <em>My Comics</em> category.</li>
+  </ul>
+</ul>
+
+<p>
+  While WordPress stores parent/child relationships, it does not store the order of all of the children underneath of a parent (the siblings). It always sorts them alphabetically by name.
+  This is bad for Websites that want to run structured sequential creative works, as that means you'd have to name your categories in a way that would cause them to sort
+  alphabetically, making the names nonsensical:
+</p>
+
+<ul>
+  <li><strong>My Comics</strong> will be first, because it has no siblings.</li>
+  <ul>
+    <li><strong>01: My Funny Comic</strong> will sort first, because <em>01</em> is less than <em>02</em>.</li>
+    <ul>
+      <li><strong>01: Chapter One</strong> will be first, because it has no siblings.</li>
+    </ul>
+    <li><strong>02: My Serious Comic</strong> will sort second, because <em>02</em> is greater than <em>01</em>.</li>
+  </ul>
+</ul>
+
+<p>
+  <em>ComicPress Core</em> allows you to sort your categories in any order, and that order is stored within <em>ComicPress Core</em>'s own configuration.
+  This would allow you to ensure that <strong>My Funny Comic</strong> always appears before <strong>My Serious Comic</strong>,
+  no matter how many children <strong>My Comics</strong> has.
+</p>
+
+<h2>Extending WordPress to Know About Sort Ordering</h2>
+
+<p>
+  In order for theme developers to be able to access this sort ordering information, <em>ComicPress Core</em> provides two template tags called <code>SL()</code> and <code>SC()</code>
+  to retrieve information about the structure of categories. It's a much richer interface than WordPress's provided interface, because they always return hierarchical information:
+</p>
+
+<pre class="prettyprint lang-php">
+foreach (SL() as $category_id => $info) {
+  $category = get_category($category_id);
+  printf('Category %d is %d levels deep', $category->name, $info['level']);
+}
+
+// by default, SC() returns categories relative to the current post
+$next = SC('next');
+$previous = SC('previous');
+$parent = SC('parent');
+
+// or you can provide a category to be relative to
+$next_from_three = SC('next', 3);
+$previous_to_chapter_four = SC('previous', 'chapter-four');
+</pre>
+
+<h2>Finding and Using Posts</h2>
+
+<p>
+  Since <em>ComicPress Core</em> knows about the structure of your storyline, you can use <em>ComicPress Core</em>'s advanced post search template tags to search subsets of your categories.
+  This is where a cool interactive goes that illustrates this complex process.
+</p>
