@@ -11,7 +11,7 @@ class ComicPressNavigation {
   }
   // @codeCoverageIgnoreEnd
 
-  function get_post_nav($post) {
+  function get_post_nav($post, $restrictions = null) {
     $nav = array();
     if (is_object($post)) {
 	    if (isset($post->ID)) {
@@ -24,14 +24,16 @@ class ComicPressNavigation {
 		    	 return $nav;
 		    }
 
+		    $categories = $this->_storyline->build_from_restrictions($restrictions);
+
 		    // global previous/next
 		    foreach (array('previous', 'next') as $field) {
-		      $nav[$field] = $this->_dbi->{"get_${field}_comic"}(null, $post);
+		      $nav[$field] = $this->_dbi->{"get_${field}_comic"}($categories, $post);
 		    }
 
 		    // global first/last
 		    foreach (array('first', 'last') as $field) {
-		      $nav[$field] = $this->_dbi->{"get_${field}_comic"}(null);
+		      $nav[$field] = $this->_dbi->{"get_${field}_comic"}($categories);
 		    }
 
 		    if ($category = $this->_storyline->get_valid_post_category($post->ID)) {
