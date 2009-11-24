@@ -671,23 +671,35 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
   	$this->assertEquals($expected_result, $this->css->_ensure_post_id($thing));
   }
 
-  function providerTestEnsureNumericCategory() {
+  function providerTestEnsureCategoryIDs() {
   	return array(
-  		array(false, false),
-  		array(0, 0),
-  		array(1, 1),
-  		array('comic', 'comic'),
-  		array('test', 1)
+  		array(false, array()),
+  		array(0, array(0)),
+  		array(1, array(1)),
+  		array('blah', array('blah')),
+  		array('test', array(1)),
+  		array('comic', array(1))
   	);
   }
 
   /**
-   * @dataProvider providerTestEnsureNumericCategory
+   * @dataProvider providerTestEnsureCategoryIDs
    */
-  function testEnsureNumericCategory($string, $expected_id) {
-  	add_category(1, (object)array('slug' => 'test'));
+  function testEnsureCategoryIDs($string, $expected_id) {
+  	add_category(1, (object)array('slug' => 'test', 'parent' => 0));
+  	add_category(2, (object)array('slug' => 'test-2', 'parent' => 1));
+  	add_category(3, (object)array('slug' => 'my-rants', 'parent' => 0));
+  	$comicpress = ComicPress::get_instance();
+		$comicpress->comicpress_options['category_groupings'] = array(
+			'comic' => array(1),
+			'blog' => array(3)
+		);
 
-  	$this->assertEquals($expected_id, $this->css->_ensure_numeric_category($string));
+  	$this->assertEquals($expected_id, $this->css->_ensure_category_ids($string));
+  }
+
+  function testNormalizeCategoryGroupings() {
+  	$this->markTestIncomplete();
   }
 }
 

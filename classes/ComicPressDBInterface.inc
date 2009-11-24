@@ -1,6 +1,7 @@
 <?php
 
 class ComicPressDBInterface {
+	var $is_single, $in_the_loop;
 	function ComicPressDBInterface() {}
 
 	function get_instance() {
@@ -11,6 +12,7 @@ class ComicPressDBInterface {
 	}
 
 	function _get_categories_to_exclude($categories = null) {
+		if (is_numeric($categories)) { $categories = array($categories); }
 		if (is_array($categories)) {
 			return array_values(array_diff(get_all_category_ids(), $categories));
 		} else {
@@ -41,6 +43,8 @@ class ComicPressDBInterface {
 	 */
 	function get_terminal_post_in_categories($categories, $first = true) {
 		$this->_prepare_wp_query();
+
+		if (!is_array($categories)) { $categories = array($categories); }
 
 		$sort_order = $first ? "asc" : "desc";
 		$terminal_comic_query = new WP_Query();
