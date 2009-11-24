@@ -639,6 +639,9 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
    * @dataProvider providerTestNormalize
    */
   function testNormalize($flattened_storyline, $do_set) {
+  	$comicpress = ComicPress::get_instance();
+  	$comicpress->comicpress_options['category_groupings'] = array();
+
   	$css = $this->getMock('ComicPressStoryline', array('get_flattened_storyline', 'get_category_flattened', 'normalize_flattened_storyline', 'set_flattened_storyline'));
   	$css->expects(is_null($flattened_storyline) ? $this->once() : $this->never())->method('get_flattened_storyline');
   	$css->expects($do_set ? $this->once() : $this->never())->method('set_flattened_storyline');
@@ -698,8 +701,35 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
   	$this->assertEquals($expected_id, $this->css->_ensure_category_ids($string));
   }
 
-  function testNormalizeCategoryGroupings() {
-  	$this->markTestIncomplete();
+  function providerTestNormalizeCategoryGroupings() {
+  	return array(
+  		array(
+  			array('test' => array(1,2)),
+  			array(1,2),
+  			array('test' => array(1,2))
+  		),
+  		array(
+  			array('test' => array(1,2)),
+  			array(1),
+  			array('test' => array(1))
+  		),
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestNormalizeCategoryGroupings
+   */
+  function testNormalizeCategoryGroupings($grouping, $valid_categories, $expected_grouping) {
+  	$comicpress = ComicPress::get_instance();
+  	$comicpress->comicpress_options['category_groupings'] = $grouping;
+
+  	foreach ($valid_categories as $category_id) {
+  		add_category($category_id, (object)array('slug' => "test-${category_id}"));
+  	}
+
+  	$this->css->normalize_category_groupings();
+
+  	$this->assertEquals($expected_grouping, $comicpress->comicpress_options['category_groupings']);
   }
 }
 

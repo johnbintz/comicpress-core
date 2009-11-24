@@ -320,6 +320,8 @@ class ComicPressStoryline {
 		}
 		$all_categories_flattened = $this->get_category_flattened();
 
+		$this->normalize_category_groupings();
+
 		$result = $this->normalize_flattened_storyline($flattened_storyline, $all_categories_flattened);
 		if ($set) {
 			$this->set_flattened_storyline($result);
@@ -328,11 +330,21 @@ class ComicPressStoryline {
 	}
 
 	/**
-	 * TODO finish this method
 	 * @return unknown_type
 	 */
 	function normalize_category_groupings() {
 		$comicpress = ComicPress::get_instance();
+
+		$valid_ids = get_all_category_ids();
+
+		foreach ($comicpress->comicpress_options['category_groupings'] as $group_id => $category_ids) {
+			$comicpress->comicpress_options['category_groupings'][$group_id] = array_intersect($category_ids, $valid_ids);
+			if (empty($comicpress->comicpress_options['category_groupings'][$group_id])) {
+				unset($comicpress->comicpress_options['category_groupings'][$group_id]);
+			}
+		}
+
+		$comicpress->save();
 	}
 
 	/**
