@@ -29,12 +29,18 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 					}
 				}
 			}
-		} while ($any_found);
+		}
+		// @codeCoverageIgnoreStart
+		while ($any_found);
+		// @codeCoverageIgnoreEnd
 
 		return $this->_searches;
 	}
 
+	// @codeCoverageIgnoreStart
 	function _replace_wordpress($post, $type) {	return ABSPATH;	}
+	// @codeCoverageIgnoreEnd
+
 	function _replace_type($post, $type) { return $type;	}
 	function _replace_y_m_d($post, $type) { return date('Y-m-d', strtotime($post->post_date));	}
 	function _replace_year($post, $type) { return date('Y', strtotime($post->post_date));	}
@@ -50,10 +56,14 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 						array_unshift($all_slugs, $category->slug);
 						$current_parent = $category->parent;
 					} else {
+						$all_slugs = array();
 						break;
 					}
 				}
-			} while ($keep_searching);
+			}
+			// @codeCoverageIgnoreStart
+			while ($keep_searching);
+			// @codeCoverageIgnoreEnd
 
 			$new_searches = array();
 			$slug_count = count($all_slugs);
