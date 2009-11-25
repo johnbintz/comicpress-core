@@ -84,6 +84,7 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 	}
 
 	function find_matching_files($patterns) {
+		$matches = array();
 		foreach ($patterns as $pattern) {
 			$dir = dirname($pattern);
 			if (is_dir($dir)) {
@@ -93,7 +94,7 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 						$target = $dir . '/' . $file;
 						if (is_file($target) || is_link($target)) {
 							if (preg_match('#' . $pattern. '#', $file) > 0) {
-								return $target;
+								$matches[] = $target;
 							}
 						}
 					}
@@ -101,7 +102,7 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 				}
 			}
 		}
-		return false;
+		return $matches;
 	}
 
 	function generate_from_post($post) {
@@ -118,6 +119,7 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 
 		if (isset($comicpress->comicpress_options['image_types'])) {
 			$files = array();
+			$all_patterns = array();
 			foreach (array_keys($comicpress->comicpress_options['image_types']) as $type) {
 				$patterns = $this->process_search_string($post, $type);
 				if (!empty($patterns)) {
@@ -126,16 +128,26 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 						$files[$type] = $result;
 					}
 				}
+				$all_patterns = array_merge($all_patterns, $patterns);
 			}
-			if (!empty($files)) {
-				$fs = new ComicPressBackendFilesystem();
-				$fs->id = 'filesystem-' . $post->ID;
-				$fs->files_by_type = $files;
-				$return[] = $fs;
+			if (($filename_pattern = $this->has_common_filename_pattern($all_patterns)) !== false) {
+				if (!empty($files)) {
+					foreach ($this->group_by_root($filename_pattern, $files) as $root => $files_for_root) {
+						$fs = new ComicPressBackendFilesystem();
+						$fs->id = 'filesystem-' . $post->ID . '-' . $root;
+						$fs->files_by_type = $files_for_root;
+						$return[] = $fs;
+					}
+				}
 			}
 		}
 
 		return $return;
+	}
+
+	function has_common_filename_pattern($patterns) {
+		$filename_patterns = array_unique(array_map('basename', $patterns));
+		return (count($filename_patterns) == 1) ? reset($filename_patterns) : false;
 	}
 
 	function group_by_root($filename_pattern, $all_files) {

@@ -66,12 +66,27 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected_searches, $fs->process_search_string($posts[$post_id_to_use], 'comic'));
 	}
 
+	function providerTestHasCommonFilenamePattern() {
+		return array(
+			array(array('/test/*.jpg', '/test2/*.jpg'), '*.jpg'),
+			array(array('/test/*.jpg', '/test2/*.gif'), false)
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestHasCommonFilenamePattern
+	 */
+	function testHasCommonFilenamePattern($patterns, $expected_result) {
+		$this->assertTrue($expected_result === $this->fs->has_common_filename_pattern($patterns));
+	}
+
 	function providerTestFindMatchingFiles() {
 		return array(
-			array(array('/blah'),	false),
-			array(array('/comic/2008-01-01.jpg'),	false),
-			array(array('/comic/2009-01-01.jpg'),	vfsStream::url('root/comic/2009-01-01.jpg')),
-			array(array('/comic/2009-01-01-test.jpg'),	vfsStream::url('root/comic/2009-01-01-test.jpg')),
+			array(array('/blah'),	array()),
+			array(array('/comic/2008-01-01.jpg'),	array()),
+			array(array('/comic/2009-01-01.jpg'),	array(vfsStream::url('root/comic/2009-01-01.jpg'))),
+			array(array('/comic/2009-01-01-test.jpg'),	array(vfsStream::url('root/comic/2009-01-01-test.jpg'))),
+			array(array('/comic/2009-01-01.jpg', '/comic/2009-01-02.jpg'),	array(vfsStream::url('root/comic/2009-01-01.jpg'))),
 		);
 	}
 
@@ -101,20 +116,30 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 
 		$comicpress->comicpress_options['backend_options']['filesystem']['search_pattern'] = 'test';
 
-		$fs = $this->getMock('ComicPressBackendFilesystem', array('process_search_string', 'find_matching_files'));
+		$fs = $this->getMock('ComicPressBackendFilesystem', array('process_search_string', 'find_matching_files', 'group_by_root', 'has_common_filename_pattern'));
 
 		$fs->expects($this->at(0))->method('process_search_string')->with($post, 'comic')->will($this->returnValue(array('comic')));
-		$fs->expects($this->at(1))->method('find_matching_files')->with(array('comic'))->will($this->returnValue('comic'));
+		$fs->expects($this->at(1))->method('find_matching_files')->with(array('comic'))->will($this->returnValue(array('comic')));
 		$fs->expects($this->at(2))->method('process_search_string')->with($post, 'rss')->will($this->returnValue(array('rss')));
-		$fs->expects($this->at(3))->method('find_matching_files')->with(array('rss'))->will($this->returnValue('rss'));
+		$fs->expects($this->at(3))->method('find_matching_files')->with(array('rss'))->will($this->returnValue(array('rss')));
+		$fs->expects($this->at(4))->method('has_common_filename_pattern')->with(array('comic', 'rss'))->will($this->returnValue('test'));
+		$fs->expects($this->at(5))->method('group_by_root')->with('test', array(
+			'comic' => array('comic'),
+			'rss'   => array('rss')
+		))->will($this->returnValue(array(
+			'root' => array(
+				'comic' => array('comic'),
+				'rss' => array('rss'),
+			)
+		)));
 
 		$return = $fs->generate_from_post($post);
 
 		$this->assertEquals(1, count($return));
-		$this->assertEquals('filesystem-1', $return[0]->id);
+		$this->assertEquals('filesystem-1-root', $return[0]->id);
 		$this->assertEquals(array(
-			'comic' => 'comic',
-			'rss'   => 'rss'
+			'comic' => array('comic'),
+			'rss'   => array('rss')
 		), $return[0]->files_by_type);
 	}
 
