@@ -8,4 +8,4 @@ ifdef comicpress28
 endif
 
 test:
-	taskset -c 1 phpunit --syntax-check --coverage-html coverage test
+	phpunit --syntax-check --coverage-html coverage test

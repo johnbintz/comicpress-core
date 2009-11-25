@@ -106,6 +106,22 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
   	}
   }
 
+  function testGetFlattenedStorylineNoComicPress() {
+  	$css = $this->getMock('ComicPressStoryline', array('_class_exists'));
+  	$css->expects($this->once())->method('_class_exists')->will($this->returnValue(false));
+
+  	update_option('comicpress-storyline-category-order', 'test');
+
+  	$this->assertEquals('test', $css->get_flattened_storyline());
+  }
+
+  function testGetFlattenedStorylineNoComicPressStorylineOrder() {
+  	$comicpress = ComicPress::get_instance();
+  	unset($comicpress->comicpress_options['storyline_order']);
+
+  	$this->assertEquals(false, $this->css->get_flattened_storyline());
+  }
+
   function providerTestCreateStructureKey() {
   	return array(
   		array(false, false),
@@ -701,6 +717,15 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
   	$this->assertEquals($expected_id, $this->css->_ensure_category_ids($string));
   }
 
+  function testEnsureCategoryIDsBadGrouping() {
+  	$comicpress = ComicPress::get_instance();
+		$comicpress->comicpress_options['category_groupings'] = array(
+			'comic' => 1,
+		);
+
+  	$this->assertEquals(array(1), $this->css->_ensure_category_ids('comic'));
+  }
+
   function providerTestNormalizeCategoryGroupings() {
   	return array(
   		array(
@@ -712,6 +737,11 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
   			array('test' => array(1,2)),
   			array(1),
   			array('test' => array(1))
+  		),
+  		array(
+  			array('test' => array(3)),
+  			array(1),
+  			array()
   		),
   	);
   }
