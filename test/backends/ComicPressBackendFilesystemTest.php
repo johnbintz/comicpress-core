@@ -98,6 +98,8 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 			'rss'   => array()
 		);
 
+		$comicpress->comicpress_options['backend_options']['filesystem']['search_pattern'] = 'test';
+
 		$fs = $this->getMock('ComicPressBackendFilesystem', array('process_search_string', 'find_matching_files'));
 
 		$fs->expects($this->at(0))->method('process_search_string')->with($post, 'comic')->will($this->returnValue(array('comic')));
