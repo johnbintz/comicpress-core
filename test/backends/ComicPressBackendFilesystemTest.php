@@ -89,6 +89,10 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected_match, $this->fs->find_matching_files(array(vfsStream::url('root/comic/2009-01-01*.jpg'))));
 	}
 
+	function testUpdateFilesystemPostMeta() {
+		$this->markTestIncomplete();
+	}
+
 	function testGenerateFromPost() {
 		$post = (object)array('ID' => 1);
 
