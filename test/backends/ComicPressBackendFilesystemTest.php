@@ -3,6 +3,7 @@
 require_once('PHPUnit/Framework.php');
 require_once('MockPress/mockpress.php');
 require_once('backends/ComicPressBackendFilesystem.inc');
+require_once('ComicPress.inc');
 require_once('vfsStream/vfsStream.php');
 
 class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
@@ -86,5 +87,32 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 		wp_set_post_categories(1, array(2));
 
 		$this->assertEquals($expected_match, $this->fs->find_matching_files(array(vfsStream::url('root/comic/2009-01-01*.jpg'))));
+	}
+
+	function testGenerateFromPost() {
+		$post = (object)array('ID' => 1);
+
+		$comicpress = ComicPress::get_instance();
+		$comicpress->comicpress_options['image_types'] = array(
+			'comic' => array(),
+			'rss'   => array()
+		);
+
+		$fs = $this->getMock('ComicPressBackendFilesystem', array('process_search_string', 'find_matching_files'));
+
+		$fs->expects($this->at(0))->method('process_search_string')->with($post, 'comic')->will($this->returnValue(array('comic')));
+		$fs->expects($this->at(1))->method('find_matching_files')->with(array('comic'))->will($this->returnValue('comic'));
+		$fs->expects($this->at(2))->method('process_search_string')->with($post, 'rss')->will($this->returnValue(array('rss')));
+		$fs->expects($this->at(3))->method('find_matching_files')->with(array('rss'))->will($this->returnValue('rss'));
+
+		$return = $fs->generate_from_post($post);
+
+		$this->assertEquals(2, count($return));
+		$this->assertEquals('filesystem-' . md5('comic'), $return[0]->id);
+		$this->assertEquals('filesystem-' . md5('rss'), $return[1]->id);
+		$this->assertEquals('comic', $return[0]->type);
+		$this->assertEquals('rss', $return[1]->type);
+		$this->assertEquals('comic', $return[0]->filepath);
+		$this->assertEquals('rss', $return[1]->filepath);
 	}
 }

@@ -4,6 +4,7 @@ require_once(dirname(__file__) . '/../ComicPressBackend.inc');
 
 class ComicPressBackendFilesystem extends ComicPressBackend {
 	var $search_string = '';
+	var $id, $type, $filepath;
 
 	function process_search_string($post, $type) {
 		$this->_searches = array($this->search_string);
@@ -100,5 +101,36 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 			}
 		}
 		return false;
+	}
+
+	function generate_from_post($post) {
+		$return = array();
+		$comicpress = ComicPress::get_instance();
+
+		if (isset(
+		  $comicpress->comicpress_options['backend_options'],
+		  $comicpress->comicpress_options['backend_options']['filesystem'],
+		  $comicpress->comicpress_options['backend_options']['filesystem']['search_pattern']
+		)) {
+			$this->search_pattern = (string)$comicpress->comicpress_options['backend_options']['filesystem']['search_pattern'];
+		}
+
+		if (isset($comicpress->comicpress_options['image_types'])) {
+			foreach (array_keys($comicpress->comicpress_options['image_types']) as $type) {
+				$patterns = $this->process_search_string($post, $type);
+				if (!empty($patterns)) {
+					$result = $this->find_matching_files($patterns);
+					if (!empty($result)) {
+						$fs = new ComicPressBackendFilesystem();
+						$fs->id = 'filesystem-' . md5($result);
+						$fs->type = $type;
+						$fs->filepath = $result;
+						$return[] = $fs;
+					}
+				}
+			}
+		}
+
+		return $return;
 	}
 }
