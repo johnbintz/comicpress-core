@@ -22,7 +22,6 @@ class ComicPressStoryline {
 			if (isset($comicpress->comicpress_options['storyline_order'])) {
 				return $comicpress->comicpress_options['storyline_order'];
 			}
-
 		} else {
 			return get_option("comicpress-storyline-category-order");
 		}
