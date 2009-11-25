@@ -110,8 +110,8 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 		$return = $fs->generate_from_post($post);
 
 		$this->assertEquals(2, count($return));
-		$this->assertEquals('filesystem-' . md5('comic'), $return[0]->id);
-		$this->assertEquals('filesystem-' . md5('rss'), $return[1]->id);
+		$this->assertEquals('filesystem-1-' . md5('comic'), $return[0]->id);
+		$this->assertEquals('filesystem-1-' . md5('rss'), $return[1]->id);
 		$this->assertEquals('comic', $return[0]->type);
 		$this->assertEquals('rss', $return[1]->type);
 		$this->assertEquals('comic', $return[0]->filepath);

@@ -122,7 +122,7 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 					$result = $this->find_matching_files($patterns);
 					if (!empty($result)) {
 						$fs = new ComicPressBackendFilesystem();
-						$fs->id = 'filesystem-' . md5($result);
+						$fs->id = 'filesystem-' . $post->ID . '-' . md5($result);
 						$fs->type = $type;
 						$fs->filepath = $result;
 						$return[] = $fs;
