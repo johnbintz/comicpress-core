@@ -141,6 +141,13 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 			'comic' => array('comic'),
 			'rss'   => array('rss')
 		), $return[0]->files_by_type);
+
+		$this->assertEquals(array(
+			'root' => array(
+				'comic' => array('comic'),
+				'rss' => array('rss'),
+			)
+		), get_post_meta(1, 'backend_filesystem_files_by_type', true));
 	}
 
 	function providerTestGroupByRoot() {
@@ -166,5 +173,25 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 	 */
 	function testGroupByRoot($pattern, $files, $expected_groupings) {
 		$this->assertEquals($expected_groupings, $this->fs->group_by_root($pattern, $files));
+	}
+
+	function providerTestGenerateFromID() {
+		return array(
+			array('blah', false)
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestGenerateFromID
+	 */
+	function testGenerateFromID($id, $is_successful) {
+		$this->markTestIncomplete();
+		wp_insert_post((object)array('ID' => 1));
+
+		if ($is_successful) {
+			$return = new ComicPressBackendFilesystem();
+		} else {
+			$return = false;
+		}
 	}
 }

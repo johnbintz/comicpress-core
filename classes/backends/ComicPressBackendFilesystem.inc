@@ -132,7 +132,9 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 			}
 			if (($filename_pattern = $this->has_common_filename_pattern($all_patterns)) !== false) {
 				if (!empty($files)) {
-					foreach ($this->group_by_root($filename_pattern, $files) as $root => $files_for_root) {
+					$grouped_by_root = $this->group_by_root($filename_pattern, $files);
+					update_post_meta($post->ID, 'backend_filesystem_files_by_type', $grouped_by_root);
+					foreach ($grouped_by_root as $root => $files_for_root) {
 						$fs = new ComicPressBackendFilesystem();
 						$fs->id = 'filesystem-' . $post->ID . '-' . $root;
 						$fs->files_by_type = $files_for_root;
