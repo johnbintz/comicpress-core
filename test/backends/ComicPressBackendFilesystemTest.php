@@ -9,6 +9,9 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 	function setUp() {
 		_reset_wp();
 		$this->fs = new ComicPressBackendFilesystem();
+
+		vfsStreamWrapper::register();
+		vfsStreamWrapper::setRoot(new vfsStreamDirectory('root'));
 	}
 
 	function providerTestProcessSearchString() {
@@ -59,5 +62,29 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 		$fs->search_string = $string;
 
 		$this->assertEquals($expected_searches, $fs->process_search_string($posts[$post_id_to_use], 'comic'));
+	}
+
+	function providerTestFindMatchingFiles() {
+		return array(
+			array(array('/blah'),	false),
+			array(array('/comic/2008-01-01.jpg'),	false),
+			array(array('/comic/2009-01-01.jpg'),	vfsStream::url('root/comic/2009-01-01.jpg')),
+			array(array('/comic/2009-01-01-test.jpg'),	vfsStream::url('root/comic/2009-01-01-test.jpg')),
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestFindMatchingFiles
+	 */
+	function testFindMatchingFiles($filesystem_layout, $expected_match) {
+		foreach ($filesystem_layout as $file) {
+			$parts = pathinfo($file);
+			mkdir(vfsStream::url("root{$parts['dirname']}"), 0666, true);
+			file_put_contents(vfsStream::url("root${file}"), 'test');
+		}
+
+		wp_set_post_categories(1, array(2));
+
+		$this->assertEquals($expected_match, $this->fs->find_matching_files(array(vfsStream::url('root/comic/2009-01-01*.jpg'))));
 	}
 }

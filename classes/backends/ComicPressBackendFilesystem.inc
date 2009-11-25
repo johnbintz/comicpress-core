@@ -80,4 +80,25 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 		}
 		return false;
 	}
+
+	function find_matching_files($patterns) {
+		foreach ($patterns as $pattern) {
+			$dir = dirname($pattern);
+			if (is_dir($dir)) {
+				$pattern = str_replace('*', '.*', basename($pattern));
+				if (($dh = opendir($dir)) !== false) {
+					while (($file = readdir($dh)) !== false) {
+						$target = $dir . '/' . $file;
+						if (is_file($target) || is_link($target)) {
+							if (preg_match('#' . $pattern. '#', $file) > 0) {
+								return $target;
+							}
+						}
+					}
+					closedir($dh);
+				}
+			}
+		}
+		return false;
+	}
 }
