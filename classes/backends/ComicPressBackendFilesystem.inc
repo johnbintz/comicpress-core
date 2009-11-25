@@ -4,7 +4,7 @@ require_once(dirname(__file__) . '/../ComicPressBackend.inc');
 
 class ComicPressBackendFilesystem extends ComicPressBackend {
 	var $search_string = '';
-	var $id, $type, $filepath;
+	var $id, $files_by_type = array();
 
 	function process_search_string($post, $type) {
 		$this->_searches = array($this->search_string);
@@ -116,21 +116,43 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 		}
 
 		if (isset($comicpress->comicpress_options['image_types'])) {
+			$files = array();
 			foreach (array_keys($comicpress->comicpress_options['image_types']) as $type) {
 				$patterns = $this->process_search_string($post, $type);
 				if (!empty($patterns)) {
 					$result = $this->find_matching_files($patterns);
 					if (!empty($result)) {
-						$fs = new ComicPressBackendFilesystem();
-						$fs->id = 'filesystem-' . $post->ID . '-' . md5($result);
-						$fs->type = $type;
-						$fs->filepath = $result;
-						$return[] = $fs;
+						$files[$type] = $result;
 					}
 				}
+			}
+			if (!empty($files)) {
+				$fs = new ComicPressBackendFilesystem();
+				$fs->id = 'filesystem-' . $post->ID;
+				$fs->files_by_type = $files;
+				$return[] = $fs;
 			}
 		}
 
 		return $return;
+	}
+
+	function group_by_root($filename_pattern, $all_files) {
+		$roots = array();
+		$filename_pattern = str_replace('*', '(.*)', basename($filename_pattern));
+
+		foreach ($all_files as $type => $files) {
+			foreach ($files as $file) {
+				$filename = basename($file);
+				if (preg_match('#^' . $filename_pattern . '$#', $filename, $matches) > 0) {
+					$filename = $matches[1];
+				}
+
+				if (!isset($roots[$filename])) { $roots[$filename] = array(); }
+				$roots[$filename][$type] = $file;
+			}
+		}
+
+		return $roots;
 	}
 }

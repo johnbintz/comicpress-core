@@ -89,10 +89,6 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected_match, $this->fs->find_matching_files(array(vfsStream::url('root/comic/2009-01-01*.jpg'))));
 	}
 
-	function testUpdateFilesystemPostMeta() {
-		$this->markTestIncomplete();
-	}
-
 	function testGenerateFromPost() {
 		$post = (object)array('ID' => 1);
 
@@ -113,12 +109,36 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 
 		$return = $fs->generate_from_post($post);
 
-		$this->assertEquals(2, count($return));
-		$this->assertEquals('filesystem-1-' . md5('comic'), $return[0]->id);
-		$this->assertEquals('filesystem-1-' . md5('rss'), $return[1]->id);
-		$this->assertEquals('comic', $return[0]->type);
-		$this->assertEquals('rss', $return[1]->type);
-		$this->assertEquals('comic', $return[0]->filepath);
-		$this->assertEquals('rss', $return[1]->filepath);
+		$this->assertEquals(1, count($return));
+		$this->assertEquals('filesystem-1', $return[0]->id);
+		$this->assertEquals(array(
+			'comic' => 'comic',
+			'rss'   => 'rss'
+		), $return[0]->files_by_type);
+	}
+
+	function providerTestGroupByRoot() {
+		return array(
+			array(
+				'test*.jpg',
+				array('comic' => array('/test/test1.jpg', '/test/test2.jpg')),
+				array('1' => array('comic' => '/test/test1.jpg'), '2' => array('comic' => '/test/test2.jpg'))
+			),
+			array(
+				'2009-01-01*.jpg',
+				array(
+				  'comic' => array('/comic/2009-01-01-01-yeah.jpg'),
+				  'rss'   => array('/rss/2009-01-01-01-yeah.jpg')
+				  ),
+				array('-01-yeah' => array('comic' => '/comic/2009-01-01-01-yeah.jpg', 'rss' => '/rss/2009-01-01-01-yeah.jpg'))
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestGroupByRoot
+	 */
+	function testGroupByRoot($pattern, $files, $expected_groupings) {
+		$this->assertEquals($expected_groupings, $this->fs->group_by_root($pattern, $files));
 	}
 }
