@@ -44,6 +44,7 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 
 	function _replace_type($post, $type) { return $type;	}
 	function _replace_y_m_d($post, $type) { return date('Y-m-d', strtotime($post->post_date));	}
+	function _replace_ymd($post, $type) { return date('Ymd', strtotime($post->post_date));	}
 	function _replace_year($post, $type) { return date('Y', strtotime($post->post_date));	}
 	function _replace_categories($post, $type) {
 		if (count($post_categories = wp_get_post_categories($post->ID)) == 1) {
