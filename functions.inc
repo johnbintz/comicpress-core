@@ -23,7 +23,6 @@ foreach (array(
 
 // Global template functions for ComicPress
 
-// @codeCoverageIgnoreStart
 function F($name, $path, $override_post = null) {
 	global $post;
 
@@ -32,7 +31,6 @@ function F($name, $path, $override_post = null) {
 	$comicpress = ComicPress::get_instance();
 	return $comicpress->find_file($name, $path, $comic_post->find_parents());
 }
-// @codeCoverageIgnoreEnd
 
 /**
  * Protect global $post and $wp_query.

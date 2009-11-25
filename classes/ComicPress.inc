@@ -35,10 +35,14 @@ class ComicPress {
 
   var $backends = array();
 
-	function &get_instance() {
+	function &get_instance($force = false) {
 		static $instance;
 
-		if (!$instance) {
+		if (is_object($force)) {
+			$instance = array($force);
+		}
+
+		if (!$instance || ($force === true)) {
 			$instance = array(new ComicPress());
 		}
 

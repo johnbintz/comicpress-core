@@ -258,4 +258,35 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals($expected_result, In_R());
 	}
+
+	function providerTestF() {
+		return array(
+			array(null, array(1 => 'one')),
+			array((object)array('ID' => 2), array(2 => 'two'))
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestF
+	 */
+	function testF($post_to_use, $expected_parents) {
+		global $post;
+
+		$post = (object)array('ID' => 1);
+
+		add_category(1, (object)array('slug' => 'one'));
+		add_category(2, (object)array('slug' => 'two'));
+
+		wp_set_post_categories(1, array(1));
+		wp_set_post_categories(2, array(2));
+
+		$comicpress = $this->getMock('ComicPress', array('find_file'));
+		$comicpress->expects($this->once())->method('find_file')->with('name', 'path', $expected_parents)->will($this->returnValue('done'));
+
+		ComicPress::get_instance($comicpress);
+
+		$this->assertEquals('done', F('name', 'path', $post_to_use));
+
+		ComicPress::get_instance(true);
+	}
 }
