@@ -86,7 +86,6 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 			array(array('/comic/2008-01-01.jpg'),	array()),
 			array(array('/comic/2009-01-01.jpg'),	array(vfsStream::url('root/comic/2009-01-01.jpg'))),
 			array(array('/comic/2009-01-01-test.jpg'),	array(vfsStream::url('root/comic/2009-01-01-test.jpg'))),
-			array(array('/comic/2009-01-01.jpg', '/comic/2009-01-02.jpg'),	array(vfsStream::url('root/comic/2009-01-01.jpg'))),
 		);
 	}
 
@@ -128,8 +127,8 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 			'rss'   => array('rss')
 		))->will($this->returnValue(array(
 			'root' => array(
-				'comic' => array('comic'),
-				'rss' => array('rss'),
+				'comic' => 'comic',
+				'rss' => 'rss',
 			)
 		)));
 
@@ -138,14 +137,14 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, count($return));
 		$this->assertEquals('filesystem-1-root', $return[0]->id);
 		$this->assertEquals(array(
-			'comic' => array('comic'),
-			'rss'   => array('rss')
+			'comic' => 'comic',
+			'rss'   => 'rss'
 		), $return[0]->files_by_type);
 
 		$this->assertEquals(array(
 			'root' => array(
-				'comic' => array('comic'),
-				'rss' => array('rss'),
+				'comic' => 'comic',
+				'rss' => 'rss',
 			)
 		), get_post_meta(1, 'backend_filesystem_files_by_type', true));
 	}
@@ -176,8 +175,14 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function providerTestGenerateFromID() {
+		$valid_backend = new ComicPressBackendFilesystem();
+		$valid_backend->id = 'filesystem-1--test';
+		$valid_backend->files_by_type = array('comic' => 'comic-file');
+
 		return array(
-			array('blah', false)
+			array('blah', false),
+			array('filesystem-1', false),
+			array('filesystem-1--test', $valid_backend),
 		);
 	}
 
@@ -185,13 +190,16 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider providerTestGenerateFromID
 	 */
 	function testGenerateFromID($id, $is_successful) {
-		$this->markTestIncomplete();
 		wp_insert_post((object)array('ID' => 1));
 
+	  update_post_meta(1, 'backend_filesystem_files_by_type', array('-test' => array('comic' => 'comic-file')));
+
 		if ($is_successful) {
-			$return = new ComicPressBackendFilesystem();
+			$return = $is_successful;
 		} else {
 			$return = false;
 		}
+
+		$this->assertEquals($return, ComicPressBackendFilesystem::generate_from_id($id));
 	}
 }

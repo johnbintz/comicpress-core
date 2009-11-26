@@ -170,4 +170,20 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 
 		return $roots;
 	}
+
+	function generate_from_id($id) {
+		if (preg_match('#^filesystem-([0-9]+)-(.*)$#', $id, $matches) > 0) {
+			list($all, $post_id, $root) = $matches;
+
+			if (($result = get_post_meta($post_id, 'backend_filesystem_files_by_type', true)) !== false) {
+				if (isset($result[$root])) {
+					$return = new ComicPressBackendFilesystem();
+					$return->id = $id;
+					$return->files_by_type = $result[$root];
+					return $return;
+				}
+			}
+		}
+		return false;
+	}
 }
