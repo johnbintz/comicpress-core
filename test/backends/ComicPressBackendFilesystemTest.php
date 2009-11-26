@@ -183,6 +183,8 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 			array('blah', false),
 			array('filesystem-1', false),
 			array('filesystem-1--test', $valid_backend),
+			array('filesystem-1--test2', false),
+			array('filesystem-2--test', false),
 		);
 	}
 
