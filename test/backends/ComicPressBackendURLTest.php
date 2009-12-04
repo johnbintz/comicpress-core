@@ -58,7 +58,7 @@ class ComicPressBackendUrlTest extends PHPUnit_Framework_TestCase {
 		return array(
 			array(false, array()),
 			array(array(), array()),
-			array(array('12345' => array('comic' => 'test')), array()),
+			array(array('12345' => array('comic' => 'test')), array($valid_backend)),
 		);
 	}
 
@@ -66,6 +66,25 @@ class ComicPressBackendUrlTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider providerTestGenerateFromPost
 	 */
 	function testGenerateFromPost($metadata, $expected_backends) {
-		update_post_meta(1, 'backend_url_images', $metadata);
+		update_post_meta(1, 'backend_url_image_urls', $metadata);
+
+		$this->assertEquals($expected_backends, ComicPressBackendURL::generate_from_post((object)array('ID' => 1)));
+	}
+
+	function providerTestGenerateID() {
+		return array(
+			array(null, null, false),
+			array(1, null, false),
+			array(null, 'test', false),
+			array('test', 'test', false),
+			array(1, 'test', 'url-1-test'),
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestGenerateID
+	 */
+	function testGenerateID($post_id, $key, $expected_result) {
+		$this->assertEquals($expected_result, ComicPressBackendURL::generate_id($post_id, $key));
 	}
 }

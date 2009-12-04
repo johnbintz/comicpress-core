@@ -34,4 +34,37 @@ class ComicPressBackendURL extends ComicPressBackend {
 			}
 		}
 	}
+
+	function generate_from_post($post) {
+		$backends = array();
+
+		if (is_numeric($post)) {
+			$post = get_post($post);
+		}
+
+		$result = get_post_meta($post->ID, 'backend_url_image_urls', true);
+		if (!empty($result)) {
+			if (is_array($result)) {
+				foreach ($result as $key => $value) {
+					if (is_scalar($key)) {
+						$backend = new ComicPressBackendURL();
+						$backend->id = ComicPressBackendURL::generate_id($post->ID, $key);
+						$backend->urls_by_type = $value;
+						$backends[] = $backend;
+					}
+				}
+			}
+		}
+		return $backends;
+	}
+
+	function generate_id($post_id, $key) {
+		if (is_numeric($post_id)) {
+			if (is_scalar($key)) {
+				return "url-${post_id}-${key}";
+			}
+		}
+
+		return false;
+	}
 }
