@@ -68,7 +68,11 @@ class ComicPressBackendUrlTest extends PHPUnit_Framework_TestCase {
 	function testGenerateFromPost($metadata, $expected_backends) {
 		update_post_meta(1, 'backend_url_image_urls', $metadata);
 
-		$this->assertEquals($expected_backends, ComicPressBackendURL::generate_from_post((object)array('ID' => 1)));
+		wp_insert_post((object)array('ID' => 1));
+
+		foreach (array(1, (object)array('ID' => 1)) as $source) {
+			$this->assertEquals($expected_backends, ComicPressBackendURL::generate_from_post($source));
+		}
 	}
 
 	function providerTestGenerateID() {
