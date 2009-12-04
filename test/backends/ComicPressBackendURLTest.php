@@ -87,4 +87,33 @@ class ComicPressBackendUrlTest extends PHPUnit_Framework_TestCase {
 	function testGenerateID($post_id, $key, $expected_result) {
 		$this->assertEquals($expected_result, ComicPressBackendURL::generate_id($post_id, $key));
 	}
+
+	function providerTestGenerateFromID() {
+		$valid_backend = new ComicPressBackendURL();
+		$valid_backend->id = 'url-1-12345';
+		$valid_backend->urls_by_type = array(
+			'comic' => 'comic',
+			'rss' => 'rss'
+		);
+
+		return array(
+			array('', false),
+			array('url-', false),
+			array('url-1', false),
+			array('url-2-12345', false),
+			array('url-1-123456', false),
+			array('url-1-12345', $valid_backend)
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestGenerateFromID
+	 */
+	function testGenerateFromID($id, $expected_result) {
+		wp_insert_post((object)array('ID' => 1));
+
+		update_post_meta(1, 'backend_url_image_urls', array('12345' => array('comic' => 'comic', 'rss' => 'rss')));
+
+		$this->assertEquals($expected_result, ComicPressBackendURL::generate_from_id($id));
+	}
 }
