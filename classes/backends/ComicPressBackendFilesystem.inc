@@ -6,6 +6,7 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 	var $search_string = '';
 	var $id, $files_by_type = array();
 
+	// TODO Make this more generic (ex: date-Ymd calls _replace_date($post, $type, "Ymd"))
 	function process_search_string($post, $type) {
 		$this->_searches = array($this->search_string);
 
@@ -83,12 +84,29 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 		return false;
 	}
 
+	function get_regex_dirname($input) {
+		return dirname(ComicPressBackendFilesystem::resolve_regex_path($input));
+	}
+
+	function get_regex_filename($input) {
+		$input = preg_replace('#\\\(?![.])#', '/', $input);
+		$input = preg_replace('#^.*\/([^\/]+)$#', '$1', $input);
+		$input = preg_replace('#(?<![.])\*#', '.*', $input);
+		return $input;
+	}
+
+	function resolve_regex_path($input) {
+		$input = str_replace('\.', '.', $input);
+		$input = str_replace('\\', '/', $input);
+		return $input;
+	}
+
 	function find_matching_files($patterns) {
 		$matches = array();
 		foreach ($patterns as $pattern) {
-			$dir = dirname($pattern);
+			$dir = $this->get_regex_dirname($pattern);
 			if (is_dir($dir)) {
-				$pattern = str_replace('*', '.*', basename($pattern));
+				$pattern = $this->get_regex_filename($pattern);
 				if (($dh = opendir($dir)) !== false) {
 					while (($file = readdir($dh)) !== false) {
 						$target = $dir . '/' . $file;

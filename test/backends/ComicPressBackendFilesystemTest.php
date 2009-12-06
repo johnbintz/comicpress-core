@@ -204,4 +204,51 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals($return, ComicPressBackendFilesystem::generate_from_id($id));
 	}
+
+	function providerTestResolveRegexPath() {
+		return array(
+			array('test', 'test'),
+			array('te\.st', 'te.st'),
+			array('te\st', 'te/st'),
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestResolveRegexPath
+	 */
+	function testResolveRegexPath($input, $expected_output) {
+	  $this->assertEquals($expected_output, ComicPressBackendFilesystem::resolve_regex_path($input));
+	}
+
+	function providerTestGetRegexDirname() {
+		return array(
+			array('/test/test2', '/test')
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestGetRegexDirname
+	 */
+	function testGetRegexDirname($input, $expected_output) {
+		$this->assertEquals($expected_output, ComicPressBackendFilesystem::get_regex_dirname($input));
+	}
+
+	function providerTestGetRegexFilename() {
+		return array(
+			array('/test/test2', 'test2'),
+			array('c:\test\test2', 'test2'),
+			array('/test/test2\.cat', 'test2\.cat'),
+			array('c:\test\test2\.cat', 'test2\.cat'),
+			array('C:/inetpub/a\.windows\.directory/comics/2009-11-24.*\..*', '2009-11-24.*\..*'),
+			array('c:\test\test2\.cat*', 'test2\.cat.*'),
+			array('c:\test\test2\.cat.*', 'test2\.cat.*'),
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestGetRegexFilename
+	 */
+	function testGetRegexFilename($input, $expected_output) {
+		$this->assertEquals($expected_output, ComicPressBackendFilesystem::get_regex_filename($input));
+	}
 }
