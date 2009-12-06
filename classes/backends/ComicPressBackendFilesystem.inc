@@ -5,6 +5,66 @@ require_once(dirname(__file__) . '/../ComicPressBackend.inc');
 class ComicPressBackendFilesystem extends ComicPressBackend {
 	var $search_string = '';
 	var $id, $files_by_type = array();
+}
+
+class ComicPressBackendFilesystemFactory {
+	function generate_from_id($id) {
+		if (preg_match('#^filesystem-([0-9]+)-(.*)$#', $id, $matches) > 0) {
+			list($all, $post_id, $root) = $matches;
+
+			if (($result = get_post_meta($post_id, 'backend_filesystem_files_by_type', true)) !== false) {
+				if (isset($result[$root])) {
+					$return = new ComicPressBackendFilesystem();
+					$return->id = $id;
+					$return->files_by_type = $result[$root];
+					return $return;
+				}
+			}
+		}
+		return false;
+	}
+
+	function generate_from_post($post) {
+		$return = array();
+		$comicpress = ComicPress::get_instance();
+
+		if (isset(
+		  $comicpress->comicpress_options['backend_options'],
+		  $comicpress->comicpress_options['backend_options']['filesystem'],
+		  $comicpress->comicpress_options['backend_options']['filesystem']['search_pattern']
+		)) {
+			$this->search_pattern = (string)$comicpress->comicpress_options['backend_options']['filesystem']['search_pattern'];
+		}
+
+		if (isset($comicpress->comicpress_options['image_types'])) {
+			$files = array();
+			$all_patterns = array();
+			foreach (array_keys($comicpress->comicpress_options['image_types']) as $type) {
+				$patterns = $this->process_search_string($post, $type);
+				if (!empty($patterns)) {
+					$result = $this->find_matching_files($patterns);
+					if (!empty($result)) {
+						$files[$type] = $result;
+					}
+				}
+				$all_patterns = array_merge($all_patterns, $patterns);
+			}
+			if (($filename_pattern = $this->has_common_filename_pattern($all_patterns)) !== false) {
+				if (!empty($files)) {
+					$grouped_by_root = $this->group_by_root($filename_pattern, $files);
+					update_post_meta($post->ID, 'backend_filesystem_files_by_type', $grouped_by_root);
+					foreach ($grouped_by_root as $root => $files_for_root) {
+						$fs = new ComicPressBackendFilesystem();
+						$fs->id = 'filesystem-' . $post->ID . '-' . $root;
+						$fs->files_by_type = $files_for_root;
+						$return[] = $fs;
+					}
+				}
+			}
+		}
+
+		return $return;
+	}
 
 	// TODO Make this more generic (ex: date-Ymd calls _replace_date($post, $type, "Ymd"))
 	function process_search_string($post, $type) {
@@ -84,22 +144,6 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 		return false;
 	}
 
-	function get_regex_dirname($input) {
-		return dirname(ComicPressBackendFilesystem::resolve_regex_path($input));
-	}
-
-	function get_regex_filename($input) {
-		$input = preg_replace('#\\\(?![.])#', '/', $input);
-		$input = preg_replace('#^.*\/([^\/]+)$#', '$1', $input);
-		$input = preg_replace('#(?<![.])\*#', '.*', $input);
-		return $input;
-	}
-
-	function resolve_regex_path($input) {
-		$input = str_replace('\.', '.', $input);
-		$input = str_replace('\\', '/', $input);
-		return $input;
-	}
 
 	function find_matching_files($patterns) {
 		$matches = array();
@@ -123,46 +167,21 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 		return $matches;
 	}
 
-	function generate_from_post($post) {
-		$return = array();
-		$comicpress = ComicPress::get_instance();
+	function get_regex_dirname($input) {
+		return dirname($this->resolve_regex_path($input));
+	}
 
-		if (isset(
-		  $comicpress->comicpress_options['backend_options'],
-		  $comicpress->comicpress_options['backend_options']['filesystem'],
-		  $comicpress->comicpress_options['backend_options']['filesystem']['search_pattern']
-		)) {
-			$this->search_pattern = (string)$comicpress->comicpress_options['backend_options']['filesystem']['search_pattern'];
-		}
+	function get_regex_filename($input) {
+		$input = preg_replace('#\\\(?![.])#', '/', $input);
+		$input = preg_replace('#^.*\/([^\/]+)$#', '$1', $input);
+		$input = preg_replace('#(?<![.])\*#', '.*', $input);
+		return $input;
+	}
 
-		if (isset($comicpress->comicpress_options['image_types'])) {
-			$files = array();
-			$all_patterns = array();
-			foreach (array_keys($comicpress->comicpress_options['image_types']) as $type) {
-				$patterns = $this->process_search_string($post, $type);
-				if (!empty($patterns)) {
-					$result = $this->find_matching_files($patterns);
-					if (!empty($result)) {
-						$files[$type] = $result;
-					}
-				}
-				$all_patterns = array_merge($all_patterns, $patterns);
-			}
-			if (($filename_pattern = $this->has_common_filename_pattern($all_patterns)) !== false) {
-				if (!empty($files)) {
-					$grouped_by_root = $this->group_by_root($filename_pattern, $files);
-					update_post_meta($post->ID, 'backend_filesystem_files_by_type', $grouped_by_root);
-					foreach ($grouped_by_root as $root => $files_for_root) {
-						$fs = new ComicPressBackendFilesystem();
-						$fs->id = 'filesystem-' . $post->ID . '-' . $root;
-						$fs->files_by_type = $files_for_root;
-						$return[] = $fs;
-					}
-				}
-			}
-		}
-
-		return $return;
+	function resolve_regex_path($input) {
+		$input = str_replace('\.', '.', $input);
+		$input = str_replace('\\', '/', $input);
+		return $input;
 	}
 
 	function has_common_filename_pattern($patterns) {
@@ -187,21 +206,5 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 		}
 
 		return $roots;
-	}
-
-	function generate_from_id($id) {
-		if (preg_match('#^filesystem-([0-9]+)-(.*)$#', $id, $matches) > 0) {
-			list($all, $post_id, $root) = $matches;
-
-			if (($result = get_post_meta($post_id, 'backend_filesystem_files_by_type', true)) !== false) {
-				if (isset($result[$root])) {
-					$return = new ComicPressBackendFilesystem();
-					$return->id = $id;
-					$return->files_by_type = $result[$root];
-					return $return;
-				}
-			}
-		}
-		return false;
 	}
 }
