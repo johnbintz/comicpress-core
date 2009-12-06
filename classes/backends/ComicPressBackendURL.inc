@@ -86,4 +86,14 @@ class ComicPressBackendURL extends ComicPressBackend {
 		}
 		return false;
 	}
+
+	function post_meta_box($post_id) {
+		echo "hello";
+	}
+
+	function admin_menu() {
+		add_meta_box('comicpess-url-backend-url', __('ComicPress Remote URL Images', 'comicpress'), array('ComicPressBackendURL', 'post_meta_box'), 'post', 'normal', 'low');
+	}
 }
+
+add_action('admin_menu', array('ComicPressBackendURL', 'admin_menu'));

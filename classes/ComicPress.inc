@@ -154,8 +154,8 @@ class ComicPress {
 		$this->normalize_image_size_options();
 
     foreach (get_declared_classes() as $class) {
-    	if (preg_match('#^ComicPressBackend.+$#', $class) > 0) {
-    		$this->backends[] = $class;
+    	if (preg_match('#^ComicPressBackend.+Factory$#', $class) > 0) {
+    		$this->backends[] = new $class();
     	}
     }
   }

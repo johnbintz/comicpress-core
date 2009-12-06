@@ -6,37 +6,10 @@ class ComicPressBackendAttachment extends ComicPressBackend {
 	var $root_id = 'attachment';
 	var $source_name = "Post attachment";
 
-	function generate_from_post($post) {
-		$result = array();
-		if (is_object($post)) {
-			if (isset($post->ID)) {
-				$children = get_children(array(
-					'post_parent' => $post->ID,
-					'post_type' => 'attachment',
-					'post_mime_type' => 'image'
-				));
-
-				if (!empty($children)) {
-					foreach ($children as $child) {
-						$meta = get_post_meta($child->ID, 'comicpress', true);
-						if (isset($meta['managed'])) {
-							if ($meta['managed']) {
-								$result[] = new ComicPressBackendAttachment($child);
-							}
-						}
-					}
-				}
-			}
-		}
-		return $result;
-	}
-
 	function ComicPressBackendAttachment($attachment = null) {
-		if (!is_null($attachment)) {
-			$this->attachment = $attachment;
-			$this->id = sprintf('%s-%d', $this->root_id, $this->attachment->ID);
-			$this->type = get_post_meta($this->attachment->ID, 'comic_image_type', true);
-		}
+		$this->attachment = $attachment;
+		$this->id = sprintf('%s-%d', $this->root_id, $this->attachment->ID);
+		$this->type = get_post_meta($this->attachment->ID, 'comic_image_type', true);
 	}
 
 	function dims($size = 'comic') {
@@ -89,6 +62,34 @@ class ComicPressBackendAttachment extends ComicPressBackend {
 		}
 		return $info;
 	}
+}
+
+class ComicPressBackendAttachmentFactory {
+	function generate_from_post($post) {
+		$result = array();
+		if (is_object($post)) {
+			if (isset($post->ID)) {
+				$children = get_children(array(
+					'post_parent' => $post->ID,
+					'post_type' => 'attachment',
+					'post_mime_type' => 'image'
+				));
+
+				if (!empty($children)) {
+					foreach ($children as $child) {
+						$meta = get_post_meta($child->ID, 'comicpress', true);
+						if (isset($meta['managed'])) {
+							if ($meta['managed']) {
+								$result[] = new ComicPressBackendAttachment($child);
+							}
+						}
+					}
+				}
+			}
+		}
+		return $result;
+	}
+
 
 	function generate_from_id($id) {
 		if (strpos($id, 'attachment-') === 0) {
@@ -108,5 +109,3 @@ class ComicPressBackendAttachment extends ComicPressBackend {
 		return false;
 	}
 }
-
-?>
