@@ -35,6 +35,46 @@ class ComicPressBackendURL extends ComicPressBackend {
 		}
 	}
 
+	function generate_id($post_id, $key) {
+		if (is_numeric($post_id)) {
+			if (is_scalar($key)) {
+				return "url-${post_id}-${key}";
+			}
+		}
+
+		return false;
+	}
+
+	function post_meta_box($post_id) {
+		echo "hello";
+	}
+
+	function admin_menu() {
+		add_meta_box('comicpess-url-backend-url', __('ComicPress Remote URL Images', 'comicpress'), array('ComicPressBackendURL', 'post_meta_box'), 'post', 'normal', 'low');
+	}
+}
+
+class ComicPressBackendURLFactory {
+	function generate_from_id($id) {
+		if (preg_match('#^url-([0-9]+)-(.+)$#', $id, $matches) > 0) {
+			list($all, $post_id, $key) = $matches;
+			$post = get_post($post_id);
+			if (!empty($post)) {
+				$meta = get_post_meta($post_id, 'backend_url_image_urls', true);
+				if (is_array($meta)) {
+					if (isset($meta[$key])) {
+						$backend = new ComicPressBackendURL();
+						$backend->id = $id;
+						$backend->urls_by_type = $meta[$key];
+						return $backend;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+
 	function generate_from_post($post) {
 		$backends = array();
 
@@ -56,43 +96,6 @@ class ComicPressBackendURL extends ComicPressBackend {
 			}
 		}
 		return $backends;
-	}
-
-	function generate_id($post_id, $key) {
-		if (is_numeric($post_id)) {
-			if (is_scalar($key)) {
-				return "url-${post_id}-${key}";
-			}
-		}
-
-		return false;
-	}
-
-	function generate_from_id($id) {
-		if (preg_match('#^url-([0-9]+)-(.+)$#', $id, $matches) > 0) {
-			list($all, $post_id, $key) = $matches;
-			$post = get_post($post_id);
-			if (!empty($post)) {
-				$meta = get_post_meta($post_id, 'backend_url_image_urls', true);
-				if (is_array($meta)) {
-					if (isset($meta[$key])) {
-						$backend = new ComicPressBackendURL();
-						$backend->id = $id;
-						$backend->urls_by_type = $meta[$key];
-						return $backend;
-					}
-				}
-			}
-		}
-		return false;
-	}
-
-	function post_meta_box($post_id) {
-		echo "hello";
-	}
-
-	function admin_menu() {
-		add_meta_box('comicpess-url-backend-url', __('ComicPress Remote URL Images', 'comicpress'), array('ComicPressBackendURL', 'post_meta_box'), 'post', 'normal', 'low');
 	}
 }
 
