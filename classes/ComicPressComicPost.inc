@@ -21,7 +21,10 @@ class ComicPressComicPost {
 			if (is_object($backend)) {
 				$a = $backend;
 			}
-			$attachments = array_merge($attachments, $a->generate_from_post($this->post));
+			$result = $a->generate_from_post($this->post);
+			if (is_array($result)) {
+				$attachments = array_merge($attachments, $result);
+			}
 		}
 		return $attachments;
   }

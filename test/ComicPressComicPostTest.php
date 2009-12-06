@@ -232,6 +232,14 @@ class ComicPressComicPostTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals($expected_result, $p->get_attachments_with_children());
   }
+
+
+  function testGetAttachmentsStringProvided() {
+  	$cp = ComicPress::get_instance(true);
+  	$m = $this->getMock('TestFactory', array('generate_from_post'));
+  	$cp->backends = array(get_class($m));
+  	$this->p->get_attachments();
+  }
 }
 
 ?>
