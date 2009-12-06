@@ -44,14 +44,6 @@ class ComicPressBackendURL extends ComicPressBackend {
 
 		return false;
 	}
-
-	function post_meta_box($post_id) {
-		echo "hello";
-	}
-
-	function admin_menu() {
-		add_meta_box('comicpess-url-backend-url', __('ComicPress Remote URL Images', 'comicpress'), array('ComicPressBackendURL', 'post_meta_box'), 'post', 'normal', 'low');
-	}
 }
 
 class ComicPressBackendURLFactory {
@@ -99,4 +91,34 @@ class ComicPressBackendURLFactory {
 	}
 }
 
-add_action('admin_menu', array('ComicPressBackendURL', 'admin_menu'));
+class ComicPressBackendURLAdmin {
+	function post_meta_box($post) {
+		$factory = new ComicPressBackendUrlFactory();
+		$backends = $factory->generate_from_post($post);
+
+		$nonce = wp_create_nonce('comicpress');
+		$action_nonce = wp_create_nonce('comicpress-backend-url');
+
+		$comicpress = ComicPress::get_instance();
+
+		include('partials/backend-url/metabox.inc');
+	}
+
+	function admin_menu() {
+		add_meta_box('comicpess-url-backend-url', __('ComicPress Remote URL Images', 'comicpress'), array('ComicPressBackendURLAdmin', 'post_meta_box'), 'post', 'normal', 'low');
+
+		wp_enqueue_script('scriptaculous-builder');
+	}
+
+	function handle_update_backend_url_new_editor($info) {
+		$comicpress = ComicPress::get_instance();
+
+		$backend = new ComicPressBackendUrl();
+		$backend->id = 'new-' . md5(rand());
+
+		include('partials/backend-url/_editor.inc');
+		exit(0);
+	}
+}
+
+add_action('admin_menu', array('ComicPressBackendURLAdmin', 'admin_menu'));

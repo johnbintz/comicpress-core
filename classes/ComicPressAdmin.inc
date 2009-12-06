@@ -483,10 +483,19 @@ class ComicPressAdmin {
 									$method = 'handle_update_' . strtolower(str_replace('-', '_', $action));
 									if (method_exists($this, $method)) {
 										$this->{$method}($_REQUEST['cp']);
+									} else {
+										foreach (get_declared_classes() as $class_name) {
+											if (preg_match('#^ComicPressBackend.+Admin$#', $class_name) > 0) {
+												if (method_exists($class_name, $method)) {
+													$fa = new $class_name();
+													$fa->{$method}($_REQUEST['cp']);
+												}
+											}
+										}
 									}
 								}
 							}
-					}
+						}
 					}
 				}
 			}
