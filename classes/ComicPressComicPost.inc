@@ -15,7 +15,13 @@ class ComicPressComicPost {
   	$comicpress = ComicPress::get_instance();
   	$attachments = array();
 		foreach ($comicpress->backends as $backend) {
-			$attachments = array_merge($attachments, call_user_func(array($backend, 'generate_from_post'), $this->post));
+			if (is_string($backend)) {
+				$a = new $backend();
+			}
+			if (is_object($backend)) {
+				$a = $backend;
+			}
+			$attachments = array_merge($attachments, $a->generate_from_post($this->post));
 		}
 		return $attachments;
   }

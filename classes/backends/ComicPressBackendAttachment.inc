@@ -31,10 +31,12 @@ class ComicPressBackendAttachment extends ComicPressBackend {
 		return $result;
 	}
 
-	function ComicPressBackendAttachment($attachment) {
-		$this->attachment = $attachment;
-		$this->id = sprintf('%s-%d', $this->root_id, $this->attachment->ID);
-		$this->type = get_post_meta($this->attachment->ID, 'comic_image_type', true);
+	function ComicPressBackendAttachment($attachment = null) {
+		if (!is_null($attachment)) {
+			$this->attachment = $attachment;
+			$this->id = sprintf('%s-%d', $this->root_id, $this->attachment->ID);
+			$this->type = get_post_meta($this->attachment->ID, 'comic_image_type', true);
+		}
 	}
 
 	function dims($size = 'comic') {
