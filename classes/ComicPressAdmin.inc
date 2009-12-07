@@ -17,6 +17,8 @@ class ComicPressAdmin {
 			add_filter('comicpress_display_attached_images', array(&$this, 'comicpress_display_attached_images'), 10, 2);
 		}
 
+		add_action('edit_form_advanced', array(&$this, 'edit_form_advanced'));
+
 		add_filter('comicpress_core_version', array(&$this, 'comicpress_core_version'));
 
 		$this->comic_image_types = array(
@@ -32,6 +34,12 @@ class ComicPressAdmin {
 			add_action('wp_head', array(&$this, 'display_messages'));
 		}
 	}
+
+	function edit_form_advanced() { ?>
+	  <input type="hidden" name="cp[_nonce]" value="<?php echo esc_attr(wp_create_nonce('comicpress')) ?>" />
+	  <input type="hidden" name="cp[action]" value="edit-form-advanced" />
+	  <input type="hidden" name="cp[_action_nonce]" value="<?php echo esc_attr(wp_create_nonce('comicpress-edit-form-advanced')) ?>" />
+	<?php }
 
 	function comicpress_core_version($version = '') { return '1.0';	}
 
@@ -483,16 +491,8 @@ class ComicPressAdmin {
 									$method = 'handle_update_' . strtolower(str_replace('-', '_', $action));
 									if (method_exists($this, $method)) {
 										$this->{$method}($_REQUEST['cp']);
-									} else {
-										foreach (get_declared_classes() as $class_name) {
-											if (preg_match('#^ComicPressBackend.+Admin$#', $class_name) > 0) {
-												if (method_exists($class_name, $method)) {
-													$fa = new $class_name();
-													$fa->{$method}($_REQUEST['cp']);
-												}
-											}
-										}
 									}
+									do_action("comicpress-${method}", $_REQUEST['cp']);
 								}
 							}
 						}

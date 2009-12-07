@@ -1,7 +1,4 @@
 <div style="overflow: hidden">
-  <input type="hidden" name="cp[_nonce]" value="<?php echo esc_attr($nonce) ?>" />
-  <input type="hidden" name="cp[action]" value="comic-ordering" />
-  <input type="hidden" name="cp[_action_nonce]" value="<?php echo esc_attr($action_nonce) ?>" />
   <div id="ordering-zoom-slider-holder">
     <div id="ordering-zoom-slider">
       <div id="ordering-zoom-handle"></div>
