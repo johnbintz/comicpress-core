@@ -21,6 +21,10 @@ class ComicPressBackendURL extends ComicPressBackend {
 											$valid_urls[$type] = $url;
 											if ($type == $default_type) {	$key = substr(md5($url), 0, 10);	}
 										}
+									} else {
+										if (strpos($type, '__') === 0) {
+											$valid_urls[$type] = $url;
+										}
 									}
 								}
 							}
@@ -57,7 +61,14 @@ class ComicPressBackendURLFactory {
 					if (isset($meta[$key])) {
 						$backend = new ComicPressBackendURL();
 						$backend->id = $id;
-						$backend->urls_by_type = $meta[$key];
+						$backend->urls_by_type = array();
+						foreach ($meta[$key] as $k => $v) {
+							if (strpos($k, '__') === 0) {
+								$backend->{substr($k, 2)} = $v;
+							} else {
+								$backend->urls_by_type[$k] = $v;
+							}
+						}
 						return $backend;
 					}
 				}
