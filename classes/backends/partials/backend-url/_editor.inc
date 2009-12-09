@@ -1,8 +1,8 @@
-<div class="comicpress-url-backend-holder">
+<div class="comicpress-backend-url-holder">
 	<table class="widefat">
 		<tr>
 			<td align="right" colspan="2">
-				<a class="comicpress-url-backend-deleter" href="#">X</a>
+				<a class="comicpress-backend-url-deleter" href="#">X</a>
 			</td>
 		</tr>
 		<?php

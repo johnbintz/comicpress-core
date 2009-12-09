@@ -237,8 +237,10 @@ class ComicPress {
 		if (isset($this->comicpress_options['image_types'])) {
 		  if (is_array($this->comicpress_options['image_types'])) {
 		  	foreach ($this->comicpress_options['image_types'] as $type => $properties) {
-		  		if ($properties['default'] === true) {
-		  			return $type;
+		  		if (isset($properties['default'])) {
+			  		if ($properties['default'] === true) {
+			  			return $type;
+			  		}
 		  		}
 		  	}
 		  }

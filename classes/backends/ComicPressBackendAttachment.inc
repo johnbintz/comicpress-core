@@ -12,17 +12,12 @@ class ComicPressBackendAttachment extends ComicPressBackend {
 		$this->type = get_post_meta($this->attachment->ID, 'comic_image_type', true);
 	}
 
-	function dims($size = 'comic') {
+	function dims($size = null) {
+		$size = $this->ensure_type($size);
 		$comicpress = ComicPress::get_instance();
 
 		$dims = array();
 		if (isset($comicpress->comicpress_options['image_types'])) {
-			if ($size == 'default') {
-				foreach ($comicpress->comicpress_options['image_types'] as $type => $info) {
-					if ($info['default']) { $size = $type; break; }
-				}
-			}
-
 			if (isset($comicpress->comicpress_options['image_types'][$size])) {
 				if (isset($comicpress->comicpress_options['image_types'][$size]['dimensions'])) {
 					$dims = array_combine(array('width', 'height'), explode("x", $comicpress->comicpress_options['image_types'][$size]['dimensions']));
@@ -44,24 +39,10 @@ class ComicPressBackendAttachment extends ComicPressBackend {
 	}
 
 	// @codeCoverageIgnoreStart
-	function embed($size = 'comic') { return $this->_embed_image($size); }
-	function file($size = 'comic') {	return $this->attachment->guid; }
+	function file($size = null) {	return $this->attachment->guid; }
 	function alt() { return $this->attachment->post_title; }
 	function title() { return $this->attachment->post_excerpt; }
 	// @codeCoverageIgnoreEnd
-
-	function get_info($size = 'comic') {
-		$info = array();
-		foreach (array('dims', 'url', 'file') as $field) {
-			$result = $this->{$field}($size);
-			if (is_array($result)) {
-				$info = array_merge($info, $result);
-			} else {
-				$info[$field] = $result;
-			}
-		}
-		return $info;
-	}
 }
 
 class ComicPressBackendAttachmentFactory {

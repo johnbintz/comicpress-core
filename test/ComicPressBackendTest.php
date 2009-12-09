@@ -36,7 +36,7 @@ class ComicPressBackendTest extends PHPUnit_Framework_TestCase {
     $backend = $this->getMock('ComicPressBackend', array('dims', 'url', 'alt', 'title'));
 
     $backend->expects($this->once())->method('dims')->with('comic')->will($this->returnValue($dims_result));
-    $backend->expects($this->once())->method('url')->will($this->returnValue('http://comic'));
+    $backend->expects($this->once())->method('url')->with('comic')->will($this->returnValue('http://comic'));
     $backend->expects($this->once())->method('alt')->will($this->returnValue('alt'));
     $backend->expects($this->once())->method('title')->will($this->returnValue('title'));
 
@@ -66,5 +66,52 @@ class ComicPressBackendTest extends PHPUnit_Framework_TestCase {
   	$comicpress->backends = array($backend);
 
   	$this->assertEquals($expected_result, ComicPressBackend::generate_from_id($id));
+  }
+
+  function providerTestEnsureType() {
+  	return array(
+  		array(null, 'comic'),
+  		array('comic', 'comic'),
+  		array('rss', 'rss')
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestEnsureType
+   */
+	function testEnsureType($provided, $expected) {
+  	$comicpress = ComicPress::get_instance();
+  	$comicpress->comicpress_options = array(
+  		'image_types' => array(
+  			'comic' => array('default' => true),
+  			'rss' => array('default' => false)
+  		)
+  	);
+
+  	$this->assertEquals($expected, ComicPressBackend::ensure_type($provided));
+	}
+
+	function testGetEmbed() {
+		$ba = $this->getMock('ComicPressBackend', array('_embed_image', 'ensure_type'));
+		$ba->expects($this->once())->method('ensure_type')->with('test')->will($this->returnValue('ensured'));
+		$ba->expects($this->once())->method('_embed_image')->with('ensured')->will($this->returnValue('embed'));
+
+		$this->assertEquals('embed', $ba->embed('test'));
+	}
+
+
+  function testGetInfo() {
+  	$ba = $this->getMock('ComicPressBackend', array('dims', 'url', 'file'), array(), 'Mock_ComicPressBackend', false);
+
+  	$ba->expects($this->once())->method('dims')->will($this->returnValue(array('width' => 320, 'height' => 240)));
+  	$ba->expects($this->once())->method('url')->will($this->returnValue('http://blah/file.jpg'));
+  	$ba->expects($this->once())->method('file')->will($this->returnValue('/root/file.jpg'));
+
+  	$this->assertEquals(array(
+  		'width' => 320,
+  		'height' => 240,
+  		'url' => 'http://blah/file.jpg',
+  		'file' => '/root/file.jpg'
+  	), $ba->get_info());
   }
 }

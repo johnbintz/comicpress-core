@@ -301,6 +301,13 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   			),
   			'comic'
   		),
+  		array(
+  			array(
+  				'rss' => array(),
+  				'comic' => array('default' => true),
+  			),
+  			'comic'
+  		),
   	);
   }
 

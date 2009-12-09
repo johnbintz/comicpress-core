@@ -49,6 +49,8 @@ class ComicPressBackendURL extends ComicPressBackend {
 
 		return false;
 	}
+
+	function dims($size = null) { return false; }
 }
 
 class ComicPressBackendURLFactory {
