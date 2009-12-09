@@ -9,6 +9,17 @@
 					</tr>
 				<?php
 			}
+
+			foreach (array(
+				'alt_text' => __('Image alt text', 'comicpress'),
+				'hover_text' => __('Hover/title text', 'comicpress')
+			) as $type => $label) {
+				$value = isset($backend->{$type}) ? $backend->{$type} : '';	?>
+				<tr>
+					<th scope="row"><?php echo $label ?></th>
+					<td><input type="text" style="width: 100%" name="cp[url][<?php echo esc_attr($backend->id) ?>][__<?php echo $type ?>]" value="<?php echo esc_attr($value) ?>" />
+				</tr>
+			<?php }
 		?>
 	</table>
 </div>
