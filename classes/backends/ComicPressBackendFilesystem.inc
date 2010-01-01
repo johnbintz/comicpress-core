@@ -77,16 +77,25 @@ class ComicPressBackendFilesystemFactory {
 				if (preg_match('#%([a-z0-9\-]+)%#i', $search, $matches) > 0) {
 					$any_found = true;
 
-					$method = '_replace_' . strtolower(str_replace('-', '_', $matches[1]));
-					if (method_exists($this, $method)) {
-						$result = $this->{$method}($post, $type);
-						if ($result !== false) {
-							$this->_searches[$i] = str_replace($matches[0], $result, $search);
-						} else {
-							// array state change, start over
-							break;
+					$found = false;
+					$parts = explode('-', $matches[1]);
+					foreach (array(
+					  '_replace_' . strtolower(str_replace('-', '_', $matches[1])) => null,
+						'_replace_' . strtolower($parts[0]) => implode('-', array_slice($parts, 1))
+					) as $method => $additional) {
+						if (method_exists($this, $method)) {
+							$found = true;
+							$result = $this->{$method}($post, $type, $additional);
+							if ($result !== false) {
+								$this->_searches[$i] = str_replace($matches[0], $result, $search);
+							} else {
+								// array state change, start over
+								break;
+							}
 						}
-					} else {
+					}
+
+					if (!$found) {
 						$this->_searches[$i] = str_replace($matches[0], '', $search);
 					}
 				}
@@ -104,9 +113,10 @@ class ComicPressBackendFilesystemFactory {
 	// @codeCoverageIgnoreEnd
 
 	function _replace_type($post, $type) { return $type;	}
-	function _replace_y_m_d($post, $type) { return date('Y-m-d', strtotime($post->post_date));	}
-	function _replace_ymd($post, $type) { return date('Ymd', strtotime($post->post_date));	}
-	function _replace_year($post, $type) { return date('Y', strtotime($post->post_date));	}
+	function _replace_date($post, $type, $additional) {
+		return date($additional, strtotime($post->post_date));
+	}
+
 	function _replace_categories($post, $type) {
 		if (count($post_categories = wp_get_post_categories($post->ID)) == 1) {
 			$current_parent = reset($post_categories);
