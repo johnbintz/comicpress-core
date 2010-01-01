@@ -231,40 +231,6 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
     }
   }
 
-  function testHandleUpdateCallAttachments() {
-  	$admin = $this->getMock('ComicPressAdmin', array('handle_update_attachments', 'handle_update_test'));
-
-  	$admin->expects($this->once())->method('handle_update_attachments');
-  	$admin->expects($this->never())->method('handle_update_test');
-
-  	$_REQUEST = array(
-  		'cp' => array(
-  			'_nonce' => wp_create_nonce('comicpress')
-  		)
-  	);
-
-  	$_POST = array('attachments' => 'test');
-
-  	$admin->handle_update();
-  }
-
-  function testHandleUpdateCallMethod() {
-  	$admin = $this->getMock('ComicPressAdmin', array('handle_update_attachments', 'handle_update_test_method'));
-
-  	$admin->expects($this->never())->method('handle_update_attachments');
-  	$admin->expects($this->once())->method('handle_update_test_method');
-
-  	$_REQUEST = array(
-  		'cp' => array(
-  			'_nonce' => wp_create_nonce('comicpress'),
-  			'action' => 'test-method',
-  			'_action_nonce' => wp_create_nonce('comicpress-test-method')
-  		)
-  	);
-
-  	$admin->handle_update();
-  }
-
   function providerTestUpdateZoomSliderMeta() {
     return array(
       array(false),
@@ -304,6 +270,50 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
    */
   function testGetEditableAttachmentList($list, $expected_result) {
   	$this->assertEquals($expected_result, $this->admin->get_editable_attachment_list($list));
+  }
+
+  function providerTestVerifyNonces() {
+  	return array(
+  		array(
+  			array(), false
+  		),
+  		array(
+  			array('cp' => false), false
+  		),
+  		array(
+  			array('cp' => array()), false
+  		),
+  		array(
+  			array('cp' => array('_nonce' => 'bad')), false
+  		),
+  		array(
+  			array('cp' => array('_nonce' => 'comicpress')), false
+  		),
+  		array(
+  			array('cp' => array('_nonce' => 'comicpress'), 'attachments' => true), 'attachments'
+  		),
+  		array(
+  			array('cp' => array('_nonce' => 'comicpress', 'action' => 'action-action')), false
+  		),
+  		array(
+  			array('cp' => array('_nonce' => 'comicpress', 'action' => 'action-action', '_action_nonce' => 'comicpress-bad')), false
+  		),
+  		array(
+  			array('cp' => array('_nonce' => 'comicpress', 'action' => 'action-action', '_action_nonce' => 'comicpress-action-action')), 'handle_update_action_action'
+  		),
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestVerifyNonces
+   */
+  function testVerifyNonces($request, $expected_result) {
+  	_set_valid_nonce('comicpress', 'comicpress');
+  	_set_valid_nonce('comicpress-action-action', 'comicpress-action-action');
+  	_set_valid_nonce('comicpress-bad', 'comicpress-bad');
+
+  	$_REQUEST = $_POST = $request;
+		$this->assertEquals($expected_result, ComicPressAdmin::verify_nonces());
   }
 }
 
