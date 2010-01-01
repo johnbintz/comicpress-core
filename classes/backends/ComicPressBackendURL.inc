@@ -50,7 +50,9 @@ class ComicPressBackendURL extends ComicPressBackend {
 		return false;
 	}
 
+	// @codeCoverageIgnoreStart
 	function dims($size = null) { return false; }
+	// @codeCoverageIgnoreEnd
 }
 
 class ComicPressBackendURLFactory {
@@ -106,6 +108,7 @@ class ComicPressBackendURLFactory {
 }
 
 class ComicPressBackendURLAdmin {
+	// @codeCoverageIgnoreStart
 	function post_meta_box($post) {
 		$factory = new ComicPressBackendUrlFactory();
 		$backends = $factory->generate_from_post($post);
@@ -141,6 +144,7 @@ class ComicPressBackendURLAdmin {
 			}
 		}
 	}
+	// @codeCoverageIgnoreEnd
 }
 
 add_action('admin_menu', array('ComicPressBackendURLAdmin', 'admin_menu'));
