@@ -743,6 +743,16 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
   			array(1),
   			array()
   		),
+  		array(
+  			false,
+  			array(1,2),
+  			array()
+  		),
+  		array(
+  			null,
+  			array(1,2),
+  			array()
+  		),
   	);
   }
 
@@ -751,7 +761,11 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
    */
   function testNormalizeCategoryGroupings($grouping, $valid_categories, $expected_grouping) {
   	$comicpress = ComicPress::get_instance();
-  	$comicpress->comicpress_options['category_groupings'] = $grouping;
+  	if (!is_null($grouping)) {
+  		$comicpress->comicpress_options['category_groupings'] = $grouping;
+  	} else {
+  		unset($comicpress->comicpress_options['category_groupings']);
+  	}
 
   	foreach ($valid_categories as $category_id) {
   		add_category($category_id, (object)array('slug' => "test-${category_id}"));
