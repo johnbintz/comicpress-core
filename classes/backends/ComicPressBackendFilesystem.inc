@@ -24,17 +24,23 @@ class ComicPressBackendFilesystemFactory {
 		return false;
 	}
 
+	function _get_search_pattern() {
+		$comicpress = ComicPress::get_instance();
+
+		if (isset(
+		  $comicpress->comicpress_options['backend_options']['filesystem']['search_pattern']
+		)) {
+			return (string)$comicpress->comicpress_options['backend_options']['filesystem']['search_pattern'];
+		}
+
+		return '';
+	}
+
 	function generate_from_post($post) {
 		$return = array();
 		$comicpress = ComicPress::get_instance();
 
-		if (isset(
-		  $comicpress->comicpress_options['backend_options'],
-		  $comicpress->comicpress_options['backend_options']['filesystem'],
-		  $comicpress->comicpress_options['backend_options']['filesystem']['search_pattern']
-		)) {
-			$this->search_pattern = (string)$comicpress->comicpress_options['backend_options']['filesystem']['search_pattern'];
-		}
+		$this->search_pattern = $this->_get_search_pattern();
 
 		if (isset($comicpress->comicpress_options['image_types'])) {
 			$files = array();
@@ -66,7 +72,6 @@ class ComicPressBackendFilesystemFactory {
 		return $return;
 	}
 
-	// TODO Make this more generic (ex: date-Ymd calls _replace_date($post, $type, "Ymd"))
 	function process_search_string($post, $type) {
 		$this->_searches = array($this->search_string);
 
@@ -88,6 +93,7 @@ class ComicPressBackendFilesystemFactory {
 							$result = $this->{$method}($post, $type, $additional);
 							if ($result !== false) {
 								$this->_searches[$i] = str_replace($matches[0], $result, $search);
+								break;
 							} else {
 								// array state change, start over
 								break;
@@ -113,6 +119,16 @@ class ComicPressBackendFilesystemFactory {
 	// @codeCoverageIgnoreEnd
 
 	function _replace_type($post, $type) { return $type;	}
+
+	function _replace_type_folder($post, $type) {
+		$comicpress = ComicPress::get_instance();
+
+		if (isset($comicpress->comicpress_options['backend_options']['filesystem']['folders'][$type])) {
+			return $comicpress->comicpress_options['backend_options']['filesystem']['folders'][$type];
+		}
+		return false;
+	}
+
 	function _replace_date($post, $type, $additional) {
 		return date($additional, strtotime($post->post_date));
 	}
@@ -218,3 +234,56 @@ class ComicPressBackendFilesystemFactory {
 		return $roots;
 	}
 }
+
+// @codeCoverageIgnoreStart
+class ComicPressBackendFilesystemAdmin {
+	function options_admin() {
+		$pattern = ComicPressBackendFilesystemFactory::_get_search_pattern();
+
+		include('partials/backend-filesystem/options-admin.inc');
+	}
+
+	function image_type_holder($type) {
+		$comicpress = ComicPress::get_instance();
+
+		$path = '';
+		if (
+			isset($comicpress->comicpress_options['backend_options']['filesystem']['folders'][$type])
+		) {
+			$path = $comicpress->comicpress_options['backend_options']['filesystem']['folders'][$type];
+		}
+
+		include('partials/backend-filesystem/image-type-holder.inc');
+	}
+
+	function handle_update_comicpress_options($info) {
+		if (isset($info['backend_options']['filesystem'])) {
+			$info = $info['backend_options']['filesystem'];
+			$comicpress = ComicPress::get_instance();
+
+			if (!isset($comicpress->comicpress_options['backend_options'])) {
+				$comicpress->comicpress_options['backend_options'] = array();
+			}
+			if (!isset($comicpress->comicpress_options['backend_options']['filesystem'])) {
+				$comicpress->comicpress_options['backend_options']['filesystem'] = array();
+			}
+
+			foreach (array('folders', 'search_pattern') as $valid_field) {
+				if (is_array($info[$valid_field])) {
+					$comicpress->comicpress_options['backend_options']['filesystem'][$valid_field] = array();
+					foreach ($info[$valid_field] as $field => $value) {
+						$comicpress->comicpress_options['backend_options']['filesystem'][$valid_field][$field] = strip_tags($value);
+					}
+				} else {
+					$comicpress->comicpress_options['backend_options']['filesystem'][$valid_field] = strip_tags($info[$valid_field]);
+				}
+			}
+			$comicpress->save();
+		}
+	}
+}
+// @codeCoverageIgnoreEnd
+
+add_action('comicpress-options-admin', array('ComicPressBackendFilesystemAdmin', 'options_admin'));
+add_action('comicpress-image-type-holder', array('ComicPressBackendFilesystemAdmin', 'image_type_holder'), 10, 1);
+add_action('comicpress-handle_update_comicpress_options', array('ComicPressBackendFilesystemAdmin', 'handle_update_comicpress_options'), 10, 1);

@@ -99,6 +99,7 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 			array('%wordpress%/comic/*.jpg', array('/wordpress/comic/*.jpg')),
 			array('%test%/comic/*.jpg', array('/comic/*.jpg')),
 			array('%wordpress%/%type%/*.jpg', array('/wordpress/comic/*.jpg')),
+			array('%wordpress%/%type-folder%/*.jpg', array('/wordpress/comic-folder/*.jpg')),
 			array('%wordpress%/comic/%date-Y-m-d%*.jpg', array('/wordpress/comic/2009-01-01*.jpg')),
 			array('%wordpress%/comic/%date-Ymd%*.jpg', array('/wordpress/comic/20090101*.jpg')),
 			array('%wordpress%/comic/%date-Y%/%date-Y-m-d%*.jpg', array('/wordpress/comic/2009/2009-01-01*.jpg')),
@@ -140,6 +141,11 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 		wp_set_post_categories(2, array(4));
 
 		$fs->search_string = $string;
+
+		$comicpress = ComicPress::get_instance(true);
+		$comicpress->comicpress_options = array(
+			'backend_options' => array('filesystem' => array('folders' => array('comic' => 'comic-folder')))
+		);
 
 		$this->assertEquals($expected_searches, $fs->process_search_string($posts[$post_id_to_use], 'comic'));
 	}
@@ -254,5 +260,44 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 	 */
 	function testGetRegexFilename($input, $expected_output) {
 		$this->assertEquals($expected_output, $this->fa->get_regex_filename($input));
+	}
+
+	function providerTestGetSearchPattern() {
+		return array(
+			array(false, ''),
+			array(true, 'test')
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestGetSearchPattern
+	 */
+	function testGetSearchPattern($set_pattern, $expected_result) {
+		$comicpress = ComicPress::get_instance(true);
+		if ($set_pattern) {
+			$comicpress->comicpress_options = array(
+			  'backend_options' => array('filesystem' => array('search_pattern' => 'test'))
+			);
+		}
+
+		$this->assertEquals($expected_result, $this->fa->_get_search_pattern());
+	}
+
+	function providerTestReplaceTypeFolder() {
+		return array(
+			array('comic', 'comic'),
+			array('rss', false)
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestReplaceTypeFolder
+	 */
+	function testReplaceTypeFolder($type, $expected_result) {
+		$comicpress = ComicPress::get_instance(true);
+		$comicpress->comicpress_options = array(
+		  'backend_options' => array('filesystem' => array('folders' => array('comic' => 'comic')))
+		);
+		$this->assertEquals($expected_result, $this->fa->_replace_type_folder(null, $type));
 	}
 }

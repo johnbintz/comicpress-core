@@ -1,5 +1,7 @@
 <?php
 
+// TODO Be able to disable backends
+
 class ComicPressAdmin {
 	// @codeCoverageIgnoreStart
 	/**

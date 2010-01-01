@@ -28,6 +28,6 @@
 				<em>(<?php _e('Leave a dimension blank to allow WordPress to calculate that dimension while scaling', 'comicpress') ?>)</em>
 			</td>
 		</tr>
-		<?php do_action('comicpress_image_type_holder') ?>
+		<?php do_action('comicpress-image-type-holder', $type) ?>
 	</table>
 </div>

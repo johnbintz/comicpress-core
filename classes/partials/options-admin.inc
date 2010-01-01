@@ -35,5 +35,7 @@
 
 			<input class="button-primary" type="submit" value="<?php _e('Submit Updated ComicPress Options', 'comicpress') ?>" />
 		</div>
+
+		<?php do_action('comicpress-options-admin') ?>
 	</form>
 </div>
