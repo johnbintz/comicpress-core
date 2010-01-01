@@ -476,7 +476,7 @@ class ComicPressAdmin {
 	 * Handle an update.
 	 */
 	function handle_update() {
-		if ($method = ComicPressAdmin::verify_nonces()) {
+		if ($method = $this->verify_nonces()) {
 			switch ($method) {
 				case 'attachments':
 					$this->handle_update_attachments();

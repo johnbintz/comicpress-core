@@ -315,6 +315,28 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
   	$_REQUEST = $_POST = $request;
 		$this->assertEquals($expected_result, ComicPressAdmin::verify_nonces());
   }
+
+  function providerTestHandleUpdate() {
+  	return array(
+  		array(false, array()),
+			array('attachments', array('handle_update_attachments')),
+			array('test', array('test')),
+		);
+  }
+
+  /**
+   * @dataProvider providerTestHandleUpdate
+   */
+  function testHandleUpdate($nonce_return, $expected_methods) {
+  	$_REQUEST = array('cp' => true);
+
+  	$admin = $this->getMock('ComicPressAdmin', array_merge($expected_methods, array('verify_nonces')));
+  	$admin->expects($this->once())->method('verify_nonces')->will($this->returnValue($nonce_return));
+  	foreach ($expected_methods as $method) {
+  		$admin->expects($this->once())->method($method);
+  	}
+		$admin->handle_update();
+  }
 }
 
 ?>
