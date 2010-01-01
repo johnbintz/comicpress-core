@@ -339,6 +339,9 @@ class ComicPressStoryline {
 
 		$valid_ids = get_all_category_ids();
 
+		if (!isset($comicpress->comicpress_options['category_groupings'])) { $comicpress->comicpress_options['category_groupings'] = array(); }
+		if (!is_array($comicpress->comicpress_options['category_groupings'])) { $comicpress->comicpress_options['category_groupings'] = array(); }
+
 		foreach ($comicpress->comicpress_options['category_groupings'] as $group_id => $category_ids) {
 			$comicpress->comicpress_options['category_groupings'][$group_id] = array_intersect($category_ids, $valid_ids);
 			if (empty($comicpress->comicpress_options['category_groupings'][$group_id])) {
