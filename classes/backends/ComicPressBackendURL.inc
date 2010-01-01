@@ -21,6 +21,10 @@ class ComicPressBackendURL extends ComicPressBackend {
 											$valid_urls[$type] = $url;
 											if ($type == $default_type) {	$key = substr(md5($url), 0, 10);	}
 										}
+									} else {
+										if (strpos($type, '__') === 0) {
+											$valid_urls[$type] = $url;
+										}
 									}
 								}
 							}
@@ -30,6 +34,7 @@ class ComicPressBackendURL extends ComicPressBackend {
 						}
 					}
 				}
+
 				update_post_meta($post->ID, 'backend_url_image_urls', $valid_url_groups);
 			}
 		}
@@ -44,6 +49,8 @@ class ComicPressBackendURL extends ComicPressBackend {
 
 		return false;
 	}
+
+	function dims($size = null) { return false; }
 }
 
 class ComicPressBackendURLFactory {
@@ -57,7 +64,14 @@ class ComicPressBackendURLFactory {
 					if (isset($meta[$key])) {
 						$backend = new ComicPressBackendURL();
 						$backend->id = $id;
-						$backend->urls_by_type = $meta[$key];
+						$backend->urls_by_type = array();
+						foreach ($meta[$key] as $k => $v) {
+							if (strpos($k, '__') === 0) {
+								$backend->{substr($k, 2)} = $v;
+							} else {
+								$backend->urls_by_type[$k] = $v;
+							}
+						}
 						return $backend;
 					}
 				}
@@ -119,7 +133,16 @@ class ComicPressBackendURLAdmin {
 		include('partials/backend-url/_editor.inc');
 		exit(0);
 	}
+
+	function save_post($post_id) {
+		if (ComicPressAdmin::verify_nonces() === 'handle_update_edit_form_advanced') {
+			if ($post = get_post($post_id)) {
+				ComicPressBackendURL::update_post_urls($post_id, $_REQUEST['cp']['url']);
+			}
+		}
+	}
 }
 
 add_action('admin_menu', array('ComicPressBackendURLAdmin', 'admin_menu'));
 add_action('comicpress-handle_update_backend_url_new_editor', array('ComicPressBackendURLAdmin', 'handle_update_backend_url_new_editor'));
+add_action('save_post', array('ComicPressBackendURLAdmin', 'save_post'), 10, 1);

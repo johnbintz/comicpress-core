@@ -2,6 +2,7 @@
 
 class ComicPressBackend {
 	function _embed_image($size) {
+		$size = $this->ensure_type($size);
 		$extras = array();
     $dims = $this->dims($size);
 		if (!empty($dims)) {
@@ -17,7 +18,7 @@ class ComicPressBackend {
 			unset($extras[$field]);
 		}
 
-		$output = sprintf('<img src="%s" alt="%s" title="%s" %s/>', $this->url(), $this->alt(), $this->title(), implode("", $extras));
+		$output = sprintf('<img src="%s" alt="%s" title="%s" %s/>', $this->url($size), $this->alt(), $this->title(), implode("", $extras));
 		return apply_filters('comicpress_embed_image', $output, $this);
 	}
 
@@ -30,5 +31,33 @@ class ComicPressBackend {
 			}
 		}
 		return false;
+	}
+
+	function ensure_type($type) {
+		if (is_null($type)) {
+			$comicpress = ComicPress::get_instance();
+			if (is_null($type)) {
+				$type = $comicpress->get_default_image_type();
+			}
+		}
+		return $type;
+	}
+
+	function embed($type = null) { return $this->_embed_image($this->ensure_type($type)); }
+
+
+	function get_info($size = null) {
+		$size = $this->ensure_type($size);
+
+		$info = array();
+		foreach (array('dims', 'url', 'file') as $field) {
+			$result = $this->{$field}($size);
+			if (is_array($result)) {
+				$info = array_merge($info, $result);
+			} else {
+				$info[$field] = $result;
+			}
+		}
+		return $info;
 	}
 }

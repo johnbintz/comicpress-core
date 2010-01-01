@@ -43,6 +43,8 @@ class ComicPressBackendUrlFactoryTest extends PHPUnit_Framework_TestCase {
 			'comic' => 'comic',
 			'rss' => 'rss'
 		);
+		$valid_backend->alt_text = 'alt text';
+		$valid_backend->hover_text = 'hover text';
 
 		return array(
 			array('', false),
@@ -60,7 +62,14 @@ class ComicPressBackendUrlFactoryTest extends PHPUnit_Framework_TestCase {
 	function testGenerateFromID($id, $expected_result) {
 		wp_insert_post((object)array('ID' => 1));
 
-		update_post_meta(1, 'backend_url_image_urls', array('12345' => array('comic' => 'comic', 'rss' => 'rss')));
+		update_post_meta(1, 'backend_url_image_urls', array(
+		  '12345' => array(
+		    'comic' => 'comic',
+		    'rss' => 'rss',
+				'__alt_text' => 'alt text',
+				'__hover_text' => 'hover text'
+			)
+		));
 
 		$this->assertEquals($expected_result, $this->fa->generate_from_id($id));
 	}

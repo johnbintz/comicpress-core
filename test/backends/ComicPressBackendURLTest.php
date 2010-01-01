@@ -21,12 +21,16 @@ class ComicPressBackendUrlTest extends PHPUnit_Framework_TestCase {
 					'test' => array(
 						'comic' => 'http://test/test',
 						'rss' => 'http://test/test2',
+			  		'__alt_text' => 'alt text',
+			  		'__hover_text' => 'hover text',
 			  	)
 				),
 				array(
 					$key => array(
 						'comic' => 'http://test/test',
-						'rss' => 'http://test/test2'
+						'rss' => 'http://test/test2',
+						'__alt_text' => 'alt text',
+						'__hover_text' => 'hover text',
 					)
 				),
 			)
