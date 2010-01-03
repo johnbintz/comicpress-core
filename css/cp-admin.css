@@ -231,3 +231,31 @@ tr.highlighted td {
   margin: inherit;
   padding: inherit
 }
+
+/* Options */
+
+.comicpress-tab-holder {
+	padding: 2px 0
+}
+
+.comicpress-tab-holder a {
+	padding: 5px;
+	background-color: #aaa;
+	font-size: 10px;
+	border-color: black;
+	border-style: solid;
+	border-width: 1px 0 0 1px;
+}
+
+.comicpress-tab-holder a.last {
+	border-right-width: 1px;
+}
+
+.comicpress-tab-holder a.active {
+	background-color: white
+}
+
+.comicpress-admin form {
+	border: solid black 1px;
+	padding: 0 10px 10px;
+}

@@ -39,3 +39,38 @@
 		<?php do_action('comicpress-options-admin') ?>
 	</form>
 </div>
+<script type="text/javascript">
+	(function() {
+		var tab_holder = new Element('div', { className: 'comicpress-tab-holder' });
+		$$('.comicpress-admin > h2').pop().insert({after: tab_holder});
+
+		var show_tab = function(which) {
+			tab_holder.childElements().each(function(t) {
+				var is_same = (t.id == which);
+				t[is_same ? 'addClassName' : 'removeClassName']('active');
+				$('comicpress-' + t.id.replace(/^comicpress-tab-/, ''))[is_same ? 'show' : 'hide']();
+			});
+		};
+
+		$$('.comicpress-admin > form > h3').each(function(t) {
+			var id_suffix = t.innerHTML.replace(/\s+/g, '_');
+			var holder = new Element("div", { className: 'comicpress-admin-section', id: 'comicpress-' + id_suffix });
+			t.insert({before: holder});
+
+			holder.insert(t.next().remove());
+			holder.insert({top: t.remove()});
+
+			var tab = new Element("a", { href: "#", id: 'comicpress-tab-' + id_suffix }).update(t.innerHTML);
+			tab_holder.insert(tab);
+
+			tab.observe('click', function(e) {
+				Event.stop(e);
+				show_tab(e.target.id)
+			});
+		});
+
+		tab_holder.childElements().pop().addClassName('last');
+
+		show_tab(tab_holder.childElements().shift().id);
+	}());
+</script>
