@@ -518,22 +518,16 @@ class ComicPressAdmin {
 	// @codeCoverageIgnoreEnd
 
 	function verify_nonces() {
-		if (isset($_REQUEST['cp'])) {
-			if (is_array($_REQUEST['cp'])) {
-				if (isset($_REQUEST['cp']['_nonce'])) {
-					if (wp_verify_nonce($_REQUEST['cp']['_nonce'], 'comicpress')) {
-						if (isset($_POST['attachments'])) {
-							//coming from media editor
-							return 'attachments';
-						} else if (isset($_REQUEST['cp']['action'])) {
-							$action = $_REQUEST['cp']['action'];
-							if (isset($_REQUEST['cp']['_action_nonce'])) {
-								if (wp_verify_nonce($_REQUEST['cp']['_action_nonce'], "comicpress-${action}")) {
-									$method = 'handle_update_' . strtolower(str_replace('-', '_', $action));
-									return $method;
-								}
-							}
-						}
+		if (isset($_REQUEST['cp']['_nonce'])) {
+			if (wp_verify_nonce($_REQUEST['cp']['_nonce'], 'comicpress')) {
+				if (isset($_POST['attachments'])) {
+					//coming from media editor
+					return 'attachments';
+				} else if (isset($_REQUEST['cp']['action'], $_REQUEST['cp']['_action_nonce'])) {
+					$action = $_REQUEST['cp']['action'];
+					if (wp_verify_nonce($_REQUEST['cp']['_action_nonce'], "comicpress-${action}")) {
+						$method = 'handle_update_' . strtolower(str_replace('-', '_', $action));
+						return $method;
 					}
 				}
 			}
