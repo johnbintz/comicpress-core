@@ -247,9 +247,11 @@ class ComicPressStoryline {
 		return $this->_merge_simple_storyline($simple_storyline);
 	}
 
+	// @codeCoverageIgnoreStart
 	function get_comicpress_dbi() {
 		return ComicPressDBInterface::get_instance();
 	}
+	// @codeCoverageIgnoreEnd
 
 	/**
 	 * Get a simple structure.

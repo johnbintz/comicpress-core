@@ -336,6 +336,8 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected_result, $css->get_category_simple_structure($parent));
 
     $this->assertEquals($expected_result, wp_cache_get($expected_cache_key, 'comicpress'));
+
+		$this->assertEquals($expected_result, $css->get_category_simple_structure($parent));
 	}
 
 	function providerTestGenerateCacheKey() {
