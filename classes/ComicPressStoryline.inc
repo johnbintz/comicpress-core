@@ -247,19 +247,28 @@ class ComicPressStoryline {
 		return $this->_merge_simple_storyline($simple_storyline);
 	}
 
+	function get_comicpress_dbi() {
+		return ComicPressDBInterface::get_instance();
+	}
+
 	/**
 	 * Get a simple structure.
 	 */
 	function get_category_simple_structure($parent = null) {
 		$structure = array();
-		foreach (get_all_category_ids() as $category_id) {
-			$category = get_category($category_id);
-			if (!isset($structure[$category->parent])) {
-				$structure[$category->parent] = array();
+		$dbi = $this->get_comicpress_dbi();
+
+		$result = $dbi->get_parent_child_category_ids();
+
+		foreach ($result as $cat_id => $cat_parent) {
+			if (!isset($structure[$cat_parent])) {
+				$structure[$cat_parent] = array();
 			}
-			$structure[$category->parent][$category_id] = true;
+			$structure[$cat_parent][$cat_id] = true;
 		}
+
 		$structure = $this->_merge_simple_storyline($structure);
+
 		if (!empty($parent)) {
 			if (isset($structure[0])) {
 				foreach ($structure[0] as $key => $children) {
@@ -267,6 +276,7 @@ class ComicPressStoryline {
 				}
 			}
 		}
+
 		return $structure;
 	}
 

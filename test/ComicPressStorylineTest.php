@@ -283,11 +283,15 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testGetCategorySimpleStructure() {
-		add_category(1, (object)array('parent' => 0));
-		add_category(2, (object)array('parent' => 1));
-		add_category(3, (object)array('parent' => 2));
-		add_category(4, (object)array('parent' => 2));
-    add_category(5, (object)array('parent' => 0));
+    $css = $this->getMock('ComicPressStoryline', array('get_comicpress_dbi'));
+
+    $dbi = $this->getMock('ComicPressDBInterface', array('get_parent_child_category_ids'));
+
+    $dbi->expects($this->any())
+        ->method('get_parent_child_category_ids')
+        ->will($this->returnValue(array(1 => 0, 2 => 1, 3 => 2, 4 => 2, 5 => 0)));
+
+    $css->expects($this->any())->method('get_comicpress_dbi')->will($this->returnValue($dbi));
 
 		$this->assertEquals(array(
 			'0' => array(
@@ -298,7 +302,7 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 					)
 				)
 			)
-		), $this->css->get_category_simple_structure(1));
+		), $css->get_category_simple_structure(1));
 
     $this->assertEquals(array(
       '0' => array(
@@ -310,7 +314,7 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
         ),
         '5' => true
       )
-    ), $this->css->get_category_simple_structure());
+    ), $css->get_category_simple_structure());
 	}
 
 	function providerTestNormalizeFlattenedStoryline() {
