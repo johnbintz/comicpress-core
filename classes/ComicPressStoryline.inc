@@ -255,6 +255,12 @@ class ComicPressStoryline {
 	 * Get a simple structure.
 	 */
 	function get_category_simple_structure($parent = null) {
+		$cache_key = $this->generate_cache_key('storyline-structure', $parent);
+		$result = wp_cache_get($cache_key, 'comicpress');
+		if (is_array($result)) {
+			return $result;
+		}
+
 		$structure = array();
 		$dbi = $this->get_comicpress_dbi();
 
@@ -277,7 +283,16 @@ class ComicPressStoryline {
 			}
 		}
 
+		wp_cache_set($cache_key, $structure, 'comicpress');
+
 		return $structure;
+	}
+
+	function generate_cache_key($key_name, $param) {
+		if (!empty($param)) {
+			$key_name = "${key_name}-${param}";
+		}
+		return $key_name;
 	}
 
 	/**

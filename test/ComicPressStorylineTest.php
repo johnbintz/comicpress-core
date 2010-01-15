@@ -7,6 +7,7 @@ require_once('ComicPressStoryline.inc');
 class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
   function setUp() {
     _reset_wp();
+    wp_cache_flush();
 
     $this->css = new ComicPressStoryline();
   }
@@ -282,7 +283,44 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected, $this->css->_merge_simple_storyline($original));
 	}
 
-	function testGetCategorySimpleStructure() {
+	function providerTestGetCategorySimpleStructure() {
+		return array(
+			array(
+				1,
+				array(
+					'0' => array(
+						'1' => array(
+							'2' => array(
+								'3' => true,
+								'4' => true
+							)
+						)
+					)
+				),
+				'storyline-structure-1'
+			),
+			array(
+				null,
+				array(
+					'0' => array(
+						'1' => array(
+							'2' => array(
+								'3' => true,
+								'4' => true
+							)
+						),
+						'5' => true
+					)
+				),
+				'storyline-structure'
+			)
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestGetCategorySimpleStructure
+	 */
+	function testGetCategorySimpleStructure($parent, $expected_result, $expected_cache_key) {
     $css = $this->getMock('ComicPressStoryline', array('get_comicpress_dbi'));
 
     $dbi = $this->getMock('ComicPressDBInterface', array('get_parent_child_category_ids'));
@@ -293,28 +331,26 @@ class ComicPressStorylineTest extends PHPUnit_Framework_TestCase {
 
     $css->expects($this->any())->method('get_comicpress_dbi')->will($this->returnValue($dbi));
 
-		$this->assertEquals(array(
-			'0' => array(
-				'1' => array(
-					'2' => array(
-						'3' => true,
-						'4' => true
-					)
-				)
-			)
-		), $css->get_category_simple_structure(1));
+    $this->assertTrue(wp_cache_get($expected_cache_key, 'comicpress') === false);
 
-    $this->assertEquals(array(
-      '0' => array(
-        '1' => array(
-          '2' => array(
-            '3' => true,
-            '4' => true
-          )
-        ),
-        '5' => true
-      )
-    ), $css->get_category_simple_structure());
+		$this->assertEquals($expected_result, $css->get_category_simple_structure($parent));
+
+    $this->assertEquals($expected_result, wp_cache_get($expected_cache_key, 'comicpress'));
+	}
+
+	function providerTestGenerateCacheKey() {
+		return array(
+			array(null, 'test-key'),
+			array(1, 'test-key-1'),
+			array('1', 'test-key-1')
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestGenerateCacheKey
+	 */
+	function testGenerateCacheKey($param, $expected_key) {
+		$this->assertEquals($expected_key, $this->css->generate_cache_key('test-key', $param));
 	}
 
 	function providerTestNormalizeFlattenedStoryline() {
