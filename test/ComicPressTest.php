@@ -320,5 +320,3 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   	$this->assertEquals($expected_result, $this->cp->get_default_image_type());
   }
 }
-
-?>
