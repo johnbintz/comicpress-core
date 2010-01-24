@@ -117,6 +117,7 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 			  ),
 			  2
 			),
+			array('%wordpress%/%upload-path%/comic/%date-Y%/%date-Y-m-d%*.jpg', array('/wordpress/upload/comic/2009/2009-01-01*.jpg')),
 		);
 	}
 
@@ -139,6 +140,8 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 
 		wp_set_post_categories(1, array(2));
 		wp_set_post_categories(2, array(4));
+
+		update_option('upload_path', 'upload');
 
 		$fs->search_string = $string;
 

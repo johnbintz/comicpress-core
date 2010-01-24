@@ -120,6 +120,8 @@ class ComicPressBackendFilesystemFactory {
 
 	function _replace_type($post, $type) { return $type;	}
 
+	function _replace_upload_path($post, $type) { return get_option('upload_path'); }
+
 	function _replace_type_folder($post, $type) {
 		$comicpress = ComicPress::get_instance();
 

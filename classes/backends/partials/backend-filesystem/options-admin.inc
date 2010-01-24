@@ -1,9 +1,9 @@
-<h3><?php _e('URL Backend Configuration', 'comicpress') ?></h3>
+<h3><?php _e('Filesystem Backend Configuration', 'comicpress') ?></h3>
 <div id="comicpress-url-backend-configuration" class="comicpress-holder">
 	<table width="100%">
 		<tr>
 			<th scope="row">
-			  <?php _e('URL Pattern:', 'comicpress') ?>
+			  <?php _e('Filesystem Pattern:', 'comicpress') ?>
 			</th>
 			<td>
 				<input style="font-size: 1.5em; width: 100%" type="text" name="cp[backend_options][filesystem][search_pattern]" value="<?php echo $pattern ?>" />
