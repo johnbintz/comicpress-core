@@ -105,14 +105,12 @@ class ComicPressDBInterface {
 	 */
 	function get_next_post($categories = null, $override_post = null) { return $this->get_adjacent_post($categories, true, $override_post); }
 
-	// @codeCoverageIgnoreEnd
-
 	function get_parent_child_category_ids() {
 		global $wpdb;
 
 		$parent_child_categories = array();
 
-		$result = $wpdb->get_results("SELECT term_id, parent FROM $wpdb->term_taxonomy", ARRAY_A);
+		$result = $wpdb->get_results("SELECT term_id, parent FROM $wpdb->term_taxonomy WHERE `taxonomy` = 'category'", ARRAY_A);
 		if (!empty($result)) {
 			foreach ($result as $row) {
 				$parent_child_categories[$row['term_id']] = $row['parent'];
@@ -121,4 +119,6 @@ class ComicPressDBInterface {
 
 		return $parent_child_categories;
 	}
+
+	// @codeCoverageIgnoreEnd
 }
