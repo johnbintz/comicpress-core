@@ -319,4 +319,50 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
 
   	$this->assertEquals($expected_result, $this->cp->get_default_image_type());
   }
+
+  function testInit() {
+  	$cp = $this->getMock('ComicPress', array('load', 'normalize_image_size_options', 'normalize_active_backends'));
+  	$cp->comicpress_options = array(
+  		'active_backends' => array('ComicPressBackendURLFactory')
+  	);
+
+  	$cp->expects($this->once())->method('load');
+  	$cp->expects($this->once())->method('normalize_image_size_options');
+
+  	$cp->expects($this->once())->method('normalize_active_backends')->will($this->returnValue(array(
+  		'ComicPressBackendURLFactory'
+  	)));
+
+		$cp->init();
+
+		$this->assertEquals(array(new ComicPressBackendURLFactory()), $cp->backends);
+  }
+
+  function providerTestNormalizeActiveBackends() {
+  	return array(
+  		array(
+  			array(), array('ComicPressBackendBadFactory'), array()
+  		),
+  		array(
+  			array('ComicPressBackendURLFactory'), array(), array()
+  		),
+  		array(
+  			array('ComicPressBackendURLFactory'), array('ComicPressBackendURLFactory'), array('ComicPressBackendURLFactory')
+  		),
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestNormalizeActiveBackends
+   */
+  function testNormalizeActiveBackends($available_backends, $enabled_backends, $expected_backends) {
+  	$cp = $this->getMock('ComicPress', array('_get_declared_classes'));
+  	$cp->comicpress_options['active_backends'] = $enabled_backends;
+
+  	$cp->expects($this->once())->method('_get_declared_classes')->will($this->returnValue($available_backends));
+
+  	$cp->normalize_active_backends();
+
+  	$this->assertEquals($expected_backends, $cp->comicpress_options['active_backends']);
+  }
 }

@@ -56,6 +56,10 @@ class ComicPressBackendURL extends ComicPressBackend {
 }
 
 class ComicPressBackendURLFactory {
+	function __construct() {
+		$this->description = __('Uses URLs assigned to posts as comic images.', 'comicpress');
+	}
+
 	function generate_from_id($id) {
 		if (preg_match('#^url-([0-9]+)-(.+)$#', $id, $matches) > 0) {
 			list($all, $post_id, $key) = $matches;

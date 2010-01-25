@@ -239,6 +239,10 @@ class ComicPressBackendFilesystemFactory {
 
 // @codeCoverageIgnoreStart
 class ComicPressBackendFilesystemAdmin {
+	function __construct() {
+		$this->description = __('Uses files on the filesystem as comic images, similar to ComicPress Legacy.', 'comicpress');
+	}
+
 	function options_admin() {
 		$pattern = ComicPressBackendFilesystemFactory::_get_search_pattern();
 

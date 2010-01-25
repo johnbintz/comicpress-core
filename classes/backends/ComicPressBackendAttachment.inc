@@ -46,6 +46,10 @@ class ComicPressBackendAttachment extends ComicPressBackend {
 }
 
 class ComicPressBackendAttachmentFactory {
+	function __construct() {
+		$this->description = __('Uses post attachments as comic images.', 'comicpress');
+	}
+
 	function generate_from_post($post) {
 		$result = array();
 		if (is_object($post)) {
@@ -70,7 +74,6 @@ class ComicPressBackendAttachmentFactory {
 		}
 		return $result;
 	}
-
 
 	function generate_from_id($id) {
 		if (strpos($id, 'attachment-') === 0) {

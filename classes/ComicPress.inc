@@ -31,6 +31,7 @@ class ComicPress {
   	),
     'helpers'             => array(),
 		'storyline_order'     => '',
+  	'active_backends' 		=> null
   );
 
   var $backends = array();
@@ -141,6 +142,8 @@ class ComicPress {
   }
 
   // @codeCoverageIgnoreStart
+  function _get_declared_classes() { return get_declared_classes(); }
+  // @codeCoverageIgnoreEnd
 
   /**
    * Initialize the class.
@@ -153,12 +156,27 @@ class ComicPress {
 
 		$this->normalize_image_size_options();
 
-    foreach (get_declared_classes() as $class) {
-    	if (preg_match('#^ComicPressBackend.+Factory$#', $class) > 0) {
-    		$this->backends[] = new $class();
-    	}
-    }
+		foreach ($this->normalize_active_backends() as $class) {
+    	$this->backends[] = new $class();
+		}
   }
+
+  function normalize_active_backends() {
+  	$available_backends = array();
+  	foreach ($this->_get_declared_classes() as $class) {
+  		if (preg_match('#^ComicPressBackend(.*)Factory$#', $class, $matches) > 0) {
+				$available_backends[] = $class;
+  		}
+  	}
+
+		if (!is_array($this->comicpress_options['active_backends'])) {
+			$this->comicpress_options['active_backends'] = array();
+		}
+
+		$this->comicpress_options['active_backends'] = array_intersect($available_backends, $this->comicpress_options['active_backends']);
+  }
+
+  // @codeCoverageIgnoreStart
 
   function announce_activated_helpers() {
     echo "<center>[ <strong>Activated ComicPress helpers:</strong> " . implode(", ", array_keys($this->comicpress_options['helpers'])) . " ]</center>";
@@ -248,5 +266,3 @@ class ComicPress {
 		return false;
 	}
 }
-
-?>

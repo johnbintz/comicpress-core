@@ -16,6 +16,7 @@
 	</p>
 	<ul>
 		<li><?php _e('<strong>%wordpress%</strong>: the local path to the WordPress installation', 'comicpress') ?></li>
+		<li><?php _e('<strong>%upload-path%</strong>: the value of the upload_path option, used by WMPU', 'comicpress') ?></li>
 		<li><?php _e('<strong>%type%</strong>: the image type short name', 'comicpress') ?></li>
 		<li><?php _e('<strong>%type-folder%</strong>: the image type folder', 'comicpress') ?></li>
 		<li><?php _e('<strong>%date-(pattern)%</strong>: the date of the post as run through the date() function. Ex: <em>%date-Y-m-d%</em>', 'comicpress') ?></li>
