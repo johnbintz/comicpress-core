@@ -349,6 +349,9 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   		array(
   			array('ComicPressBackendURLFactory'), array('ComicPressBackendURLFactory'), array('ComicPressBackendURLFactory')
   		),
+  		array(
+  			array(), false, array()
+  		),
   	);
   }
 

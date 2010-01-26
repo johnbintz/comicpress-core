@@ -11,7 +11,6 @@
 
 		<h3><?php _e('Active Components', 'comicpress') ?></h3>
 		<div id="comicpress-active-components-holder" class="comicpress-holder">
-
 		</div>
 
 		<?php do_action('comicpress-options-admin') ?>

@@ -162,18 +162,23 @@ class ComicPress {
   }
 
   function normalize_active_backends() {
+		if (!is_array($this->comicpress_options['active_backends'])) {
+			$this->comicpress_options['active_backends'] = array();
+		}
+
+		$this->comicpress_options['active_backends'] = array_intersect($this->get_valid_backends(), $this->comicpress_options['active_backends']);
+
+		return $this->comicpress_options['active_backends'];
+  }
+
+  function get_valid_backends() {
   	$available_backends = array();
   	foreach ($this->_get_declared_classes() as $class) {
   		if (preg_match('#^ComicPressBackend(.*)Factory$#', $class, $matches) > 0) {
 				$available_backends[] = $class;
   		}
   	}
-
-		if (!is_array($this->comicpress_options['active_backends'])) {
-			$this->comicpress_options['active_backends'] = array();
-		}
-
-		$this->comicpress_options['active_backends'] = array_intersect($available_backends, $this->comicpress_options['active_backends']);
+		return $available_backends;
   }
 
   // @codeCoverageIgnoreStart
