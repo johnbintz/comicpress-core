@@ -1,6 +1,7 @@
 <?php
 
 require_once('ComicPressDBInterface.inc');
+require_once('ComicPress.inc');
 
 class ComicPressStoryline {
 	var $_structure;

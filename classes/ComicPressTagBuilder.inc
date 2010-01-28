@@ -42,6 +42,10 @@ class ComicPressTagBuilder {
 			case 'last':
 				$this->post = call_user_func(array($this->dbi, "get_${method}_post"), $this->storyline->build_from_restrictions($this->restrictions), $this->parent_post);
 				break;
+			case 'in':
+				if (!isset($arguments[0])) { throw new Exception('Need to specify a category');	}
+				$this->restrictions[] = array('child_of', $arguments[0]);
+				break;
 		}
 
 		return $this;
