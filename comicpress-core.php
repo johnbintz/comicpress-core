@@ -51,5 +51,3 @@ function __comicpress_init() {
   $comicpress_filters = new ComicPressFilters();
   $comicpress_filters->init();
 }
-
-

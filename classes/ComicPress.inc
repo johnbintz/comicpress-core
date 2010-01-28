@@ -31,7 +31,7 @@ class ComicPress {
   	),
     'helpers'             => array(),
 		'storyline_order'     => '',
-  	'active_backends' 		=> null
+  	'enabled_backends' 		=> null
   );
 
   var $backends = array();
@@ -156,19 +156,42 @@ class ComicPress {
 
 		$this->normalize_image_size_options();
 
+		$this->reset_backend_admin();
+
 		foreach ($this->normalize_active_backends() as $class) {
     	$this->backends[] = new $class();
+
+    	$admin_class = preg_replace('#Factory$#', 'Admin', $class);
+    	if (class_exists($admin_class)) {
+    		if (method_exists($admin_class, 'actions')) {
+    			foreach (call_user_func(array($admin_class, 'actions')) as $options) {
+    				call_user_func_array('add_action', $options);
+    			}
+    		}
+    	}
 		}
   }
 
+  function reset_backend_admin() {
+  	foreach ($this->_get_declared_classes() as $class) {
+  		if (preg_match('#^ComicPressBackend(.*)Admin$#', $class)) {
+    		if (method_exists($class, 'actions')) {
+    			foreach (call_user_func(array($class, 'actions')) as $options) {
+  					call_user_func_array('remove_action', $options);
+    			}
+    		}
+  		}
+  	}
+  }
+
   function normalize_active_backends() {
-		if (!is_array($this->comicpress_options['active_backends'])) {
-			$this->comicpress_options['active_backends'] = array();
+		if (!is_array($this->comicpress_options['enabled_backends'])) {
+			$this->comicpress_options['enabled_backends'] = $this->get_valid_backends();
 		}
 
-		$this->comicpress_options['active_backends'] = array_intersect($this->get_valid_backends(), $this->comicpress_options['active_backends']);
+		$this->comicpress_options['enabled_backends'] = array_intersect($this->get_valid_backends(), $this->comicpress_options['enabled_backends']);
 
-		return $this->comicpress_options['active_backends'];
+		return $this->comicpress_options['enabled_backends'];
   }
 
   function get_valid_backends() {

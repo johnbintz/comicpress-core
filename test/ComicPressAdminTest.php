@@ -114,7 +114,21 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
     			'image_types' => array(
 	    			'newcomic' => array('default' => true, 'dimensions' => '100x100'),
 	    		)
-  			)
+  			),
+    	),
+    	array(
+    		array(
+    			'enabled_backends' => array()
+    		),
+    		array(
+    			'enabled_backends' => array(
+    				'ComicPressBackendURLFactory' => 'yes',
+    				'BadBackEnd' => 'yes'
+    			)
+    		),
+    		array(
+    			'enabled_backends' => array('ComicPressBackendURLFactory')
+    		),
     	)
     );
   }

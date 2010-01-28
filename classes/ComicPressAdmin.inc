@@ -167,6 +167,8 @@ class ComicPressAdmin {
 		$storyline->normalize();
 		$storyline->read_from_options();
 
+		$backends = $this->comicpress->get_valid_backends();
+
 		include(dirname(__FILE__) . '/partials/options-admin.inc');
 	}
 
@@ -389,6 +391,9 @@ class ComicPressAdmin {
 						$storyline->normalize($info[$option]);
 						break;
 					// @codeCoverageIgnoreEnd
+					case 'enabled_backends':
+						$this->comicpress->comicpress_options['enabled_backends'] = array_intersect(array_keys($info[$option]), $this->comicpress->get_valid_backends());
+						break;
 				}
 			}
 		}

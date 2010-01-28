@@ -149,8 +149,12 @@ class ComicPressBackendURLAdmin {
 		}
 	}
 	// @codeCoverageIgnoreEnd
-}
 
-add_action('admin_menu', array('ComicPressBackendURLAdmin', 'admin_menu'));
-add_action('comicpress-handle_update_backend_url_new_editor', array('ComicPressBackendURLAdmin', 'handle_update_backend_url_new_editor'));
-add_action('save_post', array('ComicPressBackendURLAdmin', 'save_post'), 10, 1);
+	function actions() {
+		return array(
+			array('admin_menu', array('ComicPressBackendURLAdmin', 'admin_menu')),
+			array('comicpress-handle_update_backend_url_new_editor', array('ComicPressBackendURLAdmin', 'handle_update_backend_url_new_editor')),
+			array('save_post', array('ComicPressBackendURLAdmin', 'save_post'), 10, 1)
+		);
+	}
+}

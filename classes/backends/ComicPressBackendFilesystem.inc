@@ -8,6 +8,10 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 }
 
 class ComicPressBackendFilesystemFactory {
+	function __construct() {
+		$this->description = __('Uses files on the filesystem as comic images, similar to ComicPress Legacy.', 'comicpress');
+	}
+
 	function generate_from_id($id) {
 		if (preg_match('#^filesystem-([0-9]+)-(.*)$#', $id, $matches) > 0) {
 			list($all, $post_id, $root) = $matches;
@@ -239,10 +243,6 @@ class ComicPressBackendFilesystemFactory {
 
 // @codeCoverageIgnoreStart
 class ComicPressBackendFilesystemAdmin {
-	function __construct() {
-		$this->description = __('Uses files on the filesystem as comic images, similar to ComicPress Legacy.', 'comicpress');
-	}
-
 	function options_admin() {
 		$pattern = ComicPressBackendFilesystemFactory::_get_search_pattern();
 
@@ -287,9 +287,13 @@ class ComicPressBackendFilesystemAdmin {
 			$comicpress->save();
 		}
 	}
+
+	function actions() {
+		return array(
+			array('comicpress-options-admin', array('ComicPressBackendFilesystemAdmin', 'options_admin')),
+			array('comicpress-image-type-holder', array('ComicPressBackendFilesystemAdmin', 'image_type_holder'), 10, 1),
+			array('comicpress-handle_update_comicpress_options', array('ComicPressBackendFilesystemAdmin', 'handle_update_comicpress_options'), 10, 1)
+		);
+	}
 }
 // @codeCoverageIgnoreEnd
-
-add_action('comicpress-options-admin', array('ComicPressBackendFilesystemAdmin', 'options_admin'));
-add_action('comicpress-image-type-holder', array('ComicPressBackendFilesystemAdmin', 'image_type_holder'), 10, 1);
-add_action('comicpress-handle_update_comicpress_options', array('ComicPressBackendFilesystemAdmin', 'handle_update_comicpress_options'), 10, 1);

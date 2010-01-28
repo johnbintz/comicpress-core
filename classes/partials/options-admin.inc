@@ -1,5 +1,5 @@
 <div class="wrap comicpress-admin">
-	<h2><?php _e('ComicPress Config', 'comicpress') ?></h2>
+	<h2><?php _e('ComicPress Core Config', 'comicpress') ?></h2>
 	<form method="post" action="">
 		<input type="hidden" name="cp[_nonce]" value="<?php echo esc_attr($nonce) ?>" />
 		<input type="hidden" name="cp[action]" value="comicpress-options" />
@@ -9,8 +9,32 @@
 
 		<?php include('_comic-image-types.inc') ?>
 
-		<h3><?php _e('Active Components', 'comicpress') ?></h3>
-		<div id="comicpress-active-components-holder" class="comicpress-holder">
+		<h3><?php _e('Enabled Backends', 'comicpress') ?></h3>
+		<div id="comicpress-enabled-backends-holder" class="comicpress-holder">
+			<table class="widefat">
+				<?php foreach ($backends as $backend) {
+					$obj = new $backend(); ?>
+					<tr>
+						<th scope="row">
+							<label>
+								<input type="checkbox"
+											 name="cp[enabled_backends][<?php echo esc_attr($backend) ?>]"
+											 value="yes"
+											 <?php echo in_array($backend, $this->comicpress->comicpress_options['enabled_backends']) ? 'checked="checked"' : '' ?> />
+								<?php echo esc_html(preg_replace('#^ComicPressBackend(.*)Factory$#', '\1', $backend)) ?>
+							</label>
+						</th>
+						<td>
+							<?php echo esc_html($obj->description) ?>
+						</td>
+					</tr>
+				<?php } ?>
+			</table>
+
+			<p>
+				<?php _e("Disable backends you're not using to save system resources.", 'comicpress') ?>
+			</p>
+			<input class="button-primary" type="submit" value="<?php _e('Submit Updated ComicPress Options', 'comicpress') ?>" />
 		</div>
 
 		<?php do_action('comicpress-options-admin') ?>

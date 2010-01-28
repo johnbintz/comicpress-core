@@ -323,7 +323,7 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
   function testInit() {
   	$cp = $this->getMock('ComicPress', array('load', 'normalize_image_size_options', 'normalize_active_backends'));
   	$cp->comicpress_options = array(
-  		'active_backends' => array('ComicPressBackendURLFactory')
+  		'enabled_backends' => array('ComicPressBackendURLFactory')
   	);
 
   	$cp->expects($this->once())->method('load');
@@ -360,12 +360,12 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
    */
   function testNormalizeActiveBackends($available_backends, $enabled_backends, $expected_backends) {
   	$cp = $this->getMock('ComicPress', array('_get_declared_classes'));
-  	$cp->comicpress_options['active_backends'] = $enabled_backends;
+  	$cp->comicpress_options['enabled_backends'] = $enabled_backends;
 
-  	$cp->expects($this->once())->method('_get_declared_classes')->will($this->returnValue($available_backends));
+  	$cp->expects($this->any())->method('_get_declared_classes')->will($this->returnValue($available_backends));
 
   	$cp->normalize_active_backends();
 
-  	$this->assertEquals($expected_backends, $cp->comicpress_options['active_backends']);
+  	$this->assertEquals($expected_backends, $cp->comicpress_options['enabled_backends']);
   }
 }
