@@ -102,7 +102,8 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 				'post_title' => 'Post title',
 				'post_date' => '2010-01-01',
 				'guid' => 'the-slug',
-			))
+			)),
+			array(array('date', 'Ymd'), '20100101'),
 		);
 	}
 
@@ -128,7 +129,52 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 		$core = new ComicPressTagBuilderFactory($dbi);
 		$core = $core->first_in_1();
 
-		$this->assertEquals($expected_result, $core->{$info_method}());
+		if (is_array($info_method)) {
+			$method = array_shift($info_method);
+			$this->assertEquals($expected_result, call_user_func_array(array($core, $method), $info_method));
+		} else {
+			$this->assertEquals($expected_result, $core->{$info_method}());
+		}
+	}
+
+	function providerTestStorylineBuilderExceptions() {
+		return array(
+			array(array('bad')),
+			array(array(array('in', 1), 'bad')),
+			array(array(array('in', 1), 'date')),
+		);
+	}
+
+	/**
+	 * @expectedException ComicPressException
+	 * @dataProvider providerTestStorylineBuilderExceptions
+	 */
+	function testStorylineBuilderExceptions($calls) {
+		$target_post = (object)array(
+			'ID' => 1,
+			'post_title' => 'Post title',
+			'post_date' => '2010-01-01',
+			'guid' => 'the-slug',
+		);
+
+		wp_insert_post($target_post);
+
+		$dbi = $this->getMock('ComicPressDBInterface', array('get_first_post'));
+		$dbi->expects($this->any())->method('get_first_post')->will($this->returnValue($target_post));
+
+		$storyline = new ComicPressStoryline();
+		$storyline->set_flattened_storyline('0/1');
+
+		$core = new ComicPressTagBuilderFactory($dbi);
+
+		foreach ($calls as $call) {
+			if (is_array($call)) {
+				$method = array_shift($call);
+				$core = call_user_func_array(array($core, $method), $call);
+			} else {
+				$core = $core->{$call}();
+			}
+		}
 	}
 
 	function providerTestMethodParser() {

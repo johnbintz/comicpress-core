@@ -294,3 +294,6 @@ class ComicPress {
 		return false;
 	}
 }
+
+class ComicPressException extends Exception {}
+

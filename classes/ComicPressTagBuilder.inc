@@ -35,16 +35,20 @@ class ComicPressTagBuilder {
 	}
 
 	public function __call($method, $arguments) {
+		$ok = false;
+
 		switch ($method) {
 			case 'next':
 			case 'previous':
 			case 'first':
 			case 'last':
 				$this->post = call_user_func(array($this->dbi, "get_${method}_post"), $this->storyline->build_from_restrictions($this->restrictions), $this->parent_post);
+				$ok = true;
 				break;
 			case 'in':
 				if (!isset($arguments[0])) { throw new Exception('Need to specify a category');	}
 				$this->restrictions[] = array('child_of', $arguments[0]);
+				$ok = true;
 				break;
 			case 'id':
 				return $this->post->ID;
@@ -52,6 +56,11 @@ class ComicPressTagBuilder {
 				return $this->post->post_title;
 			case 'timestamp':
 				return strtotime($this->post->post_date);
+			case 'date':
+				if (isset($arguments[0])) {
+					return date($arguments[0], strtotime($this->post->post_date));
+				}
+				break;
 			case 'permalink':
 				return get_permalink($this->post->ID);
 			case 'post':
@@ -63,11 +72,16 @@ class ComicPressTagBuilder {
 						$new_method = array_shift($method_info);
 						call_user_func_array(array($this, $new_method), $method_info);
 					}
+					$ok = true;
 				}
 				break;
 		}
 
-		return $this;
+		if ($ok) {
+			return $this;
+		} else {
+			throw new ComicPressException("${method} isn't allowed at this point");
+		}
 	}
 
 	public function parse_method($method_name) {
