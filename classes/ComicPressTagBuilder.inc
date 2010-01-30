@@ -84,24 +84,28 @@ class ComicPressTagBuilder {
 		}
 	}
 
+	const START_PARSE = 'start parse';
+	const HAS_POST_METHOD = 'has post method';
+	const HAS_EXTRACT_METHOD = 'has extract method';
+
 	public function parse_method($method_name) {
 		$methods = array();
 
 		$parts = explode('_', $method_name);
 
+		$state = self::START_PARSE;
+
 		$post_method = null;
+		$extract_method = null;
 
 		while (!empty($parts)) {
 			$current = strtolower(array_shift($parts));
 
-			if (is_null($post_method)) {
-				if (in_array($current, array('first', 'previous', 'next', 'last'))) {
-					$post_method = $current;
-				} else {
-					break;
-				}
-			} else {
+			if (in_array($state, array(self::HAS_POST_METHOD, self::HAS_EXTRACT_METHOD))) {
 				if ($current == "in") {
+					if (empty($parts)) {
+						throw new ComicPressException("No category specified in tag ${method_name}");
+					}
 					$is_id = false;
 					if (count($parts) == 1) {
 						if (is_numeric($parts[0])) {
@@ -112,12 +116,32 @@ class ComicPressTagBuilder {
 					if (!$is_id) {
 						$methods[] = array('in', implode('-', $parts));
 					}
+					break;
+				}
+
+				if (in_array($current, array('id', 'permalink', 'title', 'timestamp', 'date'))) {
+					if ($state == self::HAS_EXTRACT_METHOD) {
+						throw new ComicPressException('Only one extract method can be specified');
+					}
+					$extract_method = $current;
+					$state = self::HAS_EXTRACT_METHOD;
+				}
+			}
+
+			if ($state == self::START_PARSE) {
+				if (in_array($current, array('first', 'previous', 'next', 'last'))) {
+					$post_method = $current;
+					$state = self::HAS_POST_METHOD;
+				} else {
+					throw new ComicPressException("${current} isn't allowed at this point");
 				}
 			}
 		}
 
-		if (!is_null($post_method)) {
-			$methods[] = array($post_method);
+		foreach (array('post', 'extract') as $prefix) {
+			if (!is_null(${"${prefix}_method"})) {
+				$methods[] = array(${"${prefix}_method"});
+			}
 		}
 
 		return $methods;

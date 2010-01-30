@@ -198,7 +198,15 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 					array('in', 'category-1'),
 					array('first')
 				)
-			)
+			),
+			array(
+				'first_permalink_in_category_1',
+				array(
+					array('in', 'category-1'),
+					array('first'),
+					array('permalink'),
+				)
+			),
 		);
 	}
 
@@ -206,16 +214,6 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 	 * @dataProvider providerTestMethodParser
 	 */
 	function testMethodParser($method_name, $expected_pieces) {
-		foreach (array(
-			1 => array('cat_name' => 'Test 1', 'category_nicename' => 'category-1', 'category_parent' => 0),
-			2 => array('cat_name' => 'Test 2', 'category_nicename' => 'category-2', 'category_parent' => 0),
-			3 => array('cat_name' => 'Test 3', 'category_nicename' => 'category-3', 'category_parent' => 2),
-			4 => array('cat_name' => 'Test 4', 'category_nicename' => 'category-4', 'category_parent' => 2),
-			5 => array('cat_name' => 'Test 5', 'category_nicename' => 'category-5', 'category_parent' => 0),
-		) as $id => $category) {
-			add_category($id, (object)$category);
-		}
-
 		$this->assertEquals($expected_pieces, ComicPressTagBuilder::parse_method($method_name));
 	}
 }
