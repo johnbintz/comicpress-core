@@ -46,8 +46,64 @@ class ComicPressTagBuilder {
 				if (!isset($arguments[0])) { throw new Exception('Need to specify a category');	}
 				$this->restrictions[] = array('child_of', $arguments[0]);
 				break;
+			case 'id':
+				return $this->post->ID;
+			case 'title':
+				return $this->post->post_title;
+			case 'timestamp':
+				return strtotime($this->post->post_date);
+			case 'permalink':
+				return get_permalink($this->post->ID);
+			default:
+				$methods = $this->parse_method($method);
+				if (!empty($methods)) {
+					foreach ($methods as $method_info) {
+						$new_method = array_shift($method_info);
+						call_user_func_array(array($this, $new_method), $method_info);
+					}
+				}
+				break;
 		}
 
 		return $this;
+	}
+
+	public function parse_method($method_name) {
+		$methods = array();
+
+		$parts = explode('_', $method_name);
+
+		$post_method = null;
+
+		while (!empty($parts)) {
+			$current = strtolower(array_shift($parts));
+
+			if (is_null($post_method)) {
+				if (in_array($current, array('first', 'previous', 'next', 'last'))) {
+					$post_method = $current;
+				} else {
+					break;
+				}
+			} else {
+				if ($current == "in") {
+					$is_id = false;
+					if (count($parts) == 1) {
+						if (is_numeric($parts[0])) {
+							$methods[] = array('in', $parts[0]);
+							$is_id = true;
+						}
+					}
+					if (!$is_id) {
+						$methods[] = array('in', implode('-', $parts));
+					}
+				}
+			}
+		}
+
+		if (!is_null($post_method)) {
+			$methods[] = array($post_method);
+		}
+
+		return $methods;
 	}
 }
