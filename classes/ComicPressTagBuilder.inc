@@ -54,6 +54,8 @@ class ComicPressTagBuilder {
 				return strtotime($this->post->post_date);
 			case 'permalink':
 				return get_permalink($this->post->ID);
+			case 'post':
+				return $this->post;
 			default:
 				$methods = $this->parse_method($method);
 				if (!empty($methods)) {

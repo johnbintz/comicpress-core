@@ -96,7 +96,13 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 			array('id', 1),
 			array('title', 'Post title'),
 			array('timestamp', strtotime('2010-01-01')),
-			array('permalink', 'the-slug')
+			array('permalink', 'the-slug'),
+			array('post', (object)array(
+				'ID' => 1,
+				'post_title' => 'Post title',
+				'post_date' => '2010-01-01',
+				'guid' => 'the-slug',
+			))
 		);
 	}
 
