@@ -36,6 +36,7 @@ class ComicPressTagBuilder {
 
 	public function __call($method, $arguments) {
 		$ok = false;
+		$return = $this;
 
 		switch ($method) {
 			case 'next':
@@ -66,11 +67,11 @@ class ComicPressTagBuilder {
 			case 'post':
 				return $this->post;
 			default:
-				$methods = $this->parse_method($method);
+				$methods = $this->parse_method($method, $arguments);
 				if (!empty($methods)) {
 					foreach ($methods as $method_info) {
 						$new_method = array_shift($method_info);
-						call_user_func_array(array($this, $new_method), $method_info);
+						$return = call_user_func_array(array($return, $new_method), $method_info);
 					}
 					$ok = true;
 				}
@@ -78,7 +79,7 @@ class ComicPressTagBuilder {
 		}
 
 		if ($ok) {
-			return $this;
+			return $return;
 		} else {
 			throw new ComicPressException("${method} isn't allowed at this point");
 		}
@@ -88,7 +89,7 @@ class ComicPressTagBuilder {
 	const HAS_POST_METHOD = 'has post method';
 	const HAS_EXTRACT_METHOD = 'has extract method';
 
-	public function parse_method($method_name) {
+	public function parse_method($method_name, $extract_method_arguments = null) {
 		$methods = array();
 
 		$parts = explode('_', $method_name);
@@ -138,10 +139,17 @@ class ComicPressTagBuilder {
 			}
 		}
 
-		foreach (array('post', 'extract') as $prefix) {
-			if (!is_null(${"${prefix}_method"})) {
-				$methods[] = array(${"${prefix}_method"});
+		if (!is_null($post_method)) {
+			$methods[] = array($post_method);
+		}
+
+		if (!is_null($extract_method)) {
+			$extract_method = array($extract_method);
+			if (is_array($extract_method_arguments)) {
+				$extract_method = array_merge($extract_method, $extract_method_arguments);
 			}
+
+			$methods[] = $extract_method;
 		}
 
 		return $methods;
