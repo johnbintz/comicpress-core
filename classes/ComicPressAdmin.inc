@@ -537,7 +537,6 @@ class ComicPressAdmin {
 		}
 	}
 
-	// @codeCoverageIgnoreStart
 	var $messages = array(
 		'info' => array(),
 		'warn' => array(),
@@ -559,7 +558,6 @@ class ComicPressAdmin {
 			}
 		}
 	}
-	// @codeCoverageIgnoreEnd
 
 	function verify_nonces() {
 		if (isset($_REQUEST['cp']['_nonce'])) {

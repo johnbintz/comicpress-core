@@ -373,6 +373,24 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
   	}
 		$admin->handle_update();
   }
+
+  function testDisplayMessages() {
+  	$this->admin->info('info');
+  	$this->admin->warn('warn');
+  	$this->admin->error('error');
+
+  	ob_start();
+  	$this->admin->display_messages();
+  	$this->assertTrue(($xml = _to_xml(ob_get_clean())) !== false);
+
+  	foreach (array(
+  		'//div[contains(@class, "cp-info")]/p' => 'info',
+  		'//div[contains(@class, "cp-warn")]/p' => 'warn',
+  		'//div[contains(@class, "cp-error")]/p' => 'error',
+  	) as $xpath => $value) {
+  		$this->assertTrue(_xpath_test($xml, $xpath, $value), $xpath);
+  	}
+  }
 }
 
 ?>
