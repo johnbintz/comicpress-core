@@ -451,10 +451,15 @@ class ComicPressAdmin {
 		}
 	}
 
+	function _new_comicpresscomicpost($post) {
+		return new ComicPressComicPost($post);
+	}
+	// @codeCoverageIgnoreEnd
+
 	function save_post($post_id) {
-		if (ComicPressAdmin::verify_nonces() === 'handle_update_edit_form_advanced') {
-			if ($post = get_post($psot_id)) {
-				$comic_post = new ComicPressComicPost($post);
+		if ($this->verify_nonces() === 'handle_update_edit_form_advanced') {
+			if ($post = get_post($post_id)) {
+				$comic_post = $this->_new_comicpresscomicpost($post);
 				$data = $this->_json_decode(stripslashes($_POST['cp']['comic_order']));
 				if (!empty($data)) {
 					if (is_array($data)) {
@@ -465,6 +470,7 @@ class ComicPressAdmin {
 		}
 	}
 
+	// @codeCoverageIgnoreStart
 	function handle_update_get_new_image_type_editor($info) {
 		$type = substr(md5(rand()), 0, 6);
 		$info = array(

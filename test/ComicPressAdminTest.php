@@ -391,6 +391,96 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
   		$this->assertTrue(_xpath_test($xml, $xpath, $value), $xpath);
   	}
   }
-}
 
-?>
+  function providerTestSavePost() {
+  	return array(
+  		array(
+  			array(
+  				'verify_nonces' => false,
+  				'post_id' => 1
+  			),
+  			false
+  		),
+  		array(
+  			array(
+  				'verify_nonces' => 'handle_update_edit_form_advanced',
+  				'post_id' => 2
+  			),
+  			false
+  		),
+  		array(
+  			array(
+  				'verify_nonces' => 'handle_update_edit_form_advanced',
+  				'post_id' => 1,
+  				'comic_order' => 'order',
+  				'json_decode_return' => ''
+  			),
+  			false
+  		),
+  		array(
+  			array(
+  				'verify_nonces' => 'handle_update_edit_form_advanced',
+  				'post_id' => 1,
+  				'comic_order' => 'order',
+  				'json_decode_return' => array()
+  			),
+  			false
+  		),
+  		array(
+  			array(
+  				'verify_nonces' => 'handle_update_edit_form_advanced',
+  				'post_id' => 1,
+  				'comic_order' => 'order',
+  				'json_decode_return' => array('test')
+  			),
+  			true
+  		),
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestSavePost
+   */
+  function testSavePost($info, $expects_update_media_data) {
+  	extract($info);
+
+  	$post = (object)array(
+  		'ID' => 1
+  	);
+
+  	wp_insert_post($post);
+
+  	$admin = $this->getMock('ComicPressAdmin', array(
+  		'verify_nonces',
+  		'_json_decode',
+  		'_new_comicpresscomicpost'
+  	));
+
+  	$admin->expects($this->once())->method('verify_nonces')->will($this->returnValue($verify_nonces));
+
+  	if (isset($info['comic_order'])) {
+  		$comic_post = $this->getMock('ComicPressComicPost', array('update_post_media_data'));
+
+  		$expectation = $comic_post->expects($this->{$expects_update_media_data ? 'once' : 'never'}())
+  							 								->method('update_post_media_data');
+
+  		if ($expects_update_media_data) {
+  			$expectation->with($json_decode_return);
+  		}
+
+  		$admin->expects($this->once())
+  					->method('_new_comicpresscomicpost')
+  					->with($post)
+  					->will($this->returnValue($comic_post));
+
+  		$admin->expects($this->once())
+  					->method('_json_decode')
+  					->with($comic_order)
+  					->will($this->returnValue($json_decode_return));
+
+  		$_POST = array('cp' => array('comic_order' => $comic_order));
+  	}
+
+  	$admin->save_post($post_id);
+  }
+}
