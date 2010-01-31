@@ -7,6 +7,23 @@
 
 		<?php include('_storyline-order.inc') ?>
 
+		<h3><?php _e('Category Groups', 'comicpress') ?></h3>
+
+		<div id="comicpress-category-groups-holder" class="comicpress-holder">
+			<div id="category-groups-holder">
+				<?php
+					foreach ($this->comicpress->comicpress_options['category_groupings'] as $name => $category_ids) {
+						$key = $name;
+						include('_category-grouping-editor.inc');
+					}
+				?>
+			</div>
+			<a id="add-new-category-group" href="#">[+] Add a new category group</a>
+			<script type="text/javascript">CategoryGroupings.setup()</script>
+			<br />
+			<input class="button-primary" type="submit" value="<?php _e('Submit Updated ComicPress Options', 'comicpress') ?>" />
+		</div>
+
 		<?php include('_comic-image-types.inc') ?>
 
 		<h3><?php _e('Enabled Backends', 'comicpress') ?></h3>
@@ -73,5 +90,10 @@
 		tab_holder.childElements().pop().addClassName('last');
 
 		show_tab(tab_holder.childElements().shift().id);
+
+		Event.observe(document, 'dom:loaded', function() {
+			ComicPressAdmin.image_type_editor_nonce = '<?php echo wp_create_nonce('comicpress-get-new-image-type-editor') ?>';
+			ComicPressAdmin.category_group_editor_nonce = '<?php echo wp_create_nonce('comicpress-get-new-category-group-editor') ?>';
+		});
 	}());
 </script>

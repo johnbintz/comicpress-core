@@ -1,5 +1,6 @@
 var Storyline = {};
 var ComicImageTypes = {};
+var CategoryGroupings = {};
 
 (function() {
 	Storyline.get_order = function() {
@@ -76,7 +77,8 @@ var ComicImageTypes = {};
 				method: 'get',
 				parameters: {
 					'cp[_nonce]': ComicPressAdmin.nonce,
-					'cp[action]': 'get-new-image-type-editor'
+					'cp[action]': 'get-new-image-type-editor',
+					'cp[_action_nonce]': ComicPressAdmin.image_type_editor_nonce
 				},
 				insertion: 'bottom',
 				onComplete: function() {
@@ -85,4 +87,58 @@ var ComicImageTypes = {};
 			});
 		});
 	};
+
+	CategoryGroupings.highlight_child_levels = function(e) {
+		$$('.category-group-holder input[type=checkbox]').each(function(cb) {
+			cb.disabled = false;
+		});
+
+		$$('.category-group-holder li').each(function(li) {
+			var all_cb = li.select('input[type=checkbox]');
+			var cb = all_cb.shift();
+			li.removeClassName('selected');
+			if (cb && cb.checked) {
+				all_cb.each(function(ncb) {
+					ncb.disabled = true;
+				});
+				li.addClassName('selected');
+			}
+		});
+
+		$$('.category-group-holder').each(function(cgh) {
+			var all_off = true;
+			cgh.select('input[type=checkbox]').each(function(c) {
+				if (c.checked) { all_off = false; }
+			});
+			cgh.select('.empty-group-warning').pop()[all_off ? 'show' : 'hide']();
+		});
+	}
+
+	CategoryGroupings.setup_editors = function() {
+		$$('.category-group-holder input[type=checkbox], .category-group-holder label').each(function(cb) {
+			cb.stopObserving('click');
+			cb.observe('click', CategoryGroupings.highlight_child_levels);
+		});
+	}
+
+	CategoryGroupings.setup = function() {
+		CategoryGroupings.setup_editors();
+		CategoryGroupings.highlight_child_levels();
+
+		$('add-new-category-group').observe('click', function(e) {
+			Event.stop(e);
+			new Ajax.Updater('category-groups-holder', ComicPressAdmin.ajax_uri, {
+				method: 'get',
+				parameters: {
+					'cp[_nonce]': ComicPressAdmin.nonce,
+					'cp[action]': 'get-new-category-group-editor',
+					'cp[_action_nonce]': ComicPressAdmin.category_group_editor_nonce
+				},
+				onComplete: function() {
+					CategoryGroupings.setup_editors();
+				},
+				insertion: 'bottom'
+			});
+		});
+	}
 }())

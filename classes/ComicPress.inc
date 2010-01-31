@@ -31,7 +31,8 @@ class ComicPress {
   	),
     'helpers'             => array(),
 		'storyline_order'     => '',
-  	'enabled_backends' 		=> null
+  	'enabled_backends' 		=> null,
+  	'category_groupings'  => array()
   );
 
   var $backends = array();

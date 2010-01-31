@@ -259,3 +259,21 @@ tr.highlighted td {
 	border: solid black 1px;
 	padding: 0 10px 10px;
 }
+
+.category-group-holder ul ul {
+	margin-left: 20px
+}
+
+.category-group-holder {
+	border: solid #aaa 1px;
+	margin: 0 0 10px;
+	padding: 5px;
+}
+
+.delete-category-group-holder {
+	float: right
+}
+
+.category-group-holder .selected {
+	background-color: #99ccbb
+}

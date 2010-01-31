@@ -224,6 +224,23 @@ class ComicPressAdmin {
 		}
 	}
 
+	function _render_admin_storyline_grouping_tree($node, $group_name, $category_ids) {
+		foreach ($node as $category_id => $children) {
+			$category = get_category($category_id);
+			echo '<li>';
+				echo '<label><input
+											type="checkbox"' .
+											(in_array($category_id, $category_ids) ? 'checked="checked"' : '') .
+											' name="cp[category_groupings][' . esc_attr($group_name) . '][category][]" value="' . $category_id . '" /> ' . esc_html($category->name) . '</label>';
+				if (is_array($children)) {
+					echo '<ul>';
+						$this->_render_admin_storyline_grouping_tree($children, $group_name, $category_ids);
+					echo '</ul>';
+				}
+			echo '</li>';
+		}
+	}
+
 	/**
 	 * Render the comic image ordering interface.
 	 */
@@ -394,6 +411,14 @@ class ComicPressAdmin {
 					case 'enabled_backends':
 						$this->comicpress->comicpress_options['enabled_backends'] = array_intersect(array_keys($info[$option]), $this->comicpress->get_valid_backends());
 						break;
+					case 'category_groupings':
+						$this->comicpress->comicpress_options['category_groupings'] = array();
+						foreach ($info[$option] as $key => $settings) {
+							if (!empty($settings['name'])) {
+								$this->comicpress->comicpress_options['category_groupings'][$settings['name']] = isset($settings['category']) ? $settings['category'] : array();
+							}
+						}
+						break;
 				}
 			}
 		}
@@ -449,6 +474,20 @@ class ComicPressAdmin {
 		);
 
 		require_once('partials/_image-type-editor.inc');
+		exit(0);
+	}
+
+
+	function handle_update_get_new_category_group_editor($info) {
+		$key = substr(md5(rand()), 0, 6);
+		$name = 'group';
+		$category_ids = array();
+
+		$storyline = new ComicPressStoryline();
+		$storyline->normalize();
+		$storyline->read_from_options();
+
+		require_once('partials/_category-grouping-editor.inc');
 		exit(0);
 	}
 
