@@ -104,7 +104,7 @@ class ComicPressTagBuilder {
 
 			if (in_array($state, array(self::HAS_POST_METHOD, self::HAS_EXTRACT_METHOD))) {
 				if ($current == "in") {
-					if (empty($parts)) {
+					if (implode('', $parts) == '') {
 						throw new ComicPressException("No category specified in tag ${method_name}");
 					}
 					$is_id = false;
@@ -120,7 +120,7 @@ class ComicPressTagBuilder {
 					break;
 				}
 
-				if (in_array($current, array('id', 'permalink', 'title', 'timestamp', 'date'))) {
+				if (in_array($current, array('id', 'permalink', 'title', 'timestamp', 'date', 'post'))) {
 					if ($state == self::HAS_EXTRACT_METHOD) {
 						throw new ComicPressException('Only one extract method can be specified');
 					}

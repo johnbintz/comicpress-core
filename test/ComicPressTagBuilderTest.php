@@ -213,6 +213,21 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected_pieces, ComicPressTagBuilder::parse_method($method_name));
 	}
 
+	function providerTestMethodParserExceptions() {
+		return array(
+			array('first_in_'),
+			array('first_post_id')
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestMethodParserExceptions
+	 * @expectedException ComicPressException
+	 */
+	function testMethodParserExceptions($method_name) {
+		ComicPressTagBuilder::parse_method($method_name);
+	}
+
 	function testMethodParserWithParam() {
 		extract($this->setupStorylineBuilderTest());
 

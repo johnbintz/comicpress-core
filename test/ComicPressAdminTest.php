@@ -129,7 +129,29 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
     		array(
     			'enabled_backends' => array('ComicPressBackendURLFactory')
     		),
-    	)
+    	),
+    	array(
+    		array(
+    			'category_groupings' => array()
+    		),
+	    	array(
+	    		'category_groupings' => array(
+	    			'test' => array(
+	    				'name' => 'empty'
+	    			),
+	    			'test2' => array(
+	    				'name' => 'full',
+	    				'category' => array(1,2,3)
+	    			)
+	    		)
+	    	),
+	    	array(
+	    		'category_groupings' => array(
+	    			'full' => array(1,2,3),
+	    			'empty' => array()
+	    		)
+	    	)
+    	),
     );
   }
 
