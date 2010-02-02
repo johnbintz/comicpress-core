@@ -19,6 +19,7 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 		$valid_backend = new ComicPressBackendFilesystem();
 		$valid_backend->id = 'filesystem-1--test';
 		$valid_backend->files_by_type = array('comic' => 'comic-file');
+		$valid_backend->file_urls_by_type = array('comic' => 'comic-url');
 
 		return array(
 			array('blah', false),
@@ -35,7 +36,14 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 	function testGenerateFromID($id, $is_successful) {
 		wp_insert_post((object)array('ID' => 1));
 
-	  update_post_meta(1, 'backend_filesystem_files_by_type', array('-test' => array('comic' => 'comic-file')));
+	  update_post_meta(
+	  	1,
+	  	'backend_filesystem_files_by_type',
+	  	array(
+	  		array('-test' => array('comic' => 'comic-file')),
+	  		array('-test' => array('comic' => 'comic-url')),
+	  	)
+	  );
 
 		if ($is_successful) {
 			$return = $is_successful;
@@ -58,7 +66,13 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 
 		$comicpress->comicpress_options['backend_options']['filesystem']['search_pattern'] = 'test';
 
-		$fs = $this->getMock('ComicPressBackendFilesystemFactory', array('process_search_string', 'find_matching_files', 'group_by_root', 'has_common_filename_pattern'));
+		$fs = $this->getMock('ComicPressBackendFilesystemFactory', array(
+			'process_search_string',
+			'find_matching_files',
+			'group_by_root',
+			'has_common_filename_pattern',
+			'get_urls_for_post_roots'
+		));
 
 		$fs->expects($this->at(0))->method('process_search_string')->with($post, 'comic')->will($this->returnValue(array('comic')));
 		$fs->expects($this->at(1))->method('find_matching_files')->with(array('comic'))->will($this->returnValue(array('comic')));
@@ -74,6 +88,19 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 				'rss' => 'rss',
 			)
 		)));
+		$fs->expects($this->at(6))->method('get_urls_for_post_roots')->with(
+			array(
+				'root' => array(
+					'comic' => 'comic',
+					'rss' => 'rss',
+				)
+			), $post
+		)->will($this->returnValue(array(
+			'root' => array(
+				'comic' => 'comic-url',
+				'rss' => 'rss-url',
+			)
+		)));
 
 		$return = $fs->generate_from_post($post);
 
@@ -85,9 +112,22 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 		), $return[0]->files_by_type);
 
 		$this->assertEquals(array(
-			'root' => array(
-				'comic' => 'comic',
-				'rss' => 'rss',
+			'comic' => 'comic-url',
+			'rss'   => 'rss-url'
+		), $return[0]->file_urls_by_type);
+
+		$this->assertEquals(array(
+			array(
+				'root' => array(
+					'comic' => 'comic',
+					'rss' => 'rss',
+				)
+			),
+			array(
+				'root' => array(
+					'comic' => 'comic-url',
+					'rss' => 'rss-url',
+				)
 			)
 		), get_post_meta(1, 'backend_filesystem_files_by_type', true));
 	}
@@ -117,7 +157,24 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 			  ),
 			  2
 			),
-			array('%wordpress%/%upload-path%/comic/%date-Y%/%date-Y-m-d%*.jpg', array('/wordpress/upload/comic/2009/2009-01-01*.jpg')),
+			array(
+				'%wordpress%/%upload-path%/comic/%date-Y%/%date-Y-m-d%*.jpg',
+				array(
+					'/wordpress/upload/comic/2009/2009-01-01*.jpg'
+				)
+			),
+			array(
+				'%wordpress-url%/%type%/%filename%',
+				array(
+					'http://wordpress/comic/filename.jpg'
+				)
+			),
+			array(
+				'http://cdn.domain.name/%type%/%filename%',
+				array(
+					'http://cdn.domain.name/comic/filename.jpg'
+				)
+			),
 		);
 	}
 
@@ -142,6 +199,7 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 		wp_set_post_categories(2, array(4));
 
 		update_option('upload_path', 'upload');
+		update_option('home', 'http://wordpress/');
 
 		$fs->search_string = $string;
 
@@ -150,7 +208,7 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 			'backend_options' => array('filesystem' => array('folders' => array('comic' => 'comic-folder')))
 		);
 
-		$this->assertEquals($expected_searches, $fs->process_search_string($posts[$post_id_to_use], 'comic'));
+		$this->assertEquals($expected_searches, $fs->process_search_string($posts[$post_id_to_use], 'comic', 'filename.jpg'));
 	}
 
 
@@ -302,5 +360,37 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 		  'backend_options' => array('filesystem' => array('folders' => array('comic' => 'comic')))
 		);
 		$this->assertEquals($expected_result, $this->fa->_replace_type_folder(null, $type));
+	}
+
+	function testGetURLPattern() {
+		$comicpress = ComicPress::get_instance(true);
+		$comicpress->comicpress_options = array(
+		  'backend_options' => array('filesystem' => array('url_pattern' => 'pattern'))
+		);
+
+		$this->assertEquals('pattern', $this->fa->_get_url_pattern());
+	}
+
+	function testGetURLsForPostRoots() {
+		$roots = array(
+			'one' => array(
+				'comic' => '/this/file1.jpg'
+			),
+			'two' => array(
+				'rss' => '/this/file2.jpg'
+			)
+		);
+
+		$fa = $this->getMock('ComicPressBackendFilesystemFactory', array('_get_url_pattern'));
+		$fa->expects($this->any())->method('_get_url_pattern')->will($this->returnValue('test/%type%/%date-Y%/%filename%'));
+
+		$this->assertEquals(array(
+			'one' => array(
+				'comic' => 'test/comic/2010/file1.jpg'
+			),
+			'two' => array(
+				'rss' => 'test/rss/2010/file2.jpg'
+			)
+		), $fa->get_urls_for_post_roots($roots, (object)array('post_date' => '2010-01-01')));
 	}
 }

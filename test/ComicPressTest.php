@@ -134,14 +134,7 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
             'dimensions' => '1000x'
           )
         )
-      ), '1000x'),
-      array(array(
-        'image_types' => array(
-          'comic' => array(
-            'test' => 'hello'
-          )
-        )
-      ), 'default')
+      ), '1000x')
     );
   }
 
@@ -150,7 +143,9 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
    */
   function testLoad($options_array, $expected_dimensions) {
     update_option('comicpress-options', $options_array);
-    if ($expected_dimensions == 'default') { $expected_dimensions = $this->cp->comicpress_options['image_types']['comic']['dimensions']; }
+    if ($expected_dimensions == 'default') {
+    	$expected_dimensions = $this->cp->default_image_types['comic']['dimensions'];
+   	}
     $this->cp->load();
     $this->assertEquals($expected_dimensions, $this->cp->comicpress_options['image_types']['comic']['dimensions']);
   }

@@ -1,6 +1,8 @@
 <?php
 
 class ComicPressBackend {
+	function __construct() {}
+
 	function _embed_image($size) {
 		$size = $this->ensure_type($size);
 		$extras = array();

@@ -4,7 +4,31 @@ require_once(dirname(__file__) . '/../ComicPressBackend.inc');
 
 class ComicPressBackendFilesystem extends ComicPressBackend {
 	var $search_string = '';
-	var $id, $files_by_type = array();
+	var $id, $files_by_type = array(), $file_urls_by_type = array();
+	var $source_name;
+
+	function __construct() {
+		parent::__construct();
+		$this->source_name = __('Filesystem', 'comicpress');
+	}
+
+	function dims($size = null) {
+		$dims = array();
+
+		if ($result = getimagesize($this->files_by_type[$this->ensure_type($size)])) {
+			$dims = array_combine(array('width', 'height'), array_slice($result, 0, 2));
+		}
+
+		return $dims;
+	}
+
+	function url($size = null) {
+		return $this->file_urls_by_type[$this->ensure_type($size)];
+	}
+
+	function file($size = null) { return $this->files_by_type[$this->ensure_type($size)]; }
+	function alt() {}
+	function title() {}
 }
 
 class ComicPressBackendFilesystemFactory {
@@ -17,11 +41,17 @@ class ComicPressBackendFilesystemFactory {
 			list($all, $post_id, $root) = $matches;
 
 			if (($result = get_post_meta($post_id, 'backend_filesystem_files_by_type', true)) !== false) {
-				if (isset($result[$root])) {
-					$return = new ComicPressBackendFilesystem();
-					$return->id = $id;
-					$return->files_by_type = $result[$root];
-					return $return;
+				if (is_array($result)) {
+					if (isset($result[0][$root])) {
+						$return = new ComicPressBackendFilesystem();
+						$return->id = $id;
+
+						foreach (array('files_by_type', 'file_urls_by_type') as $index => $name) {
+							$return->{$name} = $result[$index][$root];
+						}
+
+						return $return;
+					}
 				}
 			}
 		}
@@ -29,12 +59,20 @@ class ComicPressBackendFilesystemFactory {
 	}
 
 	function _get_search_pattern() {
+		return $this->_get_pattern('search_pattern');
+	}
+
+	function _get_url_pattern() {
+		return $this->_get_pattern('url_pattern');
+	}
+
+	function _get_pattern($which) {
 		$comicpress = ComicPress::get_instance();
 
 		if (isset(
-		  $comicpress->comicpress_options['backend_options']['filesystem']['search_pattern']
+		  $comicpress->comicpress_options['backend_options']['filesystem'][$which]
 		)) {
-			return (string)$comicpress->comicpress_options['backend_options']['filesystem']['search_pattern'];
+			return (string)$comicpress->comicpress_options['backend_options']['filesystem'][$which];
 		}
 
 		return '';
@@ -44,7 +82,7 @@ class ComicPressBackendFilesystemFactory {
 		$return = array();
 		$comicpress = ComicPress::get_instance();
 
-		$this->search_pattern = $this->_get_search_pattern();
+		$this->search_string = $this->_get_search_pattern();
 
 		if (isset($comicpress->comicpress_options['image_types'])) {
 			$files = array();
@@ -62,11 +100,15 @@ class ComicPressBackendFilesystemFactory {
 			if (($filename_pattern = $this->has_common_filename_pattern($all_patterns)) !== false) {
 				if (!empty($files)) {
 					$grouped_by_root = $this->group_by_root($filename_pattern, $files);
-					update_post_meta($post->ID, 'backend_filesystem_files_by_type', $grouped_by_root);
+					$urls_by_root = $this->get_urls_for_post_roots($grouped_by_root, $post);
+
+					update_post_meta($post->ID, 'backend_filesystem_files_by_type', array($grouped_by_root, $urls_by_root));
 					foreach ($grouped_by_root as $root => $files_for_root) {
 						$fs = new ComicPressBackendFilesystem();
 						$fs->id = 'filesystem-' . $post->ID . '-' . $root;
 						$fs->files_by_type = $files_for_root;
+						$fs->file_urls_by_type = $urls_by_root[$root];
+
 						$return[] = $fs;
 					}
 				}
@@ -76,16 +118,15 @@ class ComicPressBackendFilesystemFactory {
 		return $return;
 	}
 
-	function process_search_string($post, $type) {
+	function process_search_string($post, $type, $filename = null) {
 		$this->_searches = array($this->search_string);
+		$this->_filename = $filename;
 
 		do {
 			$any_found = false;
 			for ($i = 0; $i < count($this->_searches); ++$i) {
 				$search = $this->_searches[$i];
-				if (preg_match('#%([a-z0-9\-]+)%#i', $search, $matches) > 0) {
-					$any_found = true;
-
+				if (preg_match('#%([a-z0-9-]+?)%#i', $search, $matches) > 0) {
 					$found = false;
 					$parts = explode('-', $matches[1]);
 					foreach (array(
@@ -93,6 +134,7 @@ class ComicPressBackendFilesystemFactory {
 						'_replace_' . strtolower($parts[0]) => implode('-', array_slice($parts, 1))
 					) as $method => $additional) {
 						if (method_exists($this, $method)) {
+							$any_found = true;
 							$found = true;
 							$result = $this->{$method}($post, $type, $additional);
 							if ($result !== false) {
@@ -119,8 +161,12 @@ class ComicPressBackendFilesystemFactory {
 	}
 
 	// @codeCoverageIgnoreStart
-	function _replace_wordpress($post, $type) {	return ABSPATH;	}
+	function _replace_wordpress($post, $type) {	return untrailingslashit(ABSPATH);	}
 	// @codeCoverageIgnoreEnd
+
+	function _replace_wordpress_url($post, $type) { return untrailingslashit(get_option('home')); }
+
+	function _replace_filename($post, $type) { return $this->_filename; }
 
 	function _replace_type($post, $type) { return $type;	}
 
@@ -132,7 +178,7 @@ class ComicPressBackendFilesystemFactory {
 		if (isset($comicpress->comicpress_options['backend_options']['filesystem']['folders'][$type])) {
 			return $comicpress->comicpress_options['backend_options']['filesystem']['folders'][$type];
 		}
-		return false;
+		return '';
 	}
 
 	function _replace_date($post, $type, $additional) {
@@ -239,12 +285,29 @@ class ComicPressBackendFilesystemFactory {
 
 		return $roots;
 	}
+
+	function get_urls_for_post_roots($roots, $post) {
+		$urls = array();
+
+		$this->search_string = $this->_get_url_pattern();
+
+		foreach ($roots as $root => $files) {
+			$urls[$root] = array();
+			foreach ($files as $type => $file) {
+				$urls[$root][$type] = reset($this->process_search_string($post, $type, basename($file)));
+			}
+		}
+
+		return $urls;
+	}
 }
 
 // @codeCoverageIgnoreStart
 class ComicPressBackendFilesystemAdmin {
 	function options_admin() {
-		$pattern = ComicPressBackendFilesystemFactory::_get_search_pattern();
+		$factory = new ComicPressBackendFilesystemFactory();
+		$filesystem_pattern = $factory->_get_search_pattern();
+		$url_pattern = $factory->_get_url_pattern();
 
 		include('partials/backend-filesystem/options-admin.inc');
 	}
@@ -274,7 +337,7 @@ class ComicPressBackendFilesystemAdmin {
 				$comicpress->comicpress_options['backend_options']['filesystem'] = array();
 			}
 
-			foreach (array('folders', 'search_pattern') as $valid_field) {
+			foreach (array('folders', 'search_pattern', 'url_pattern') as $valid_field) {
 				if (is_array($info[$valid_field])) {
 					$comicpress->comicpress_options['backend_options']['filesystem'][$valid_field] = array();
 					foreach ($info[$valid_field] as $field => $value) {

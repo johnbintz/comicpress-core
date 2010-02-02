@@ -7,32 +7,34 @@ require_once(dirname(__FILE__) . '/ComicPressComicPost.inc');
  */
 class ComicPress {
   var $comicpress_options = array(
-		'image_types' => array(
-			'comic' => array(
-  			'default' => true,
-  			'name' => 'Comic',
-  			'dimensions' => '760x'
-  		),
-			'rss' => array(
-  			'default' => false,
-  			'name' => 'RSS',
-  			'dimensions' => '350x'
-  		),
-			'archive' => array(
-  			'default' => false,
-  			'name' => 'Archive',
-  			'dimensions' => '125x'
-  		),
-  		'mini' => array(
-  			'default' => false,
-  			'name' => 'Minithumb',
-  			'dimensions' => '100x'
-  		),
-  	),
+		'image_types'				  => array(),
     'helpers'             => array(),
 		'storyline_order'     => '',
   	'enabled_backends' 		=> null,
   	'category_groupings'  => array()
+  );
+
+  var $default_image_types = array(
+		'comic' => array(
+  		'default' => true,
+  		'name' => 'Comic',
+  		'dimensions' => '760x'
+  	),
+		'rss' => array(
+  		'default' => false,
+  		'name' => 'RSS',
+  		'dimensions' => '350x'
+  	),
+		'archive' => array(
+  		'default' => false,
+  		'name' => 'Archive',
+  		'dimensions' => '125x'
+  	),
+  	'mini' => array(
+  		'default' => false,
+  		'name' => 'Minithumb',
+  		'dimensions' => '100x'
+  	)
   );
 
   var $backends = array();
@@ -56,8 +58,10 @@ class ComicPress {
    */
   function load() {
     $result = get_option('comicpress-options');
-    if (is_array($result)) {
+    if (!empty($result) && is_array($result)) {
       $this->comicpress_options = $this->_array_merge_replace_recursive($this->comicpress_options, $result);
+    } else {
+    	$this->comicpress_options['image_types'] = $this->default_image_types;
     }
   }
 
@@ -297,4 +301,3 @@ class ComicPress {
 }
 
 class ComicPressException extends Exception {}
-
