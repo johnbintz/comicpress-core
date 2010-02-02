@@ -51,4 +51,11 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals('url', $fs->url('type'));
 	}
+
+	function testGetImageSize() {
+		$result = $this->fs->_getimagesize(dirname(__FILE__) . '/../files/test.png');
+		$this->assertTrue(is_array($result));
+		$this->assertEquals(20, $result[0]);
+		$this->assertEquals(10, $result[1]);
+	}
 }
