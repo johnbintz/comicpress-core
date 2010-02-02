@@ -12,10 +12,12 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 		$this->source_name = __('Filesystem', 'comicpress');
 	}
 
+	function _getimagesize($file) { return getimagesize($file); }
+
 	function dims($size = null) {
 		$dims = array();
 
-		if ($result = getimagesize($this->files_by_type[$this->ensure_type($size)])) {
+		if ($result = $this->_getimagesize($this->files_by_type[$this->ensure_type($size)])) {
 			$dims = array_combine(array('width', 'height'), array_slice($result, 0, 2));
 		}
 
