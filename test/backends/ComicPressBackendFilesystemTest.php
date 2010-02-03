@@ -58,4 +58,13 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(20, $result[0]);
 		$this->assertEquals(10, $result[1]);
 	}
+
+	function testFile() {
+		$fs = $this->getMock('ComicPressBackendFilesystem', array('ensure_type'));
+		$fs->expects($this->once())->method('ensure_type')->with('type')->will($this->returnValue('newtype'));
+
+		$fs->files_by_type = array('newtype' => 'file');
+
+		$this->assertEquals('file', $fs->file('type'));
+	}
 }
