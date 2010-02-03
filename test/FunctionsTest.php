@@ -100,40 +100,6 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 		$this->assertTrue(is_null($__wp_query));
 	}
 
-	function providerTestPrepR() {
-		$post = (object)array('ID' => 1);
-
-		return array(
-			array(
-				array(), array()
-			),
-			array(
-				'from_post', array('from_post' => $post)
-			),
-			array(
-				array('test' => 'test'), array('test' => 'test')
-			),
-			array(
-				array('test' => '__post'), array('test' => $post)
-			),
-			array(
-				array('test' => array('test')), array('test' => array('test'))
-			),
-			array(
-				'my-category', array('child_of' => 'my-category')
-			)
-		);
-	}
-
-	/**
-	 * @dataProvider providerTestPrepR
-	 */
-	function testPrepR($restrictions, $expected_result) {
-		add_category(1, (object)array('slug' => 'my-category'));
-
-		$this->assertEquals($expected_result, __prep_R($restrictions, (object)array('ID' => 1)));
-	}
-
 	function providerTestEM() {
 		return array(
 			array(array(), 'embed', 'default', false, false),
@@ -233,30 +199,6 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 		} else {
 			$this->assertEquals($expected_result, $result->term_id);
 		}
-	}
-
-	function providerTestIn_R() {
-		return array(
-			array(array(1), true),
-			array(array(5), false),
-			array(array(1,5), false),
-			array(array('test'), false)
-		);
-	}
-
-	/**
-	 * @dataProvider providerTestIn_R
-	 */
-	function testIn_R($categories, $expected_result) {
-		global $post;
-
-		$post = (object)array('ID' => 1);
-		wp_set_post_categories(1, $categories);
-
-		$s = new ComicPressStoryline();
-		$s->set_flattened_storyline('0/1,0/2,0/2/3,0/2/4');
-
-		$this->assertEquals($expected_result, In_R());
 	}
 
 	function providerTestF() {
