@@ -116,6 +116,46 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 		}
 	}
 
+	function providerTestPostIn() {
+		return array(
+			array(null, false),
+			array((object)array('ID' => 2), true)
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestPostIn
+	 */
+	function testPostIn($post_to_use = null, $expected_result) {
+		global $post;
+
+		$post = (object)array('ID' => 1);
+		wp_insert_post($post);
+
+		$storyline = new ComicPressStoryline();
+		$storyline->set_flattened_storyline('0/1,0/2,0/2/3,0/2/4,0/5');
+
+		foreach (array(
+			1 => array('cat_name' => 'Test 1', 'category_nicename' => 'category-1', 'category_parent' => 0),
+			2 => array('cat_name' => 'Test 2', 'category_nicename' => 'category-2', 'category_parent' => 0),
+			3 => array('cat_name' => 'Test 3', 'category_nicename' => 'category-3', 'category_parent' => 2),
+			4 => array('cat_name' => 'Test 4', 'category_nicename' => 'category-4', 'category_parent' => 2),
+			5 => array('cat_name' => 'Test 5', 'category_nicename' => 'category-5', 'category_parent' => 0),
+		) as $id => $category) {
+			add_category($id, (object)$category);
+		}
+
+		wp_set_post_categories(1, array(1));
+		wp_set_post_categories(2, array(2));
+
+		$dbi = $this->getMock('ComicPressDBInterface');
+		$core = new ComicPressTagBuilderFactory($dbi);
+
+		$post_to_use = empty($post_to_use) ? $post : $post_to_use;
+
+		$this->assertEquals($expected_result, $core->post_in('category-2', $post_to_use));
+	}
+
 	private function setupStorylineBuilderTest($for_exceptions = false) {
 		$target_post = (object)array(
 			'ID' => 1,

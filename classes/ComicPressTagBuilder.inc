@@ -22,6 +22,23 @@ class ComicPressTagBuilderFactory {
 		$a = new ComicPressTagBuilder($post, $this->storyline, $this->dbi);
 		return call_user_func_array(array($a, $method), $arguments);
 	}
+
+	public function post_in($category, $override_post = null) {
+		global $post;
+
+		$post_to_use = empty($override_post) ? $post : $override_post;
+
+		$is_in = false;
+		$categories = wp_get_post_categories($post_to_use->ID);
+		if (is_array($categories)) {
+			$children = $this->storyline->_find_children($category);
+			if (is_array($children)) {
+				$is_in = count(array_intersect($children, $categories)) > 0;
+			}
+		}
+
+		return $is_in;
+	}
 }
 
 class ComicPressTagBuilder {
