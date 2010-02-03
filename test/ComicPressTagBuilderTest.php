@@ -63,6 +63,14 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 				array('get_first_post', array(2,3,4), 'current-post'),
 				true
 			),
+			array(
+				array(
+					array('from', (object)array('other-post' => 'post')),
+					array('in', 2),
+					array('first')
+				),
+				array('get_first_post', array(2,3,4), (object)array('other-post' => 'post')),
+			)
 		);
 	}
 
@@ -168,6 +176,9 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 			array(array('bad')),
 			array(array(array('in', 1), 'bad')),
 			array(array(array('in', 1), 'date')),
+			array(array(array('from', 'test'))),
+			array(array(array('in'))),
+			array(array(array('from'))),
 		);
 	}
 

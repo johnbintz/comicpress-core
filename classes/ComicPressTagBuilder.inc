@@ -45,6 +45,16 @@ class ComicPressTagBuilder {
 				if (empty($this->post)) { throw new Exception('You need to have retrieved a post for setup to work'); }
 				$this->_setup_postdata($this->post);
 				return $this->post;
+			case 'from':
+				if (!isset($arguments[0])) {
+					throw new ComicPressException('Need to specify a post');
+				}
+				if (!is_object($arguments[0]) && !is_array($arguments[0])) {
+					throw new ComicPressException('Provided post needs to be an array or object');
+				}
+				$this->parent_post = (object)$arguments[0];
+				$ok = true;
+				break;
 			case 'next':
 			case 'previous':
 			case 'first':
@@ -53,7 +63,9 @@ class ComicPressTagBuilder {
 				$ok = true;
 				break;
 			case 'in':
-				if (!isset($arguments[0])) { throw new Exception('Need to specify a category');	}
+				if (!isset($arguments[0])) {
+					throw new ComicPressException('Need to specify a category');
+				}
 				$this->restrictions[] = array('child_of', $arguments[0]);
 				$ok = true;
 				break;
