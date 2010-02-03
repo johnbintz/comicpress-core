@@ -54,13 +54,22 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 				),
 				array('get_first_post', array(2,3,4), 'current-post')
 			),
+			array(
+				array(
+					array('in', 2),
+					array('first'),
+					array('setup')
+				),
+				array('get_first_post', array(2,3,4), 'current-post'),
+				true
+			),
 		);
 	}
 
 	/**
 	 * @dataProvider providerTestBuilder
 	 */
-	function testStorylineBuilder($instructions, $expected_dbi_call) {
+	function testStorylineBuilder($instructions, $expected_dbi_call, $expects_setup_postdata = false) {
 		global $post, $wp_test_expectations;
 		$post = 'current-post';
 
@@ -69,6 +78,10 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 		$dbi = $this->getMock('ComicPressDBInterface', array($method));
 		$expectation = $dbi->expects($this->once())->method($method);
 		call_user_func_array(array($expectation, 'with'), $expected_dbi_call);
+
+		if ($expects_setup_postdata) {
+			call_user_func(array($expectation, 'will'), $this->returnValue('new-post'));
+		}
 
 		$core = new ComicPressTagBuilderFactory($dbi);
 
@@ -88,6 +101,10 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 		foreach ($instructions as $instruction) {
 			$method = array_shift($instruction);
 			$core = call_user_func_array(array($core, $method), $instruction);
+		}
+
+		if ($expects_setup_postdata) {
+			$this->assertEquals('new-post', $post);
 		}
 	}
 
@@ -203,6 +220,14 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 					array('permalink'),
 				)
 			),
+			array(
+				'setup_first_post_in_category_1',
+				array(
+					array('in', 'category-1'),
+					array('first'),
+					array('setup')
+				)
+			)
 		);
 	}
 
@@ -216,7 +241,9 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 	function providerTestMethodParserExceptions() {
 		return array(
 			array('first_in_'),
-			array('first_post_id')
+			array('first_post_id'),
+			array('setup_setup'),
+			array('setup_first_permalink')
 		);
 	}
 

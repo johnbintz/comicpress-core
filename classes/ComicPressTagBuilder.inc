@@ -34,11 +34,17 @@ class ComicPressTagBuilder {
 		$this->parent_post = $parent_post;
 	}
 
+	public function _setup_postdata($post) { setup_postdata($post); }
+
 	public function __call($method, $arguments) {
 		$ok = false;
 		$return = $this;
 
 		switch ($method) {
+			case 'setup':
+				if (empty($this->post)) { throw new Exception('You need to have retrieved a post for setup to work'); }
+				$this->_setup_postdata($this->post);
+				return $this->post;
 			case 'next':
 			case 'previous':
 			case 'first':
@@ -88,6 +94,7 @@ class ComicPressTagBuilder {
 	const START_PARSE = 'start parse';
 	const HAS_POST_METHOD = 'has post method';
 	const HAS_EXTRACT_METHOD = 'has extract method';
+	const IS_SETUP = 'is setup';
 
 	public function parse_method($method_name, $extract_method_arguments = null) {
 		$methods = array();
@@ -98,6 +105,7 @@ class ComicPressTagBuilder {
 
 		$post_method = null;
 		$extract_method = null;
+		$is_setup = false;
 
 		while (!empty($parts)) {
 			$current = strtolower(array_shift($parts));
@@ -121,20 +129,35 @@ class ComicPressTagBuilder {
 				}
 
 				if (in_array($current, array('id', 'permalink', 'title', 'timestamp', 'date', 'post'))) {
-					if ($state == self::HAS_EXTRACT_METHOD) {
-						throw new ComicPressException('Only one extract method can be specified');
+					if ($is_setup) {
+						if ($current != 'post') {
+							throw new ComicPressException('You can only set up a post');
+						}
+						$extract_method = 'setup';
+					} else {
+						if ($state == self::HAS_EXTRACT_METHOD) {
+							throw new ComicPressException('Only one extract method can be specified');
+						}
+						$extract_method = $current;
+						$state = self::HAS_EXTRACT_METHOD;
 					}
-					$extract_method = $current;
-					$state = self::HAS_EXTRACT_METHOD;
 				}
 			}
 
-			if ($state == self::START_PARSE) {
-				if (in_array($current, array('first', 'previous', 'next', 'last'))) {
-					$post_method = $current;
-					$state = self::HAS_POST_METHOD;
+			if (in_array($state, array(self::START_PARSE, self::IS_SETUP))) {
+				if ($current == 'setup') {
+					if ($state == self::IS_SETUP) {
+						throw new ComicPressException('Setup need only be called once');
+					}
+					$is_setup = true;
+					$state = self::IS_SETUP;
 				} else {
-					throw new ComicPressException("${current} isn't allowed at this point");
+					if (in_array($current, array('first', 'previous', 'next', 'last'))) {
+						$post_method = $current;
+						$state = self::HAS_POST_METHOD;
+					} else {
+						throw new ComicPressException("${current} isn't allowed at this point");
+					}
 				}
 			}
 		}
