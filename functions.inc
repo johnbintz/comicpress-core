@@ -67,21 +67,6 @@ function Unprotect() {
 }
 
 /**
- * Retrieve post attachment info to be used with EM().
- * @param object $override_post The post to retrieve attachment info for. If not provided, use the current Loop post.
- * @return array The list of attachment info.
- */
-function M($override_post = null) {
-	global $post, $__attachments;
-	$post_to_use = !is_null($override_post) ? $override_post : $post;
-
-	$comic_post = new ComicPressComicPost($post_to_use);
-	$__attachments = $comic_post->get_attachments_with_children(true);
-
-	return $__attachments;
-}
-
-/**
  * Call a function on the backend specified by the provided attachment info.
  * @param array $attachment_info The post attachment info from M().
  * @param string $which The subattachment short name to reference.

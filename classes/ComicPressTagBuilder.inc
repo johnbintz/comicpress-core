@@ -51,7 +51,13 @@ class ComicPressTagBuilder {
 		$this->parent_post = $parent_post;
 	}
 
-	public function _setup_postdata($post) { setup_postdata($post); }
+	public function _setup_postdata($post) {
+		setup_postdata($post);
+	}
+
+	public function _new_comicpresscomicpost($post) {
+		return new ComicPressComicPost($post);
+	}
 
 	public function __call($method, $arguments) {
 		$ok = false;
@@ -101,6 +107,9 @@ class ComicPressTagBuilder {
 				return get_permalink($this->post->ID);
 			case 'post':
 				return $this->post;
+			case 'media':
+				$comic_post = $this->_new_comicpresscomicpost($this->post);
+				return $comic_post->get_attachments_with_children(true);
 			default:
 				$methods = $this->parse_method($method, $arguments);
 				if (!empty($methods)) {

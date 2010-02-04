@@ -70,7 +70,7 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 					array('first')
 				),
 				array('get_first_post', array(2,3,4), (object)array('other-post' => 'post')),
-			)
+			),
 		);
 	}
 
@@ -312,5 +312,28 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 		$core = new ComicPressTagBuilderFactory($dbi);
 
 		$this->assertEquals('2010-01-01', $core->first_date_in_1('Y-m-d'));
+	}
+
+	function testMedia() {
+		$core = $this->getMock('ComicPressTagBuilder', array('_new_comicpresscomicpost'), array(), 'ComicPressTagBuilder_Mock', false);
+		$core->post = 'this-post';
+
+		$comicpresscomicpost = $this->getMock('ComicPressComicPost', array('get_attachments_with_children'));
+		$comicpresscomicpost->expects($this->once())
+												->method('get_attachments_with_children')
+												->with(true)
+												->will($this->returnValue(array('post-media')));
+
+		$core->expects($this->once())
+				 ->method('_new_comicpresscomicpost')
+				 ->with('this-post')
+				 ->will($this->returnValue($comicpresscomicpost));
+
+		$this->assertEquals(array('post-media'), $core->media());
+	}
+
+	function testComicPressComicPost() {
+		$a = ComicPressTagBuilder::_new_comicpresscomicpost('test');
+		$this->assertTrue(is_a($a, 'ComicPressComicPost'));
 	}
 }
