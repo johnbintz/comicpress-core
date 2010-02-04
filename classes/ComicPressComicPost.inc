@@ -209,5 +209,3 @@ class ComicPressComicPost {
 		return $attachments_with_children;
   }
 }
-
-?>

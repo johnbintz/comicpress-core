@@ -108,8 +108,13 @@ class ComicPressTagBuilder {
 			case 'post':
 				return $this->post;
 			case 'media':
-				$comic_post = $this->_new_comicpresscomicpost($this->post);
-				return $comic_post->get_attachments_with_children(true);
+				if (isset($this->post)) {
+					$comic_post = $this->_new_comicpresscomicpost($this->post);
+					return $comic_post->get_attachments_with_children(true);
+				} else {
+					$which = (isset($arguments[1])) ? $arguments[1] : 'default';
+					return ComicPressBackend::generate_from_id($arguments[0][$which]);
+				}
 			default:
 				$methods = $this->parse_method($method, $arguments);
 				if (!empty($methods)) {

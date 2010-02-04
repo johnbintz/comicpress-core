@@ -347,4 +347,21 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 		$a = ComicPressTagBuilder::_new_comicpresscomicpost('test');
 		$this->assertTrue(is_a($a, 'ComicPressComicPost'));
 	}
+
+	function testFactoryMedia() {
+		$dbi = $this->getMock('ComicPressDBInterface');
+		$core = new ComicPressTagBuilderFactory($dbi);
+
+		$comicpress = ComicPress::get_instance(true);
+
+		$test_backend = $this->getMock('ComicPressFakeBackendFactory', array('generate_from_id'));
+		$test_backend->expects($this->once())
+								 ->method('generate_from_id')
+								 ->with('my-image')
+								 ->will($this->returnValue('my-backend'));
+
+		$comicpress->backends = array($test_backend);
+
+		$this->assertEquals('my-backend', $core->media(array('default' => 'my-image')));
+	}
 }

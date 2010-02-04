@@ -61,64 +61,6 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 		$this->assertTrue(is_null($__wp_query));
 	}
 
-	function providerTestEM() {
-		return array(
-			array(array(), 'embed', 'default', false, false),
-			array(
-				array('default' => 'test-1'),
-				'embed',
-				'default',
-				'test-1',
-				'embed'
-			),
-			array(
-				array('default' => 'test-1'),
-				'cats',
-				'default',
-				'test-1',
-				false
-			),
-			array(
-				array('default' => 'test-1'),
-				'embed',
-				'comic',
-				false,
-				false
-			),
-			array(
-				array('default' => 'test-1', 'comic' => 'test-2'),
-				'embed',
-				'comic',
-				'test-2',
-				'embed'
-			),
-
-		);
-	}
-
-	/**
-	 * @dataProvider providerTestEM
-	 */
-	function testEM($info, $action, $which, $will_get_id, $expected_result) {
-		$backend = $this->getMock('ComicPressFakeBackend', array('generate_from_id', 'embed', 'url'));
-		if (is_string($will_get_id)) {
-			$backend->expects($this->once())->method('generate_from_id')->with($will_get_id)->will($this->returnValue($backend));
-
-			if (method_exists($backend, $action)) {
-				$backend->expects($this->once())->method($action)->will($this->returnValue($expected_result));
-			} else {
-				$backend->expects($this->never())->method($action);
-			}
-		} else {
-			$backend->expects($this->never())->method('generate_from_id');
-		}
-
-		$comicpress = ComicPress::get_instance();
-		$comicpress->backends = array($backend);
-
-		$this->assertEquals($expected_result, EM($info, $which, $action));
-	}
-
 	function testSL() {
 		$s = new ComicPressStoryline();
 		$s->set_flattened_storyline('0/1,0/2,0/2/3');

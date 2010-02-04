@@ -67,31 +67,6 @@ function Unprotect() {
 }
 
 /**
- * Call a function on the backend specified by the provided attachment info.
- * @param array $attachment_info The post attachment info from M().
- * @param string $which The subattachment short name to reference.
- * @param string $action The method to call on the backend.
- * @return object The result from the backend.
- */
-function EM($attachment_info, $which = 'default', $action = 'embed') {
-	if (substr($action, 0, 1) != '_') {
-		$args = func_get_args();
-
-		if (isset($attachment_info[$which])) {
-			if (($attachment = ComicPressBackend::generate_from_id($attachment_info[$which])) !== false) {
-				if (method_exists($attachment, $action)) {
-					return call_user_func_array(array($attachment, $action), array_merge(array($which), array_slice($args, 3)));
-				}
-
-				switch ($action) {
-					case 'object': return $attachment;
-				}
-			}
-		}
-	}
-}
-
-/**
  * Return the raw storyline structure.
  * @return array The astoryline structure from ComicPressStoryline
  */
