@@ -278,6 +278,14 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 					array('first'),
 					array('setup')
 				)
+			),
+			array(
+				'media_for_first_post_in_category_1',
+				array(
+					array('in', 'category-1'),
+					array('first'),
+					array('media')
+				)
 			)
 		);
 	}
@@ -294,7 +302,10 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 			array('first_in_'),
 			array('first_post_id'),
 			array('setup_setup'),
-			array('setup_first_permalink')
+			array('setup_first_permalink'),
+			array('setup_media'),
+			array('media_setup'),
+			array('setup_for')
 		);
 	}
 

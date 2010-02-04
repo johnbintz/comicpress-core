@@ -133,6 +133,7 @@ class ComicPressTagBuilder {
 	const HAS_POST_METHOD = 'has post method';
 	const HAS_EXTRACT_METHOD = 'has extract method';
 	const IS_SETUP = 'is setup';
+	const IS_MEDIA = 'is media';
 
 	public function parse_method($method_name, $extract_method_arguments = null) {
 		$methods = array();
@@ -144,6 +145,7 @@ class ComicPressTagBuilder {
 		$post_method = null;
 		$extract_method = null;
 		$is_setup = false;
+		$is_media = false;
 
 		while (!empty($parts)) {
 			$current = strtolower(array_shift($parts));
@@ -167,11 +169,11 @@ class ComicPressTagBuilder {
 				}
 
 				if (in_array($current, array('id', 'permalink', 'title', 'timestamp', 'date', 'post'))) {
-					if ($is_setup) {
+					if ($is_setup || $is_media) {
 						if ($current != 'post') {
 							throw new ComicPressException('You can only set up a post');
 						}
-						$extract_method = 'setup';
+						$extract_method = $is_setup ? 'setup' : 'media';
 					} else {
 						if ($state == self::HAS_EXTRACT_METHOD) {
 							throw new ComicPressException('Only one extract method can be specified');
@@ -182,20 +184,35 @@ class ComicPressTagBuilder {
 				}
 			}
 
-			if (in_array($state, array(self::START_PARSE, self::IS_SETUP))) {
-				if ($current == 'setup') {
-					if ($state == self::IS_SETUP) {
-						throw new ComicPressException('Setup need only be called once');
-					}
-					$is_setup = true;
-					$state = self::IS_SETUP;
-				} else {
-					if (in_array($current, array('first', 'previous', 'next', 'last'))) {
-						$post_method = $current;
-						$state = self::HAS_POST_METHOD;
-					} else {
-						throw new ComicPressException("${current} isn't allowed at this point");
-					}
+			if (in_array($state, array(self::START_PARSE, self::IS_SETUP, self::IS_MEDIA))) {
+				switch ($current) {
+					case 'setup':
+						if ($state != self::START_PARSE) {
+							throw new ComicPressException('Setup can only be called at the beginning');
+						}
+						$is_setup = true;
+						$state = self::IS_SETUP;
+						break;
+					case 'media':
+						if ($state != self::START_PARSE) {
+							throw new ComicPressException('Media can only be called at the beginning');
+						}
+						$is_media = true;
+						$state = self::IS_MEDIA;
+						break;
+					case 'for':
+						if ($state != self::IS_MEDIA) {
+							throw new ComicPressException('"for" only allowed in media methods');
+						}
+						break;
+					default:
+						if (in_array($current, array('first', 'previous', 'next', 'last'))) {
+							$post_method = $current;
+							$state = self::HAS_POST_METHOD;
+						} else {
+							throw new ComicPressException("${current} isn't allowed at this point");
+						}
+						break;
 				}
 			}
 		}
