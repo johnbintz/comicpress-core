@@ -103,7 +103,6 @@ class ComicPressTagBuilder {
 		return new ComicPressComicPost($post);
 	}
 
-	// TODO categories (SC and SL)
 	// TODO filtered versions of template tags
 	public function __call($method, $arguments) {
 		$ok = false;
