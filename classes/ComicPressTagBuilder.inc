@@ -43,7 +43,7 @@ class ComicPressTagBuilderFactory {
 }
 
 class ComicPressTagBuilder {
-	public $categories, $restrictions, $storyline, $dbi, $parent_post, $post;
+	public $categories, $restrictions, $storyline, $dbi, $parent_post, $post, $category;
 
 	public function __construct($parent_post, $storyline, $dbi) {
 		$this->restrictions = array();
@@ -61,6 +61,7 @@ class ComicPressTagBuilder {
 	}
 
 	// TODO categories (SC and SL)
+	// TODO filtered versions of template tags
 	public function __call($method, $arguments) {
 		$ok = false;
 		$return = $this;
@@ -80,11 +81,48 @@ class ComicPressTagBuilder {
 				$this->parent_post = (object)$arguments[0];
 				$ok = true;
 				break;
+			case 'current':
+				if (isset($this->category)) {
+					if (isset($arguments[0])) {
+						return $this->category;
+					} else {
+						return get_category($this->category);
+					}
+				}
+				break;
+			case 'parent':
+				$id = $this->storyline->parent($this->category);
+				return isset($arguments[0]) ? get_category($id) : $id;
+			case 'children':
+				$children = $this->storyline->_find_children($this->category);
+				if (!isset($arguments[0])) {
+					foreach ($children as &$child) {
+						$child = get_category($child);
+					}
+					unset($child);
+				}
+				return $children;
 			case 'next':
 			case 'previous':
 			case 'first':
 			case 'last':
-				$this->post = call_user_func(array($this->dbi, "get_${method}_post"), $this->storyline->build_from_restrictions($this->restrictions), $this->parent_post);
+				if (isset($this->category)) {
+					switch ($method) {
+						case 'next':
+						case 'previous':
+							$id = $this->storyline->{$method}($this->category);
+							break;
+						case 'first':
+							$id = reset(array_keys($this->storyline->_structure));
+							break;
+						case 'last':
+							$id = end(array_keys($this->storyline->_structure));
+							break;
+					}
+					return isset($arguments[0]) ? get_category($id) : $id;
+				} else {
+					$this->post = call_user_func(array($this->dbi, "get_${method}_post"), $this->storyline->build_from_restrictions($this->restrictions), $this->parent_post);
+				}
 				$ok = true;
 				break;
 			case 'in':
@@ -117,6 +155,14 @@ class ComicPressTagBuilder {
 					$which = (isset($arguments[1])) ? $arguments[1] : 'default';
 					return ComicPressBackend::generate_from_id($arguments[0][$which]);
 				}
+			case 'category':
+				if (isset($arguments[0])) {
+					$this->category = $arguments[0];
+				} else {
+					$this->category = reset(wp_get_post_categories($this->parent_post->ID));
+				}
+				$ok = true;
+				break;
 			case 'structure':
 				return $this->storyline->_structure;
 			default:

@@ -378,4 +378,122 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 			'3' => array('previous' => 2, 'level' => 1),
 		), $core->structure());
 	}
+
+	function providerTestCategoryTraversal() {
+		return array(
+			array(
+				array(
+					array('category'),
+					array('current')
+				),
+				2
+			),
+			array(
+				array(
+					array('category'),
+					array('current', true)
+				),
+				2
+			),
+			array(
+				array(
+					array('category'),
+					array('next')
+				),
+				3
+			),
+			array(
+				array(
+					array('category'),
+					array('previous')
+				),
+				1
+			),
+			array(
+				array(
+					array('category'),
+					array('first')
+				),
+				1
+			),
+			array(
+				array(
+					array('category'),
+					array('last')
+				),
+				5
+			),
+			array(
+				array(
+					array('category'),
+					array('parent')
+				),
+				false
+			),
+			array(
+				array(
+					array('from', (object)array('ID' => 2)),
+					array('category'),
+					array('parent')
+				),
+				2
+			),
+			array(
+				array(
+					array('category', 4),
+					array('parent')
+				),
+				2
+			),
+			array(
+				array(
+					array('category', 2),
+					array('children', true)
+				),
+				array(2, 3, 4)
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestCategoryTraversal
+	 */
+	function testCategoryTraversal($methods, $expected_result) {
+		global $post;
+
+		$storyline = new ComicPressStoryline();
+		$storyline->set_flattened_storyline('0/1,0/2,0/2/3,0/2/4,0/5');
+
+		foreach (array(
+			1 => array('cat_name' => 'Test 1', 'category_nicename' => 'category-1', 'category_parent' => 0),
+			2 => array('cat_name' => 'Test 2', 'category_nicename' => 'category-2', 'category_parent' => 0),
+			3 => array('cat_name' => 'Test 3', 'category_nicename' => 'category-3', 'category_parent' => 2),
+			4 => array('cat_name' => 'Test 4', 'category_nicename' => 'category-4', 'category_parent' => 2),
+			5 => array('cat_name' => 'Test 5', 'category_nicename' => 'category-5', 'category_parent' => 0),
+		) as $id => $category) {
+			add_category($id, (object)$category);
+		}
+
+		$post = (object)array('ID' => 1);
+
+		$dbi = $this->getMock('ComicPressDBInterface');
+		$core = new ComicPressTagBuilderFactory($dbi);
+
+		wp_insert_post($post);
+		wp_insert_post((object)array('ID' => 2));
+
+		wp_set_post_categories(1, array(2));
+		wp_set_post_categories(2, array(3));
+
+		foreach ($methods as $method_info) {
+			$method = array_shift($method_info);
+			$core = call_user_func_array(array($core, $method), $method_info);
+		}
+
+		if (is_object($core)) {
+			$this->assertEquals($expected_result, $core->cat_ID);
+		} else {
+			$this->assertEquals($expected_result, $core);
+		}
+	}
 }
