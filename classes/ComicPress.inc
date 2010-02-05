@@ -209,34 +209,6 @@ class ComicPress {
 		return $available_backends;
   }
 
-  // @codeCoverageIgnoreStart
-
-  function announce_activated_helpers() {
-    echo "<center>[ <strong>Activated ComicPress helpers:</strong> " . implode(", ", array_keys($this->comicpress_options['helpers'])) . " ]</center>";
-  }
-  /**
-   * Gather blog posts for the given index page.
-   */
-  function get_index_blog_posts_query() {
-    global $post, $paged;
-
-    $t = $post;
-
-    $wp_query = new WP_Query();
-    $wp_query->query(
-      'showposts=' .
-      (int)$this->comicpress_options['blogpost_count'] .
-      '&cat=-' .
-      $this->comicpress_options['comic_category_id'] .
-      '&paged=' .
-      $paged
-    );
-
-    return $wp_query;
-  }
-
-  // @codeCoverageIgnoreEnd
-
 	/**
 	 * Search a path for directories named after the slugs provided.
 	 * @param array $categories A list of category slugs going from child -> parent -> root.

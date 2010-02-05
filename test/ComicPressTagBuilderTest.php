@@ -505,4 +505,21 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 			}
 		}
 	}
+
+	function testFindFilePassthru() {
+		$dbi = $this->getMock('ComicPressDBInterface');
+		$core = new ComicPressTagBuilderFactory($dbi);
+
+		$comicpress = $this->getMock('ComicPress', array('find_file'));
+		$comicpress->expects($this->once())
+		           ->method('find_file')
+		           ->with('name', 'path', 'categories')
+		           ->will($this->returnValue('file'));
+
+		ComicPress::get_instance($comicpress);
+
+		$this->assertEquals('file', $core->find_file('name', 'path', 'categories'));
+
+		ComicPress::get_instance(true);
+	}
 }

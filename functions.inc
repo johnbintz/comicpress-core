@@ -1,7 +1,6 @@
 <?php
 
 foreach (array(
-	'F' => 3,
 	'Protect' => 0,
 	'Restore' => 0,
 	'Unprotect' => 0,
@@ -11,17 +10,6 @@ foreach (array(
 	} else {
 		add_filter("comicpress-${function}", $function, 10, $param_count);
 	}
-}
-
-// Global template functions for ComicPress
-// TODO is this even necessary anymore?
-function F($name, $path, $override_post = null) {
-	global $post;
-
-	$comic_post = new ComicPressComicPost(is_null($override_post) ? $post : $override_post);
-
-	$comicpress = ComicPress::get_instance();
-	return $comicpress->find_file($name, $path, $comic_post->find_parents());
 }
 
 /**

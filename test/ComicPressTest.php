@@ -363,4 +363,8 @@ class ComicPressTest extends PHPUnit_Framework_TestCase {
 
   	$this->assertEquals($expected_backends, $cp->comicpress_options['enabled_backends']);
   }
+
+  function testGetInstanceObjectOverride() {
+  	$this->assertEquals((object)array(), ComicPress::get_instance((object)array()));
+  }
 }

@@ -40,6 +40,11 @@ class ComicPressTagBuilderFactory {
 
 		return $is_in;
 	}
+
+	public function find_file($name, $path = '', $categories = null) {
+		$comicpress = ComicPress::get_instance();
+		return $comicpress->find_file($name, $path, $categories);
+	}
 }
 
 class ComicPressTagBuilder {
