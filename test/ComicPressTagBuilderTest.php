@@ -507,8 +507,7 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function testFindFilePassthru() {
-		$dbi = $this->getMock('ComicPressDBInterface');
-		$core = new ComicPressTagBuilderFactory($dbi);
+		$core = new ComicPressTagBuilderFactory();
 
 		$comicpress = $this->getMock('ComicPress', array('find_file'));
 		$comicpress->expects($this->once())
@@ -521,5 +520,60 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals('file', $core->find_file('name', 'path', 'categories'));
 
 		ComicPress::get_instance(true);
+	}
+
+	function providerTestProtect() {
+		return array(
+			array(null, 'test'),
+			array('test3', 'test3')
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestProtect
+	 */
+	function testProtect($post_to_use, $expected_post) {
+		global $post, $wp_query;
+
+		$post = "test";
+		$wp_query = "test2";
+
+		$core = new ComicPressTagBuilderFactory();
+
+		$core->protect($post_to_use);
+
+		$this->assertEquals($core->_post, 'test');
+		$this->assertEquals($expected_post, $post);
+		$this->assertEquals($wp_query, $core->_wp_query);
+	}
+
+	function testRestore() {
+		global $post;
+
+		$core = new ComicPressTagBuilderFactory();
+
+		$post = 'not';
+		$core->_post = 'test';
+
+		$core->restore();
+
+		$this->assertEquals($core->_post, $post);
+	}
+
+	function testUnprotect() {
+		global $post, $wp_query;
+
+		$core = new ComicPressTagBuilderFactory();
+
+		$core->_post = $core->_wp_query = 'test';
+		$post = $wp_query = 'not';
+
+		$core->unprotect();
+
+		$this->assertEquals('test', $post);
+		$this->assertEquals('test', $wp_query);
+
+		$this->assertTrue(!isset($core->_post));
+		$this->assertTrue(!isset($core->_wp_query));
 	}
 }

@@ -32,7 +32,7 @@ add_action('init', '__comicpress_init');
 
 function __comicpress_init() {
   $classes_search = array(
-    '/', '/classes/', '/classes/backends/'
+    '/classes/', '/classes/backends/'
   );
 
   foreach ($classes_search as $path) {

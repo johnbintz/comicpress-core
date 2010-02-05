@@ -2,7 +2,6 @@
 
 require_once('ComicPressStoryline.inc');
 
-// TODO Loop preservation
 class ComicPressTagBuilderFactory {
 	private $storyline, $dbi;
 
@@ -44,6 +43,45 @@ class ComicPressTagBuilderFactory {
 	public function find_file($name, $path = '', $categories = null) {
 		$comicpress = ComicPress::get_instance();
 		return $comicpress->find_file($name, $path, $categories);
+	}
+
+	/**
+	 * Protect global $post and $wp_query.
+	 * @param object $use_this_post If provided, after saving the current post, set up this post for template tag use.
+	 */
+	function protect($use_this_post = null) {
+		global $post, $wp_query;
+
+		$this->_post = $post;
+		$this->_wp_query = $wp_query;
+
+		if (!is_null($use_this_post)) {
+			$post = $use_this_post;
+			setup_postdata($post);
+		}
+	}
+
+	/**
+	 * Temporarily restore the global $post variable and set it up for use.
+	 */
+	function restore() {
+		global $post;
+
+		$post = $this->_post;
+		setup_postdata($post);
+	}
+
+	/**
+	 * Restore global $post and $wp_query.
+	 */
+	function unprotect() {
+		global $post, $wp_query;
+
+		$post = $this->_post;
+		$wp_query = $this->_wp_query;
+
+		unset($this->_post);
+		unset($this->_wp_query);
 	}
 }
 
