@@ -364,4 +364,18 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals('my-backend', $core->media(array('default' => 'my-image')));
 	}
+
+	function testCategoryStructure() {
+		$storyline = new ComicPressStoryline();
+		$storyline->set_flattened_storyline('0/1,0/2,0/3');
+
+		$dbi = $this->getMock('ComicPressDBInterface');
+		$core = new ComicPressTagBuilderFactory($dbi);
+
+		$this->assertEquals(array(
+			'1' => array('next' => 2, 'level' => 1),
+			'2' => array('next' => 3, 'previous' => 1, 'level' => 1),
+			'3' => array('previous' => 2, 'level' => 1),
+		), $core->structure());
+	}
 }

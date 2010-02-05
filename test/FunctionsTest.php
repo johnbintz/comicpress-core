@@ -61,14 +61,6 @@ class FunctionsTest extends PHPUnit_Framework_TestCase {
 		$this->assertTrue(is_null($__wp_query));
 	}
 
-	function testSL() {
-		$s = new ComicPressStoryline();
-		$s->set_flattened_storyline('0/1,0/2,0/2/3');
-		$s->read_from_options();
-
-		$this->assertEquals($s->_structure, SL());
-	}
-
 	function providerTestSC() {
 		return array(
 			array('next', 1, 2),

@@ -18,7 +18,7 @@ foreach (array(
 }
 
 // Global template functions for ComicPress
-
+// TODO is this even necessary anymore?
 function F($name, $path, $override_post = null) {
 	global $post;
 
@@ -64,16 +64,6 @@ function Unprotect() {
 	$wp_query = $__wp_query;
 
 	$__post = $__wp_query = null;
-}
-
-/**
- * Return the raw storyline structure.
- * @return array The astoryline structure from ComicPressStoryline
- */
-function SL() {
-	$storyline = new ComicPressStoryline();
-	$storyline->read_from_options();
-	return $storyline->_structure;
 }
 
 /**

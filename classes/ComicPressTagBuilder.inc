@@ -2,6 +2,7 @@
 
 require_once('ComicPressStoryline.inc');
 
+// TODO Loop preservation
 class ComicPressTagBuilderFactory {
 	private $storyline, $dbi;
 
@@ -59,6 +60,7 @@ class ComicPressTagBuilder {
 		return new ComicPressComicPost($post);
 	}
 
+	// TODO categories (SC and SL)
 	public function __call($method, $arguments) {
 		$ok = false;
 		$return = $this;
@@ -115,6 +117,8 @@ class ComicPressTagBuilder {
 					$which = (isset($arguments[1])) ? $arguments[1] : 'default';
 					return ComicPressBackend::generate_from_id($arguments[0][$which]);
 				}
+			case 'structure':
+				return $this->storyline->_structure;
 			default:
 				$methods = $this->parse_method($method, $arguments);
 				if (!empty($methods)) {
