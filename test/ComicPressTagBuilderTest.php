@@ -219,6 +219,7 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 			array(array(array('from', 'test'))),
 			array(array(array('in'))),
 			array(array(array('from'))),
+			array(array(array('current')))
 		);
 	}
 
@@ -448,9 +449,10 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 			array(
 				array(
 					array('category', 2),
-					array('children', true)
+					array('children')
 				),
-				array(2, 3, 4)
+				array(2, 3, 4),
+				true
 			),
 		);
 	}
@@ -458,7 +460,7 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @dataProvider providerTestCategoryTraversal
 	 */
-	function testCategoryTraversal($methods, $expected_result) {
+	function testCategoryTraversal($methods, $expected_result, $compare_ids = false) {
 		global $post;
 
 		$storyline = new ComicPressStoryline();
@@ -493,7 +495,14 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 		if (is_object($core)) {
 			$this->assertEquals($expected_result, $core->cat_ID);
 		} else {
-			$this->assertEquals($expected_result, $core);
+			if (is_array($core) && $compare_ids) {
+				foreach ($expected_result as $id) {
+					$cat = array_shift($core);
+					$this->assertEquals($id, $cat->cat_ID);
+				}
+			} else {
+				$this->assertEquals($expected_result, $core);
+			}
 		}
 	}
 }
