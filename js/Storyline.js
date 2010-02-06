@@ -111,6 +111,14 @@ var CategoryGroupings = {};
 			$('.category-group-holder input[type=checkbox], .category-group-holder label')
 				.unbind('click')
 				.click(CategoryGroupings.highlight_child_levels);
+
+			$('.delete-category-group-holder')
+				.unbind('click')
+				.click(function() {
+					if (confirm('Are you sure?')) {
+						$(this).parents('.category-group-holder').remove();
+					}
+				});
 		}(jQuery))
 	}
 
