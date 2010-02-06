@@ -235,7 +235,14 @@ tr.highlighted td {
 /* Options */
 
 .comicpress-tab-holder {
-	padding: 2px 0
+	padding: 3px 0;
+	overflow: hidden
+}
+
+.comicpress-tab-holder li {
+	float: left;
+	display: inline;
+	margin: 0
 }
 
 .comicpress-tab-holder a {
@@ -247,17 +254,12 @@ tr.highlighted td {
 	border-width: 1px 0 0 1px;
 }
 
-.comicpress-tab-holder a.last {
+.comicpress-tab-holder .last a {
 	border-right-width: 1px;
 }
 
-.comicpress-tab-holder a.active {
+.ui-tabs-selected a {
 	background-color: white
-}
-
-.comicpress-admin form {
-	border: solid black 1px;
-	padding: 0 10px 10px;
 }
 
 .category-group-holder ul ul {
@@ -276,4 +278,13 @@ tr.highlighted td {
 
 .category-group-holder .selected {
 	background-color: #99ccbb
+}
+
+.comicpress-admin-section {
+	border: solid black 1px;
+	padding: 10px
+}
+
+.comicpress-admin-section h3 {
+	margin-top: 0
 }

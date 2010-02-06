@@ -3,13 +3,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head profile="http://selenium-ide.openqa.org/profiles/test-case">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<link rel="selenium.base" href="http://comicpress-mu.local/" />
-<title>TestCategoryGroupings</title>
+<link rel="selenium.base" href="" />
+<title>TestComicImageTypes</title>
 </head>
 <body>
 <table cellpadding="1" cellspacing="1" border="1">
 <thead>
-<tr><td rowspan="1" colspan="3">TestCategoryGroupings</td></tr>
+<tr><td rowspan="1" colspan="3">TestComicImageTypes</td></tr>
 </thead><tbody>
 <tr>
 	<td>open</td>
@@ -23,17 +23,22 @@
 </tr>
 <tr>
 	<td>click</td>
-	<td>comicpress-tab-Category_Groups</td>
+	<td>comicpress-tab-Comic_Image_Types</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertVisible</td>
+	<td>comicpress-Comic_Image_Types</td>
 	<td></td>
 </tr>
 <tr>
 	<td>storeXpathCount</td>
-	<td>//div[@id=&quot;category-groups-holder&quot;]/div</td>
+	<td>//div[@id=&quot;image-type-container&quot;]/div</td>
 	<td>current_count</td>
 </tr>
 <tr>
 	<td>click</td>
-	<td>add-new-category-group</td>
+	<td>add-new-image-type</td>
 	<td></td>
 </tr>
 <tr>
@@ -43,12 +48,12 @@
 </tr>
 <tr>
 	<td>waitForElementPresent</td>
-	<td>//div[@id=&quot;category-groups-holder&quot;]/div[${current_count}]</td>
+	<td>//div[@id=&quot;image-type-container&quot;]/div[${current_count}]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>storeXpathCount</td>
-	<td>//div[@id=&quot;category-groups-holder&quot;]/div</td>
+	<td>//div[@id=&quot;image-type-container&quot;]/div</td>
 	<td>new_count</td>
 </tr>
 <tr>
@@ -58,33 +63,43 @@
 </tr>
 <tr>
 	<td>assertValue</td>
-	<td>//div[@id=&quot;category-groups-holder&quot;]/div[${new_count}]//input[contains(@name, &quot;[name]&quot;)]</td>
-	<td>group</td>
+	<td>//div[@id=&quot;image-type-container&quot;]/div[${new_count}]//input[contains(@name, &quot;[name]&quot;)]</td>
+	<td>New Type</td>
 </tr>
 <tr>
 	<td>click</td>
-	<td>//div[@id=&quot;category-groups-holder&quot;]/div[${new_count}]//a[@class=&quot;delete-category-group-holder&quot;]</td>
+	<td>//div[@id=&quot;image-type-container&quot;]/div[${new_count}]//a[@class=&quot;delete-image-type&quot;]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>assertConfirmation</td>
-	<td>Are you sure?</td>
+	<td>Are you sure?*</td>
 	<td></td>
 </tr>
 <tr>
 	<td>waitForElementNotPresent</td>
-	<td>//div[@id=&quot;category-groups-holder&quot;]/div[${current_count}]</td>
+	<td>//div[@id=&quot;image-type-container&quot;]/div[${current_count}]</td>
 	<td></td>
 </tr>
 <tr>
 	<td>storeXpathCount</td>
-	<td>//div[@id=&quot;category-groups-holder&quot;]/div</td>
+	<td>//div[@id=&quot;image-type-container&quot;]/div</td>
 	<td>new_count</td>
 </tr>
 <tr>
 	<td>assertEval</td>
 	<td>${current_count} - 1</td>
 	<td>${new_count}</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>//div[@id='comicpress-image-types-holder']/input</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextPresent</td>
+	<td>ComicPress configuration updated.</td>
+	<td></td>
 </tr>
 
 </tbody></table>

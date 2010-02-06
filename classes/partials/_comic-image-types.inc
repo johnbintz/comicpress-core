@@ -6,7 +6,6 @@
 		<?php } ?>
 	</div>
 	<a id="add-new-image-type" href="#">[+] Add a new image type</a>
-	<script type="text/javascript">ComicImageTypes.setup()</script>
 
 	<input class="button-primary" type="submit" value="<?php _e('Submit Updated ComicPress Options', 'comicpress') ?>" />
 </div>

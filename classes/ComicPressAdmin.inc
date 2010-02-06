@@ -88,7 +88,7 @@ class ComicPressAdmin {
 		switch ($plugin_page) {
 			case 'comicpress/render_admin':
 				wp_enqueue_style('cp-admin', plugin_dir_url(dirname(__FILE__)) . '/css/cp-admin.css');
-				wp_enqueue_script('cp-admin', plugin_dir_url(dirname(__FILE__)) . '/js/Storyline.js', array('jquery', 'jquery-ui-dialog'));
+				wp_enqueue_script('cp-admin', plugin_dir_url(dirname(__FILE__)) . '/js/Storyline.js', array('jquery', 'jquery-ui-sortable', 'jquery-ui-tabs'));
 				add_action('admin_footer', array(&$this, 'admin_footer'));
 				break;
 			case 'comicpress/comicpress_docs':
@@ -375,14 +375,14 @@ class ComicPressAdmin {
 					case 'image_types':
 						if (is_array($info['image_types'])) {
 							$this->comicpress->comicpress_options['image_types'] = array();
-							$defined_default = null;
+							$defined_default = isset($info['image_types']['_default']) ? $info['image_types']['_default'] : null;
+							unset($info['image_types']['_default']);
 							foreach ($info['image_types'] as $type => $image_info) {
 								if (is_array($image_info)) {
 									$new_value = array();
 									$new_type = $type;
 									foreach ($image_info as $field => $field_value) {
 										switch ($field) {
-											case 'default':	$defined_default = $type; break;
 											case 'dimensions':
 												if (is_array($field_value)) {
 													if (count(array_intersect(array('width', 'height'), array_keys($field_value))) == 2) {

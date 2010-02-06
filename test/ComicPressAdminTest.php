@@ -52,9 +52,10 @@ class ComicPressAdminTest extends PHPUnit_Framework_TestCase {
 	    	),
 	    	array(
 	    		'image_types' => array(
+	    			'_default' => 'archive',
 	    			'comic' => array('dimensions' => array('width' => '500', 'height' => '50')),
-	    			'archive' => array('default' => 'yes', 'dimensions' => array('width' => '100', 'height' => '100')),
-	    	)
+	    			'archive' => array('dimensions' => array('width' => '100', 'height' => '100')),
+	    		)
 	    	),
 	    	array(
     			'image_types' => array(

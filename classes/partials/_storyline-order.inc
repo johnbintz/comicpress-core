@@ -10,7 +10,6 @@
 			?>
 		</div>
 	</div>
-	<script type="text/javascript">Storyline.setup()</script>
 	<p><em><?php _e('(drag and drop desired order. categories can be modified on the Posts -> Categories page)', 'comicpress') ?></em></p>
 
 	<input class="button-primary" type="submit" value="<?php _e('Submit Updated ComicPress Options', 'comicpress') ?>" />

@@ -13,7 +13,7 @@
 			<th scope="row">Default image type?</th>
 			<td>
 				<label>
-					<input type="checkbox" name="cp[image_types][<?php echo $type ?>][default]" value="yes" <?php echo (!empty($info['default'])) ? 'checked="checked"' : '' ?> />
+					<input type="radio" name="cp[image_types][_default]" value="<?php echo esc_attr($type) ?>" <?php echo (!empty($info['default'])) ? 'checked="checked"' : '' ?> />
 					<em>(<?php _e('When using a ComicPress tag without specifying a type, this one will be used', 'comicpress') ?>)</em>
 				</label>
 			</td>

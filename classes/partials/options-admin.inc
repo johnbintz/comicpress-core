@@ -5,95 +5,93 @@
 		<input type="hidden" name="cp[action]" value="comicpress-options" />
 		<input type="hidden" name="cp[_action_nonce]" value="<?php echo esc_attr($action_nonce) ?>" />
 
-		<?php include('_storyline-order.inc') ?>
+		<div id="comicpress-admin-holder">
+			<?php include('_storyline-order.inc') ?>
 
-		<h3><?php _e('Category Groups', 'comicpress') ?></h3>
+			<h3><?php _e('Category Groups', 'comicpress') ?></h3>
 
-		<div id="comicpress-category-groups-holder" class="comicpress-holder">
-			<div id="category-groups-holder">
-				<?php
-					foreach ($this->comicpress->comicpress_options['category_groupings'] as $name => $category_ids) {
-						$key = $name;
-						include('_category-grouping-editor.inc');
-					}
-				?>
+			<div id="comicpress-category-groups-holder" class="comicpress-holder">
+				<div id="category-groups-holder">
+					<?php
+						foreach ($this->comicpress->comicpress_options['category_groupings'] as $name => $category_ids) {
+							$key = $name;
+							include('_category-grouping-editor.inc');
+						}
+					?>
+				</div>
+				<a id="add-new-category-group" href="#">[+] Add a new category group</a>
+				<br />
+				<input class="button-primary" type="submit" value="<?php _e('Submit Updated ComicPress Options', 'comicpress') ?>" />
 			</div>
-			<a id="add-new-category-group" href="#">[+] Add a new category group</a>
-			<script type="text/javascript">CategoryGroupings.setup()</script>
-			<br />
-			<input class="button-primary" type="submit" value="<?php _e('Submit Updated ComicPress Options', 'comicpress') ?>" />
+
+			<?php include('_comic-image-types.inc') ?>
+
+			<h3><?php _e('Enabled Backends', 'comicpress') ?></h3>
+			<div id="comicpress-enabled-backends-holder" class="comicpress-holder">
+				<table class="widefat">
+					<?php foreach ($backends as $backend) {
+						$obj = new $backend(); ?>
+						<tr>
+							<th scope="row">
+								<label>
+									<input type="checkbox"
+												 name="cp[enabled_backends][<?php echo esc_attr($backend) ?>]"
+												 value="yes"
+												 <?php echo in_array($backend, $this->comicpress->comicpress_options['enabled_backends']) ? 'checked="checked"' : '' ?> />
+									<?php echo esc_html(preg_replace('#^ComicPressBackend(.*)Factory$#', '\1', $backend)) ?>
+								</label>
+							</th>
+							<td>
+								<?php echo esc_html($obj->description) ?>
+							</td>
+						</tr>
+					<?php } ?>
+				</table>
+
+				<p>
+					<?php _e("Disable backends you're not using to save system resources.", 'comicpress') ?>
+				</p>
+				<input class="button-primary" type="submit" value="<?php _e('Submit Updated ComicPress Options', 'comicpress') ?>" />
+			</div>
+
+			<?php do_action('comicpress-options-admin') ?>
 		</div>
-
-		<?php include('_comic-image-types.inc') ?>
-
-		<h3><?php _e('Enabled Backends', 'comicpress') ?></h3>
-		<div id="comicpress-enabled-backends-holder" class="comicpress-holder">
-			<table class="widefat">
-				<?php foreach ($backends as $backend) {
-					$obj = new $backend(); ?>
-					<tr>
-						<th scope="row">
-							<label>
-								<input type="checkbox"
-											 name="cp[enabled_backends][<?php echo esc_attr($backend) ?>]"
-											 value="yes"
-											 <?php echo in_array($backend, $this->comicpress->comicpress_options['enabled_backends']) ? 'checked="checked"' : '' ?> />
-								<?php echo esc_html(preg_replace('#^ComicPressBackend(.*)Factory$#', '\1', $backend)) ?>
-							</label>
-						</th>
-						<td>
-							<?php echo esc_html($obj->description) ?>
-						</td>
-					</tr>
-				<?php } ?>
-			</table>
-
-			<p>
-				<?php _e("Disable backends you're not using to save system resources.", 'comicpress') ?>
-			</p>
-			<input class="button-primary" type="submit" value="<?php _e('Submit Updated ComicPress Options', 'comicpress') ?>" />
-		</div>
-
-		<?php do_action('comicpress-options-admin') ?>
 	</form>
 </div>
 <script type="text/javascript">
-	(function() {
-		var tab_holder = new Element('div', { className: 'comicpress-tab-holder' });
-		$$('.comicpress-admin > h2').pop().insert({after: tab_holder});
+	(function($) {
+		var tab_holder = $('<div class="comicpress-tab-holder"><ul /></div>');
 
-		var show_tab = function(which) {
-			tab_holder.childElements().each(function(t) {
-				var is_same = (t.id == which);
-				t[is_same ? 'addClassName' : 'removeClassName']('active');
-				$('comicpress-' + t.id.replace(/^comicpress-tab-/, ''))[is_same ? 'show' : 'hide']();
-			});
-		};
+		$('#comicpress-admin-holder').prepend(tab_holder);
 
-		$$('.comicpress-admin > form > h3').each(function(t) {
-			var id_suffix = t.innerHTML.replace(/\s+/g, '_');
-			var holder = new Element("div", { className: 'comicpress-admin-section', id: 'comicpress-' + id_suffix });
-			t.insert({before: holder});
+		$('#comicpress-admin-holder h3').each(function() {
+			var id = 'comicpress-' + $(this).html().replace(/\s+/g, '_');
 
-			holder.insert(t.next().remove());
-			holder.insert({top: t.remove()});
+			var tab = $('<a>')
+				.attr('href', '#' + id)
+				.wrap('<li />')
+				.html($(this).html())
+				.parent();
 
-			var tab = new Element("a", { href: "#", id: 'comicpress-tab-' + id_suffix }).update(t.innerHTML);
-			tab_holder.insert(tab);
+			tab_holder.find('ul').append(tab);
 
-			tab.observe('click', function(e) {
-				Event.stop(e);
-				show_tab(e.target.id)
+			var holder = $('<div class="comicpress-admin-section" />').attr('id', id);
+
+			$(this).before(holder).add($(this).next()).each(function() {
+				$(holder).append($(this).clone());
+				$(this).remove();
 			});
 		});
 
-		tab_holder.childElements().pop().addClassName('last');
+		$(tab_holder).find('ul li:last').addClass('last').end().tabs();
 
-		show_tab(tab_holder.childElements().shift().id);
-
-		Event.observe(document, 'dom:loaded', function() {
+		$(document).ready(function() {
 			ComicPressAdmin.image_type_editor_nonce = '<?php echo wp_create_nonce('comicpress-get-new-image-type-editor') ?>';
 			ComicPressAdmin.category_group_editor_nonce = '<?php echo wp_create_nonce('comicpress-get-new-category-group-editor') ?>';
+
+			ComicImageTypes.setup();
+			CategoryGroupings.setup();
+			Storyline.setup();
 		});
-	}());
+	}(jQuery));
 </script>
