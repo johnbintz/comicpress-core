@@ -89,56 +89,52 @@ var CategoryGroupings = {};
 	};
 
 	CategoryGroupings.highlight_child_levels = function(e) {
-		$$('.category-group-holder input[type=checkbox]').each(function(cb) {
-			cb.disabled = false;
-		});
+		(function($) {
+			$('.category-group-holder input[type=checkbox]').attr('disabled', false);
 
-		$$('.category-group-holder li').each(function(li) {
-			var all_cb = li.select('input[type=checkbox]');
-			var cb = all_cb.shift();
-			li.removeClassName('selected');
-			if (cb && cb.checked) {
-				all_cb.each(function(ncb) {
-					ncb.disabled = true;
-				});
-				li.addClassName('selected');
-			}
-		});
+			$('.category-group-holder li')
+	    	.removeClass('selected')
+	    	.each(function() {
+	    		if ($(this).find('input[type=checkbox]:first').is('*:checked')) {
+	    			$(this).addClass('selected').find('input[type=checkbox]').not("*:first").attr('disabled', true);
+	    		}
+	    	});
 
-		$$('.category-group-holder').each(function(cgh) {
-			var all_off = true;
-			cgh.select('input[type=checkbox]').each(function(c) {
-				if (c.checked) { all_off = false; }
+			$('.category-group-holder').each(function() {
+				$(this).find('.empty-group-warning')[($(this).find('input:checked').length == 0) ? 'show' : 'hide'](250);
 			});
-			cgh.select('.empty-group-warning').pop()[all_off ? 'show' : 'hide']();
-		});
+		}(jQuery))
 	}
 
 	CategoryGroupings.setup_editors = function() {
-		$$('.category-group-holder input[type=checkbox], .category-group-holder label').each(function(cb) {
-			cb.stopObserving('click');
-			cb.observe('click', CategoryGroupings.highlight_child_levels);
-		});
+		(function($) {
+			$('.category-group-holder input[type=checkbox], .category-group-holder label')
+				.unbind('click')
+				.click(CategoryGroupings.highlight_child_levels);
+		}(jQuery))
 	}
 
 	CategoryGroupings.setup = function() {
 		CategoryGroupings.setup_editors();
 		CategoryGroupings.highlight_child_levels();
 
-		$('add-new-category-group').observe('click', function(e) {
-			Event.stop(e);
-			new Ajax.Updater('category-groups-holder', ComicPressAdmin.ajax_uri, {
-				method: 'get',
-				parameters: {
-					'cp[_nonce]': ComicPressAdmin.nonce,
-					'cp[action]': 'get-new-category-group-editor',
-					'cp[_action_nonce]': ComicPressAdmin.category_group_editor_nonce
-				},
-				onComplete: function() {
-					CategoryGroupings.setup_editors();
-				},
-				insertion: 'bottom'
+		(function($) {
+			$('#add-new-category-group').click(function() {
+				$.post(
+					ComicPressAdmin.ajax_uri,
+					{
+						'cp[_nonce]': ComicPressAdmin.nonce,
+						'cp[action]': 'get-new-category-group-editor',
+						'cp[_action_nonce]': ComicPressAdmin.category_group_editor_nonce
+					},
+					function(data) {
+						$('#category-groups-holder').append(data);
+						CategoryGroupings.setup_editors();
+					}
+				);
+
+				return false;
 			});
-		});
+		}(jQuery));
 	}
 }())

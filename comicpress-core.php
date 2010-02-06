@@ -44,9 +44,7 @@ function __comicpress_init() {
   $comicpress = ComicPress::get_instance();
   $comicpress->init();
 
-  if (is_admin()) {
-	  $comicpress_admin = new ComicPressAdmin();
-	  $comicpress_admin->init();
-	  $comicpress_admin->handle_update();
-  }
+  $comicpress_admin = new ComicPressAdmin();
+  $comicpress_admin->init();
+  $comicpress_admin->handle_update();
 }
