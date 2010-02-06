@@ -9,27 +9,27 @@ class ComicPressAdmin {
 	function init() {
 		$this->comicpress = &ComicPress::get_instance();
 
-		add_action('admin_menu', array(&$this, 'admin_menu'));
-		add_filter('attachment_fields_to_edit', array(&$this, 'setup_comic_metadata_buttons'), 10, 2);
-
-		if (current_user_can('edit_posts') && isset($comicpress->comicpress_options['helpers']['show_inline_comic_ordering'])) {
-			add_filter('comicpress_attached_image', array(&$this, 'comicpress_attached_image'), 10, 3);
-			add_filter('comicpress_display_attached_images', array(&$this, 'comicpress_display_attached_images'), 10, 2);
-		}
-
-		add_action('edit_form_advanced', array(&$this, 'edit_form_advanced'));
-		add_action('save_post', array(&$this, 'save_post'), 10, 1);
-
-		add_filter('comicpress_core_version', array(&$this, 'comicpress_core_version'));
-
-		$this->comic_image_types = array(
-			'none'    => __('Not a comic', 'comicpress'),
-			'comic'   => __('Comic', 'comicpress'),
-			'rss'     => __('RSS', 'comicpress'),
-			'archive' => __('Archive', 'comicpress')
-		);
-
 		if (is_admin()) {
+			add_action('admin_menu', array(&$this, 'admin_menu'));
+			add_filter('attachment_fields_to_edit', array(&$this, 'setup_comic_metadata_buttons'), 10, 2);
+
+			if (current_user_can('edit_posts') && isset($comicpress->comicpress_options['helpers']['show_inline_comic_ordering'])) {
+				add_filter('comicpress_attached_image', array(&$this, 'comicpress_attached_image'), 10, 3);
+				add_filter('comicpress_display_attached_images', array(&$this, 'comicpress_display_attached_images'), 10, 2);
+			}
+
+			add_action('edit_form_advanced', array(&$this, 'edit_form_advanced'));
+			add_action('save_post', array(&$this, 'save_post'), 10, 1);
+
+			add_filter('comicpress_core_version', array(&$this, 'comicpress_core_version'));
+
+			$this->comic_image_types = array(
+				'none'    => __('Not a comic', 'comicpress'),
+				'comic'   => __('Comic', 'comicpress'),
+				'rss'     => __('RSS', 'comicpress'),
+				'archive' => __('Archive', 'comicpress')
+			);
+
 			add_action('admin_notices', array(&$this, 'display_messages'));
 		} else {
 			add_action('wp_head', array(&$this, 'display_messages'));
@@ -83,12 +83,7 @@ class ComicPressAdmin {
 		add_theme_page(__("ComicPress", 'comicpress'), __('ComicPress', 'comicpress'), 'edit_themes', 'comicpress/render_admin', array(&$this, 'render_admin'));
 		add_theme_page(__("ComicPress Documentation", 'comicpress'), __('ComicPress Docs', 'comicpress'), 'edit_themes', 'comicpress/comicpress_docs', array(&$this, 'render_documentation'));
 
-		if (strpos($pagenow, "post") === 0) {
-			add_meta_box("comic-image-ordering", __("Comic Image Ordering", 'comicpress'), array(&$this, 'render_comic_image_ordering'), "post", "normal", "low");
-			wp_enqueue_script('cp-ordering', plugin_dir_url(dirname(__FILE__)) . '/js/ComicImageOrdering.js', array('scriptaculous', 'scriptaculous-slider'));
-			wp_enqueue_style('cp-admin', plugin_dir_url(dirname(__FILE__)) . '/css/cp-admin.css');
-			add_action('admin_footer', array(&$this, 'admin_footer'));
-		}
+		add_action('admin_enqueue_scripts', array(&$this, 'admin_enqueue_scripts'));
 
 		if ($plugin_page == 'comicpress/render_admin') {
 			wp_enqueue_style('cp-admin', plugin_dir_url(dirname(__FILE__)) . '/css/cp-admin.css');
@@ -102,10 +97,20 @@ class ComicPressAdmin {
 			wp_enqueue_style('prettify', plugin_dir_url(dirname(__FILE__)) . '/js/prettify/prettify.css');
 			wp_enqueue_script('scriptaculous-effects');
 		}
+	}
 
-		if (strpos($pagenow, "-upload") !== false) {
-			wp_enqueue_style('cp-admin', plugin_dir_url(dirname(__FILE__)) . '/css/cp-admin.css');
-			wp_enqueue_script('cp-media', plugin_dir_url(dirname(__FILE__)) . '/js/MediaUpload.js', array('prototype'));
+	function admin_enqueue_scripts($hook_suffix) {
+		switch ($hook_suffix) {
+			case 'post.php':
+				add_meta_box("comic-image-ordering", __("Comic Image Ordering", 'comicpress'), array(&$this, 'render_comic_image_ordering'), "post", "normal", "low");
+				wp_enqueue_script('cp-ordering', plugin_dir_url(dirname(__FILE__)) . '/js/ComicImageOrdering.js', array('scriptaculous', 'scriptaculous-slider'));
+				wp_enqueue_style('cp-admin', plugin_dir_url(dirname(__FILE__)) . '/css/cp-admin.css');
+				add_action('admin_footer', array(&$this, 'admin_footer'));
+				break;
+			case 'media-upload-popup':
+				wp_enqueue_style('cp-admin', plugin_dir_url(dirname(__FILE__)) . '/css/cp-admin.css');
+				wp_enqueue_script('cp-media', plugin_dir_url(dirname(__FILE__)) . '/js/MediaUpload.js', array('prototype'));
+				break;
 		}
 	}
 
