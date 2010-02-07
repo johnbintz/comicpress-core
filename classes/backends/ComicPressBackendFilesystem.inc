@@ -120,7 +120,7 @@ class ComicPressBackendFilesystemFactory {
 		return $return;
 	}
 
-	function process_search_string($post, $type, $filename = null) {
+	function process_search_string($post, $type, $filename = null, $replace_object = null) {
 		$this->_searches = array($this->search_string);
 		$this->_filename = $filename;
 
@@ -135,16 +135,23 @@ class ComicPressBackendFilesystemFactory {
 					  '_replace_' . strtolower(str_replace('-', '_', $matches[1])) => null,
 						'_replace_' . strtolower($parts[0]) => implode('-', array_slice($parts, 1))
 					) as $method => $additional) {
-						if (method_exists($this, $method)) {
-							$any_found = true;
-							$found = true;
-							$result = $this->{$method}($post, $type, $additional);
-							if ($result !== false) {
-								$this->_searches[$i] = str_replace($matches[0], $result, $search);
-								break;
-							} else {
-								// array state change, start over
-								break;
+						$object_calls = array($this);
+						if (is_object($replace_object)) {
+							array_unshift($object_calls, $replace_object);
+						}
+
+						foreach ($object_calls as $obj) {
+							if (method_exists($obj, $method)) {
+								$any_found = true;
+								$found = true;
+								$result = $obj->{$method}($post, $type, $additional);
+								if ($result !== false) {
+									$this->_searches[$i] = str_replace($matches[0], $result, $search);
+									break 2;
+								} else {
+									// array state change, start over
+									break 2;
+								}
 							}
 						}
 					}
