@@ -393,18 +393,4 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 			)
 		), $fa->get_urls_for_post_roots($roots, (object)array('post_date' => '2010-01-01')));
 	}
-
-	function testProvideReplaceObject() {
-		$fa = $this->getMock('ComicPressBackendFilesystemFactory', array('_replace_wordpress', '_replace_type'));
-
-		$fa->search_string = '%wordpress%/%type%';
-
-		$fa->expects($this->once())->method('_replace_wordpress')->will($this->returnValue('wordpress'));
-		$fa->expects($this->never())->method('_replace_type');
-
-		$replace = $this->getMock('ReplaceObject', array('_replace_type'));
-		$replace->expects($this->once())->method('_replace_type')->will($this->returnValue('type'));
-
-		$this->assertEquals(array('wordpress/type'), $fa->process_search_string(null, 'type', null, $replace));
-	}
 }

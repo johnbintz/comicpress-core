@@ -1,13 +1,13 @@
 <?php
 /*
 Plugin Name: ComicPress Core
-Plugin URI: http://comicpress.org/
+Plugin URI: http://core.comicpress.org/
 Description: Provides the core functionality of ComicPress, a powerful media and structured category management system geared toward creative works.
 Version: 1.0
 Author: John Bintz
 Author URI: http://comicpress.org/
 
-Copyright 2009 John Bintz  (email : john@coswellproductions.com)
+Copyright 2009-2010 John Bintz  (email : john@coswellproductions.com)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
