@@ -140,6 +140,7 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 			array('%test%/comic/*.jpg', array('/comic/*.jpg')),
 			array('%wordpress%/%type%/*.jpg', array('/wordpress/comic/*.jpg')),
 			array('%wordpress%/%type-folder%/*.jpg', array('/wordpress/comic-folder/*.jpg')),
+			array('%wordpress%/%type-folder%/%title%.jpg', array('/wordpress/comic-folder/*.jpg')),
 			array('%wordpress%/comic/%date-Y-m-d%*.jpg', array('/wordpress/comic/2009-01-01*.jpg')),
 			array('%wordpress%/comic/%date-Ymd%*.jpg', array('/wordpress/comic/20090101*.jpg')),
 			array('%wordpress%/comic/%date-Y%/%date-Y-m-d%*.jpg', array('/wordpress/comic/2009/2009-01-01*.jpg')),

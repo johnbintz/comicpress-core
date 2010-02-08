@@ -167,11 +167,9 @@ class ComicPressBackendFilesystemFactory {
 	// @codeCoverageIgnoreEnd
 
 	function _replace_wordpress_url($post, $type) { return untrailingslashit(get_option('home')); }
-
 	function _replace_filename($post, $type) { return $this->_filename; }
-
 	function _replace_type($post, $type) { return $type;	}
-
+	function _replace_title($post, $type) { return "*";	}
 	function _replace_upload_path($post, $type) { return get_option('upload_path'); }
 
 	function _replace_type_folder($post, $type) {
