@@ -31,6 +31,8 @@ add_action('init', '__comicpress_init');
 // @codeCoverageIgnoreStart
 
 function __comicpress_init() {
+	global $core;
+
   $classes_search = array(
     '/classes/', '/classes/backends/'
   );
@@ -47,4 +49,8 @@ function __comicpress_init() {
   $comicpress_admin = new ComicPressAdmin();
   $comicpress_admin->init();
   $comicpress_admin->handle_update();
+
+  if (!is_admin()) {
+  	$core = new ComicPressTagBuilderFactory();
+  }
 }

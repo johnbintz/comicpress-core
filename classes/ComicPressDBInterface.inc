@@ -45,15 +45,14 @@ class ComicPressDBInterface {
 		$this->_prepare_wp_query();
 
 		if (!is_array($categories)) { $categories = array($categories); }
-
 		$sort_order = $first ? "asc" : "desc";
 		$terminal_comic_query = new WP_Query();
 		$terminal_comic_query->query(array(
 			'showposts' => 1,
 		  'order' => $sort_order,
-			'category__in' => $categories,
-			'status' => 'publish'
+			'category__in' => $categories
 		));
+
 		$post = false;
 		if ($terminal_comic_query->have_posts()) {
 			$post = reset($terminal_comic_query->posts);

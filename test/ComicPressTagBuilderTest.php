@@ -523,6 +523,18 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 		ComicPress::get_instance(true);
 	}
 
+	/**
+	 * @expectedException ComicPressException
+	 */
+	function testSetupEmptyPostException() {
+		$core = new ComicPressTagBuilderFactory();
+		unset($core->post);
+
+		$this->assertTrue(false === $core->setup());
+
+		$core->setup(true);
+	}
+
 	function providerTestProtect() {
 		return array(
 			array(null, 'test'),

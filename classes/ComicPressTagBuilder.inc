@@ -112,7 +112,13 @@ class ComicPressTagBuilder {
 
 		switch ($method) {
 			case 'setup':
-				if (empty($this->post)) { throw new Exception('You need to have retrieved a post for setup to work'); }
+				if (empty($this->post)) {
+					if (isset($arguments[0])) {
+						throw new ComicPressException('You need to have retrieved a post for setup to work');
+					} else {
+						return false;
+					}
+				}
 				$this->_setup_postdata($this->post);
 				return $this->post;
 			case 'from':
