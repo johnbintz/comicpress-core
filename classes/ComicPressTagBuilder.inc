@@ -82,6 +82,8 @@ class ComicPressTagBuilderFactory {
 
 		unset($this->_post);
 		unset($this->_wp_query);
+
+		setup_postdata($post);
 	}
 }
 
