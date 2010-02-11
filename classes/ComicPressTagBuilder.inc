@@ -19,7 +19,7 @@ class ComicPressTagBuilderFactory {
 	public function __call($method, $arguments) {
 		global $post;
 
-		$a = new ComicPressTagBuilder($post, $this->storyline, $this->dbi);
+		$a = $this->_new_comicpresstagbuilder($post, $this->storyline, $this->dbi);
 		return call_user_func_array(array($a, $method), $arguments);
 	}
 
@@ -222,9 +222,6 @@ class ComicPressTagBuilder {
 				if (isset($this->post)) {
 					$comic_post = $this->_new_comicpresscomicpost($this->post);
 					return $comic_post->get_attachments_with_children(true);
-				} else {
-					$which = (isset($arguments[1])) ? $arguments[1] : 'default';
-					return ComicPressBackend::generate_from_id($arguments[0][$which]);
 				}
 			case 'category':
 				if (isset($arguments[0])) {
