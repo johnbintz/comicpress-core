@@ -345,26 +345,41 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals(array('post-media'), $core->media());
 	}
 
+	function testMediaForCurrentPost() {
+		global $post;
+		$post = 'this-post';
+
+		$core = $this->getMock(
+			'ComicPressTagBuilderFactory',
+			array('_new_comicpresstagbuilder'),
+			array(),
+			'ComicPressTagBuilderFactory_' . md5(rand()),
+			false
+		);
+
+		$core->dbi = 'dbi';
+		$core->storyline = 'storyline';
+
+		$tag_builder = $this->getMock('ComicPressTagBuilder', array('media'), array($post, 'storyline', 'dbi'));
+
+		$tag_builder->expects($this->any())
+								->method('media')
+								->will($this->returnValue(array('post-media')));
+
+		$core->expects($this->any())
+				 ->method('_new_comicpresstagbuilder')
+				 ->with($post, 'storyline', 'dbi')
+				 ->will($this->returnValue($tag_builder));
+
+		$this->assertEquals(array('post-media'), $core->media());
+
+		$this->assertEquals('post-media', $core->media(0));
+		$this->assertEquals(false, $core->media(1));
+	}
+
 	function testComicPressComicPost() {
 		$a = ComicPressTagBuilder::_new_comicpresscomicpost('test');
 		$this->assertTrue(is_a($a, 'ComicPressComicPost'));
-	}
-
-	function testFactoryMedia() {
-		$dbi = $this->getMock('ComicPressDBInterface');
-		$core = new ComicPressTagBuilderFactory($dbi);
-
-		$comicpress = ComicPress::get_instance(true);
-
-		$test_backend = $this->getMock('ComicPressFakeBackendFactory', array('generate_from_id'));
-		$test_backend->expects($this->once())
-								 ->method('generate_from_id')
-								 ->with('my-image')
-								 ->will($this->returnValue('my-backend'));
-
-		$comicpress->backends = array($test_backend);
-
-		$this->assertEquals('my-backend', $core->media(array('default' => 'my-image')));
 	}
 
 	function testCategoryStructure() {

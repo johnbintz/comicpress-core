@@ -3,7 +3,7 @@
 require_once('ComicPressStoryline.inc');
 
 class ComicPressTagBuilderFactory {
-	private $storyline, $dbi;
+	public $storyline, $dbi;
 
 	public function __construct($dbi = null) {
 		$this->storyline = new ComicPressStoryline();
@@ -43,6 +43,27 @@ class ComicPressTagBuilderFactory {
 	public function find_file($name, $path = '', $categories = null) {
 		$comicpress = ComicPress::get_instance();
 		return $comicpress->find_file($name, $path, $categories);
+	}
+
+	public function _new_comicpresstagbuilder($p, $s, $d) {
+		return new ComicPressTagBuilder($p, $s, $d);
+	}
+
+	public function media($index = null) {
+		global $post;
+
+		$tag = $this->_new_comicpresstagbuilder($post, $this->storyline, $this->dbi);
+		$media = $tag->media();
+		if (is_null($index)) {
+			return $media;
+		} else {
+			$index = (int)$index;
+			if (isset($media[$index])) {
+				return $media[$index];
+			} else {
+				return false;
+			}
+		}
 	}
 
 	/**
