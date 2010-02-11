@@ -67,4 +67,14 @@ class ComicPressBackendFilesystemTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertEquals('file', $fs->file('type'));
 	}
+
+	function testAlt() {
+		$this->fs->alt_text = 'text';
+		$this->assertEquals('text', $this->fs->alt());
+	}
+
+	function testTitle() {
+		$this->fs->title_text = 'text';
+		$this->assertEquals('text', $this->fs->title());
+	}
 }

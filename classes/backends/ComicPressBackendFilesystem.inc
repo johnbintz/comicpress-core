@@ -29,8 +29,8 @@ class ComicPressBackendFilesystem extends ComicPressBackend {
 	}
 
 	function file($size = null) { return $this->files_by_type[$this->ensure_type($size)]; }
-	function alt() {}
-	function title() {}
+	function alt() { return $this->alt_text; }
+	function title() { return $this->title_text; }
 }
 
 class ComicPressBackendFilesystemFactory {
