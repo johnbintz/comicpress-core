@@ -53,17 +53,9 @@ class ComicPressTagBuilderFactory {
 		global $post;
 
 		$tag = $this->_new_comicpresstagbuilder($post, $this->storyline, $this->dbi);
-		$media = $tag->media();
-		if (is_null($index)) {
-			return $media;
-		} else {
-			$index = (int)$index;
-			if (isset($media[$index])) {
-				return $media[$index];
-			} else {
-				return false;
-			}
-		}
+		$tag->post = $post;
+
+		return $tag->media();
 	}
 
 	/**
@@ -221,7 +213,7 @@ class ComicPressTagBuilder {
 			case 'media':
 				if (isset($this->post)) {
 					$comic_post = $this->_new_comicpresscomicpost($this->post);
-					return $comic_post->get_attachments_with_children(true);
+					return new ComicPressMediaWrapper($comic_post->get_attachments_with_children(true));
 				}
 			case 'category':
 				if (isset($arguments[0])) {
@@ -354,5 +346,49 @@ class ComicPressTagBuilder {
 		}
 
 		return $methods;
+	}
+}
+
+class ComicPressMediaWrapper {
+	public $media;
+
+	public function __construct($media) {
+		$this->media = $media;
+	}
+
+	public function __call($method, $arguments) {
+		$type = (isset($arguments[0])) ? $arguments[0] : 'default';
+		$which = 'all';
+		$separator = '';
+
+		if (count($arguments) == 2) {
+			if (is_numeric($arguments[1])) {
+				$which = (int)$arguments[1];
+			} else {
+				$separator = $arguments[1];
+			}
+		}
+
+		if (is_numeric($which)) {
+			if (isset($this->media[$which][$type])) {
+				if ($media = ComicPressBackend::generate_from_id($this->media[$which][$type])) {
+					return $media->{$method}($type);
+				}
+			}
+			return false;
+		} else {
+			$output = array();
+			foreach ($this->media as $ids) {
+				if ($media = ComicPressBackend::generate_from_id($ids[$type])) {
+					$output[] = $media->{$method}($type);
+				}
+			}
+			if (is_string($separator)) {
+				$output = implode($separator, $output);
+			}
+			return $output;
+		}
+
+		return false;
 	}
 }

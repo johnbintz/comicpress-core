@@ -72,7 +72,8 @@ class ComicPressBackendTest extends PHPUnit_Framework_TestCase {
   	return array(
   		array(null, 'comic'),
   		array('comic', 'comic'),
-  		array('rss', 'rss')
+  		array('rss', 'rss'),
+  		array('default', 'comic'),
   	);
   }
 

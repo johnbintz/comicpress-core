@@ -342,7 +342,7 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 				 ->with('this-post')
 				 ->will($this->returnValue($comicpresscomicpost));
 
-		$this->assertEquals(array('post-media'), $core->media());
+		$this->assertEquals(new ComicPressMediaWrapper(array('post-media')), $core->media());
 	}
 
 	function testMediaForCurrentPost() {
@@ -362,19 +362,16 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 
 		$tag_builder = $this->getMock('ComicPressTagBuilder', array('media'), array($post, 'storyline', 'dbi'));
 
-		$tag_builder->expects($this->any())
+		$tag_builder->expects($this->once())
 								->method('media')
 								->will($this->returnValue(array('post-media')));
 
-		$core->expects($this->any())
+		$core->expects($this->once())
 				 ->method('_new_comicpresstagbuilder')
 				 ->with($post, 'storyline', 'dbi')
 				 ->will($this->returnValue($tag_builder));
 
 		$this->assertEquals(array('post-media'), $core->media());
-
-		$this->assertEquals('post-media', $core->media(0));
-		$this->assertEquals(false, $core->media(1));
 	}
 
 	function testComicPressComicPost() {
@@ -603,5 +600,79 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 
 		$this->assertTrue(!isset($core->_post));
 		$this->assertTrue(!isset($core->_wp_query));
+	}
+
+	function providerTestComicPressMediaWrapper() {
+		return array(
+			array(
+				array(), 'default-id-1default-id-2'
+			),
+			array(
+				array('comic'), 'comic-id-1comic-id-2'
+			),
+			array(
+				array('default', '<br />'), 'default-id-1<br />default-id-2'
+			),
+			array(
+				array('default', 0), 'default-id-1'
+			),
+			array(
+				array('default', 2), false
+			),
+			array(
+				array('archive', 0), false
+			),
+			array(
+				array('comic', 0), false, true
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestComicPressMediaWrapper
+	 */
+	function testComicPressMediaWrapper($arguments, $expected_return, $is_total_fail = false) {
+		$backend = $this->getMock('ComicPressMockBackendFactory', array('embed', 'generate_from_id'));
+		$backend->expects($this->any())
+		        ->method('generate_from_id')
+		        ->will($this->returnCallback(function($id) use ($backend) {
+		        	if (in_array($id, array('comic-id-1', 'default-id-1', 'comic-id-2', 'default-id-2'))) {
+			        	$backend->_id = $id;
+			        	return $backend;
+		        	} else {
+		        		return false;
+		        	}
+		        }));
+
+		$backend->expects($this->any())
+					  ->method('embed')
+					  ->will($this->returnCallback(function($which) use ($backend) {
+					  	switch ($which) {
+					  		case 'comic':
+					  		case 'default':
+					  			return $backend->_id;
+					  			break;
+					  		default:
+					  			return false;
+					  	}
+					  }));
+
+		$comicpress = ComicPress::get_instance(true);
+		$comicpress->backends = array($backend);
+
+		$media = new ComicPressMediaWrapper(array(
+			array(
+				'comic' => $is_total_fail ? 'total-fail' : 'comic-id-1',
+				'default' => 'default-id-1'
+			),
+			array(
+				'comic' => 'comic-id-2',
+				'default' => 'default-id-2'
+			),
+		));
+
+		$this->assertEquals($expected_return, call_user_func_array(array($media, 'embed'), $arguments));
+
+		$comicpress = ComicPress::get_instance(true);
 	}
 }

@@ -36,11 +36,9 @@ class ComicPressBackend {
 	}
 
 	function ensure_type($type) {
-		if (is_null($type)) {
+		if (is_null($type) || ($type == 'default')) {
 			$comicpress = ComicPress::get_instance();
-			if (is_null($type)) {
-				$type = $comicpress->get_default_image_type();
-			}
+			$type = $comicpress->get_default_image_type();
 		}
 		return $type;
 	}
