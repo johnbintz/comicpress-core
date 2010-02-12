@@ -348,28 +348,34 @@ class ComicPressBackendFilesystemAdmin {
 	// @codeCoverageIgnoreEnd
 
 	function handle_update_comicpress_options($info) {
-		if (isset($info['backend_options']['filesystem'])) {
-			$info = $info['backend_options']['filesystem'];
-			$comicpress = ComicPress::get_instance();
+		if (is_array($info)) {
+			if (isset($info['backend_options']['filesystem'])) {
+				if (is_array($info['backend_options']['filesystem'])) {
+					$info = $info['backend_options']['filesystem'];
+					$comicpress = ComicPress::get_instance();
 
-			if (!isset($comicpress->comicpress_options['backend_options'])) {
-				$comicpress->comicpress_options['backend_options'] = array();
-			}
-			if (!isset($comicpress->comicpress_options['backend_options']['filesystem'])) {
-				$comicpress->comicpress_options['backend_options']['filesystem'] = array();
-			}
-
-			foreach (array('folders', 'search_pattern', 'url_pattern') as $valid_field) {
-				if (is_array($info[$valid_field])) {
-					$comicpress->comicpress_options['backend_options']['filesystem'][$valid_field] = array();
-					foreach ($info[$valid_field] as $field => $value) {
-						$comicpress->comicpress_options['backend_options']['filesystem'][$valid_field][$field] = strip_tags($value);
+					if (!isset($comicpress->comicpress_options['backend_options'])) {
+						$comicpress->comicpress_options['backend_options'] = array();
 					}
-				} else {
-					$comicpress->comicpress_options['backend_options']['filesystem'][$valid_field] = strip_tags($info[$valid_field]);
+					if (!isset($comicpress->comicpress_options['backend_options']['filesystem'])) {
+						$comicpress->comicpress_options['backend_options']['filesystem'] = array();
+					}
+
+					foreach (array('folders', 'search_pattern', 'url_pattern') as $valid_field) {
+						if (isset($info[$valid_field])) {
+							if (is_array($info[$valid_field])) {
+								$comicpress->comicpress_options['backend_options']['filesystem'][$valid_field] = array();
+								foreach ($info[$valid_field] as $field => $value) {
+									$comicpress->comicpress_options['backend_options']['filesystem'][$valid_field][$field] = strip_tags($value);
+								}
+							} else {
+								$comicpress->comicpress_options['backend_options']['filesystem'][$valid_field] = strip_tags($info[$valid_field]);
+							}
+						}
+					}
+					$comicpress->save();
 				}
 			}
-			$comicpress->save();
 		}
 	}
 

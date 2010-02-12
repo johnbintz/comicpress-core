@@ -90,5 +90,64 @@ class ComicPressBackendFilesystemAdminTest extends PHPUnit_Framework_TestCase {
 		ComicPressBackendFilesystemAdmin::save_post(1);
 
 		$this->assertEquals($expected_post_meta, get_post_meta(1, 'backend_filesystem_image_meta', true));
+
+		$comicpress = ComicPress::get_instance(true);
+	}
+
+	function providerTestUpdateComicPressOptions() {
+		return array(
+			array(false, array()),
+			array(array(), array()),
+			array(
+				array('backend_options' => array(
+					'filesystem' => 'test'
+				)),
+				array()
+			),
+			array(
+				array('backend_options' => array(
+					'filesystem' => array()
+				)),
+				array(
+					'backend_options' => array('filesystem' => array())
+				)
+			),
+			array(
+				array('backend_options' => array(
+					'filesystem' => array(
+						'search_pattern' => '<b>value</b>',
+						'url_pattern' => '<b>value</b>',
+						'folders' => array(
+							'one' => '<b>value</b>',
+							'two' => '<b>value</b>',
+						),
+					)
+				)),
+				array(
+					'backend_options' => array('filesystem' => array(
+						'search_pattern' => 'value',
+						'url_pattern' => 'value',
+						'folders' => array(
+							'one' => 'value',
+							'two' => 'value'
+						)
+					))
+				)
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider providerTestUpdateComicPressOptions
+	 */
+	function testUpdateComicPressOptions($info, $expected_comicpress_options) {
+		$comicpress = ComicPress::get_instance(true);
+		$comicpress->comicpress_options = array();
+
+		ComicPressBackendFilesystemAdmin::handle_update_comicpress_options($info);
+
+		$this->assertEquals($expected_comicpress_options, $comicpress->comicpress_options);
+
+		$comicpress = ComicPress::get_instance(true);
 	}
 }
