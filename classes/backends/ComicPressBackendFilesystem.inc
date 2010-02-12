@@ -47,9 +47,20 @@ class ComicPressBackendFilesystemFactory {
 					if (isset($result[0][$root])) {
 						$return = new ComicPressBackendFilesystem();
 						$return->id = $id;
+						$return->root = $root;
 
 						foreach (array('files_by_type', 'file_urls_by_type') as $index => $name) {
 							$return->{$name} = $result[$index][$root];
+						}
+
+						if (($result = get_post_meta($post_id, 'backend_filesystem_image_meta', true)) !== false) {
+							if (is_array($result)) {
+								if (isset($result[$root])) {
+									foreach ($result[$root] as $key => $value) {
+										$return->{$key} = $value;
+									}
+								}
+							}
 						}
 
 						return $return;
@@ -103,6 +114,7 @@ class ComicPressBackendFilesystemFactory {
 				if (!empty($files)) {
 					$grouped_by_root = $this->group_by_root($filename_pattern, $files);
 					$urls_by_root = $this->get_urls_for_post_roots($grouped_by_root, $post);
+					$image_meta_by_root = array();
 
 					update_post_meta($post->ID, 'backend_filesystem_files_by_type', array($grouped_by_root, $urls_by_root));
 					foreach ($grouped_by_root as $root => $files_for_root) {
@@ -112,6 +124,14 @@ class ComicPressBackendFilesystemFactory {
 						$fs->file_urls_by_type = $urls_by_root[$root];
 
 						$return[] = $fs;
+
+						$image_meta_by_root[$root] = array(
+							'alt_text' => '',
+							'title_text' => ''
+						);
+					}
+					if (!($check = get_post_meta($post->ID, 'backend_filesystem_image_meta', true))) {
+						update_post_meta($post->ID, 'backend_filesystem_image_meta', array($image_meta_by_root));
 					}
 				}
 			}
@@ -325,6 +345,8 @@ class ComicPressBackendFilesystemAdmin {
 		include('partials/backend-filesystem/image-type-holder.inc');
 	}
 
+	// @codeCoverageIgnoreEnd
+
 	function handle_update_comicpress_options($info) {
 		if (isset($info['backend_options']['filesystem'])) {
 			$info = $info['backend_options']['filesystem'];
@@ -351,11 +373,60 @@ class ComicPressBackendFilesystemAdmin {
 		}
 	}
 
+	function save_post($post_id) {
+		if (isset($_POST['cp'])) {
+			$info = $_POST['cp'];
+			if (isset($info['attachments'])) {
+				$image_meta_updates = array();
+				foreach ($info['attachments'] as $id => $properties) {
+					if ($backend = ComicPressBackend::generate_from_id($id)) {
+						if (is_a($backend, 'ComicPressBackendFilesystem')) {
+							$image_meta_updates[$backend->root] = array();
+							foreach (array('alt_text', 'title_text') as $field) {
+								if (isset($properties[$field])) {
+									$image_meta_updates[$backend->root][$field] = strip_tags($properties[$field]);
+								} else {
+									$image_meta_updates[$backend->root][$field] = '';
+								}
+							}
+						}
+					}
+				}
+				update_post_meta($post_id, 'backend_filesystem_image_meta', $image_meta_updates);
+			}
+		}
+	}
+
+	// @codeCoverageIgnoreStart
+
+	function comic_ordering_holder($backend) {
+		if (is_a($backend, 'ComicPressBackendFilesystem')) {
+			?>
+				<table class="widefat">
+					<tr>
+						<th scope="row">Title (hover) text:</th>
+						<td>
+							<input type="text" name="cp[attachments][<?php echo esc_attr($backend->id) ?>][title_text]" value="<?php echo esc_attr($backend->title()) ?>" style="width:100%" />
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">Alt (accessibility) text:</th>
+						<td>
+							<input type="text" name="cp[attachments][<?php echo esc_attr($backend->id) ?>][alt_text]" value="<?php echo esc_attr($backend->alt()) ?>" style="width:100%" />
+						</td>
+					</tr>
+				</table>
+			<?php
+		}
+	}
+
 	function actions() {
 		return array(
 			array('comicpress-options-admin', array('ComicPressBackendFilesystemAdmin', 'options_admin')),
 			array('comicpress-image-type-holder', array('ComicPressBackendFilesystemAdmin', 'image_type_holder'), 10, 1),
-			array('comicpress-handle_update_comicpress_options', array('ComicPressBackendFilesystemAdmin', 'handle_update_comicpress_options'), 10, 1)
+			array('comicpress-handle_update_comicpress_options', array('ComicPressBackendFilesystemAdmin', 'handle_update_comicpress_options'), 10, 1),
+			array('comicpress-comic-ordering-holder', array('ComicPressBackendFilesystemAdmin', 'comic_ordering_holder'), 10, 1),
+			array('save_post', array('ComicPressBackendFilesystemAdmin', 'save_post'), 10, 1)
 		);
 	}
 }

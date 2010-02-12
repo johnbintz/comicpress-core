@@ -105,14 +105,6 @@ ComicImageOrdering.setup = function() {
 					ComicImageOrdering.build_response();
 				});
 			});
-
-			var associations_box = att.select('.comic-ordering-associations').pop();
-			associations_box[($H(ComicImageOrdering.ids_with_children[id]).keys().length == 0) ? 'hide' : 'show']();
-
-			att.select('.comic-ordering-show-associations').pop().observe('click', function(e) {
-				Event.stop(e);
-				new Effect[associations_box.visible() ? 'BlindUp' : 'BlindDown'](associations_box, { duration: 0.25 });
-			});
 		});
 
 		$$('#comic-ordering input[type=checkbox]').each(function(ch) {

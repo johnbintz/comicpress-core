@@ -20,6 +20,9 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 		$valid_backend->id = 'filesystem-1--test';
 		$valid_backend->files_by_type = array('comic' => 'comic-file');
 		$valid_backend->file_urls_by_type = array('comic' => 'comic-url');
+		$valid_backend->alt_text = 'alt text';
+		$valid_backend->title_text = 'title text';
+		$valid_backend->root = '-test';
 
 		return array(
 			array('blah', false),
@@ -42,6 +45,17 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 	  	array(
 	  		array('-test' => array('comic' => 'comic-file')),
 	  		array('-test' => array('comic' => 'comic-url')),
+	  	)
+	  );
+
+	  update_post_meta(
+	  	1,
+	  	'backend_filesystem_image_meta',
+	  	array(
+	  		'-test' => array(
+	  			'alt_text' => 'alt text',
+	  			'title_text' => 'title text'
+				)
 	  	)
 	  );
 
@@ -130,6 +144,15 @@ class ComicPressBackendFilesystemFactoryTest extends PHPUnit_Framework_TestCase 
 				)
 			)
 		), get_post_meta(1, 'backend_filesystem_files_by_type', true));
+
+		$this->assertEquals(array(
+			array(
+				'root' => array(
+					'alt_text' => '',
+					'title_text' => ''
+				)
+			)
+		), get_post_meta(1, 'backend_filesystem_image_meta', true));
 	}
 
 

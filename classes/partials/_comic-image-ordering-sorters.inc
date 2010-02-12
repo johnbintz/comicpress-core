@@ -23,7 +23,6 @@
 								<p><strong><?php echo esc_html($result->source_name) ?>:</strong> <?php echo esc_html(basename($info['file'])) ?></p>
 							<?php } ?>
 							<?php	if (count($comicpress->comicpress_options['image_types']) > 1) { ?>
-
 								<a class="comic-ordering-show-associations" href="#"><?php _e('Edit associations', 'comicpress') ?></a>
 								<div class="comic-ordering-associations">
 									<ul>
@@ -38,6 +37,7 @@
 									</ul>
 								</div>
 							<?php } ?>
+							<?php do_action('comicpress-comic-ordering-holder', $result) ?>
 						</div>
 						<br style="clear: both" />
 					</div>
