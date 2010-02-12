@@ -376,23 +376,29 @@ class ComicPressBackendFilesystemAdmin {
 	function save_post($post_id) {
 		if (isset($_POST['cp'])) {
 			$info = $_POST['cp'];
-			if (isset($info['attachments'])) {
-				$image_meta_updates = array();
-				foreach ($info['attachments'] as $id => $properties) {
-					if ($backend = ComicPressBackend::generate_from_id($id)) {
-						if (is_a($backend, 'ComicPressBackendFilesystem')) {
-							$image_meta_updates[$backend->root] = array();
-							foreach (array('alt_text', 'title_text') as $field) {
-								if (isset($properties[$field])) {
-									$image_meta_updates[$backend->root][$field] = strip_tags($properties[$field]);
-								} else {
-									$image_meta_updates[$backend->root][$field] = '';
+			if (is_array($info)) {
+				if (isset($info['attachments'])) {
+					if (is_array($info['attachments'])) {
+						$image_meta_updates = array();
+						foreach ($info['attachments'] as $id => $properties) {
+							if (is_array($properties)) {
+								if ($backend = ComicPressBackend::generate_from_id($id)) {
+									if (is_a($backend, 'ComicPressBackendFilesystem')) {
+										$image_meta_updates[$backend->root] = array();
+										foreach (array('alt_text', 'title_text') as $field) {
+											if (isset($properties[$field])) {
+												$image_meta_updates[$backend->root][$field] = strip_tags($properties[$field]);
+											} else {
+												$image_meta_updates[$backend->root][$field] = '';
+											}
+										}
+									}
 								}
 							}
 						}
+						update_post_meta($post_id, 'backend_filesystem_image_meta', $image_meta_updates);
 					}
 				}
-				update_post_meta($post_id, 'backend_filesystem_image_meta', $image_meta_updates);
 			}
 		}
 	}
