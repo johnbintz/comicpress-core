@@ -558,6 +558,10 @@ class ComicPressStoryline {
 		return $this;
 	}
 
+	function _find_all() {
+		return array_keys($this->_structure);
+	}
+
 	function _find_level_or_above($level = null) {
 		$found = array();
 		foreach ($this->_structure as $category_id => $info) {

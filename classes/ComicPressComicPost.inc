@@ -31,7 +31,7 @@ class ComicPressComicPost {
 
   /**
    * Normalize the ordering of attachments in this post.
-   * If images have beed added or removed, intelligently update the metadata.
+   * If images have been added or removed, intelligently update the metadata.
    * @param boolean $skip_checks If true, only return the post metadata, assuming that everything is correct. Do not use anywhere in the admin interface!
    * @return array The normalized data, which is also written to the post's metadata if $skip_checks is false.
    */

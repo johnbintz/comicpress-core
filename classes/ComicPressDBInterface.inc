@@ -36,43 +36,55 @@ class ComicPressDBInterface {
 		$wp_query->in_the_loop = $this->in_the_loop;
 	}
 
+	function ensure_count($count) {
+		return max((int)$count, 1);
+	}
+
 	// @codeCoverageIgnoreStart
 
 	/**
 	 * Find the terminal post in a specific category.
 	 */
-	function get_terminal_post_in_categories($categories, $first = true) {
+	function get_terminal_post_in_categories($categories, $first = true, $count = false) {
 		$this->_prepare_wp_query();
+
+		$count = $this->ensure_count($count);
 
 		if (!is_array($categories)) { $categories = array($categories); }
 		$sort_order = $first ? "asc" : "desc";
 		$terminal_comic_query = new WP_Query();
 		$terminal_comic_query->query(array(
-			'showposts' => 1,
+			'showposts' => $count,
 		  'order' => $sort_order,
-			'category__in' => $categories
+			'category__in' => $categories,
+			'post_status' => 'publish'
 		));
 
-		$post = false;
+		$result = false;
+
 		if ($terminal_comic_query->have_posts()) {
-			$post = reset($terminal_comic_query->posts);
+			if ($count == 1) {
+				$result = reset($terminal_comic_query->posts);
+			} else {
+				$result = $terminal_comic_query->posts;
+			}
 		}
 
 		$this->_reset_wp_query();
-		return $post;
+		return $result;
 	}
 
 	/**
 	 * Get the first comic in a category.
 	 */
-	function get_first_post($categories) {
-		return $this->get_terminal_post_in_categories($categories);
+	function get_first_post($categories, $reference_post = null, $count = false) {
+		return $this->get_terminal_post_in_categories($categories, true, $count);
 	}
 
 	/**
 	 * Get the last comic in a category.
 	 */
-	function get_last_post($categories) {
+	function get_last_post($categories, $reference_post = null, $count = false) {
 		return $this->get_terminal_post_in_categories($categories, false);
 	}
 
@@ -80,29 +92,61 @@ class ComicPressDBInterface {
 	 * Get the comic post adjacent to the current comic.
 	 * Wrapper around get_adjacent_post(). Don't unit test this method.
 	 */
-	function get_adjacent_post($categories, $next = false, $override_post = null) {
-		global $post;
+	function get_adjacent_post($categories, $next = false, $override_post = null, $count = false) {
+		global $wpdb, $post;
 
-		$this->_prepare_wp_query();
-		if (!is_null($override_post)) { $temp_post = $post; $post = $override_post; }
+		$count = $this->ensure_count($count);
 
-		$result = get_adjacent_post(false, implode(" and ", $this->_get_categories_to_exclude($categories)), !$next);
+		$post_to_use = (!is_null($override_post)) ? $override_post : $post;
 
-		$this->_reset_wp_query();
-		if (!is_null($override_post)) { $post = $temp_post; }
+		$op = ($next ? '>' : '<');
+		$order = ($next ? 'ASC' : 'DESC');
 
-		return empty($result) ? false : $result;
+		$query = $wpdb->prepare("SELECT p.* FROM $wpdb->posts AS p
+													   INNER JOIN $wpdb->term_relationships AS tr ON p.ID = tr.object_id
+													   INNER JOIN $wpdb->term_taxonomy tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+													   WHERE p.post_date ${op} %s
+													   AND p.post_type = 'post'
+													   AND p.post_status = 'publish'
+													   AND tt.taxonomy = 'category'
+													   AND tt.term_id IN (%s)
+													   ORDER BY p.post_date ${order} LIMIT %d",
+														 $post_to_use->post_date,
+														 implode(',', $categories),
+														 $count);
+
+		$query_key = 'comicpress_adjacent_post_' . md5($query);
+		$result = wp_cache_get($query_key, 'counts');
+		if ($result !== false) {
+			return $result;
+		}
+
+		$result = $wpdb->get_results($query);
+
+		if (!empty($result)) {
+			if ($count == 1) { $result = $result[0]; }
+
+			wp_cache_set($query_key, $result, 'counts');
+
+			return $result;
+		} else {
+			return ($count == 1) ? false : array();
+		}
 	}
 
 	/**
 	 * Get the previous comic from the current one.
 	 */
-	function get_previous_post($categories = null, $override_post = null) { return $this->get_adjacent_post($categories, false, $override_post); }
+	function get_previous_post($categories = null, $override_post = null, $count = false) {
+		return $this->get_adjacent_post($categories, false, $override_post, $count);
+	}
 
 	/**
 	 * Get the next comic from the current one.
 	 */
-	function get_next_post($categories = null, $override_post = null) { return $this->get_adjacent_post($categories, true, $override_post); }
+	function get_next_post($categories = null, $override_post = null, $count = false) {
+		return $this->get_adjacent_post($categories, true, $override_post, $count);
+	}
 
 	function get_parent_child_category_ids() {
 		global $wpdb;

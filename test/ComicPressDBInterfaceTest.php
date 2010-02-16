@@ -80,6 +80,22 @@ class ComicPressDBInterfaceTest extends PHPUnit_Framework_TestCase {
   	$this->assertTrue(false === $wp_query->is_single);
   	$this->assertTrue(false === $wp_query->in_the_loop);
   }
+
+  function providerTestEnsureCount() {
+  	return array(
+  		array(0, 1),
+  		array(1, 1),
+  		array(2, 2),
+  		array('test', 1),
+  		array(false, 1)
+  	);
+  }
+
+  /**
+   * @dataProvider providerTestEnsureCount
+   */
+  function testEnsureCount($input, $expected_output) {
+  	$this->assertEquals($expected_output, ComicPressDBInterface::ensure_count($input));
+  }
 }
 
-?>

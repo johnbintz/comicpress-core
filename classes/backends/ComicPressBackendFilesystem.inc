@@ -110,6 +110,7 @@ class ComicPressBackendFilesystemFactory {
 				}
 				$all_patterns = array_merge($all_patterns, $patterns);
 			}
+
 			if (($filename_pattern = $this->has_common_filename_pattern($all_patterns)) !== false) {
 				if (!empty($files)) {
 					$grouped_by_root = $this->group_by_root($filename_pattern, $files);

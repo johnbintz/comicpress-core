@@ -184,7 +184,22 @@ class ComicPressTagBuilder {
 					}
 					return isset($arguments[0]) ? get_category($id) : $id;
 				} else {
-					$this->post = call_user_func(array($this->dbi, "get_${method}_post"), $this->storyline->build_from_restrictions($this->restrictions), $this->parent_post);
+					if (empty($this->restrictions)) {
+						$this->restrictions = array(
+							array('from_post', $this->parent_post->ID)
+						);
+					}
+
+					$count = (isset($arguments[0])) ? (int)$arguments[0] : false;
+					if ($count < 2) {
+						$count = false;
+					}
+					$result = call_user_func(array($this->dbi, "get_${method}_post"), $this->storyline->build_from_restrictions($this->restrictions), $this->parent_post, $count);
+					if (is_array($result)) {
+						return $result;
+					} else {
+						$this->post = $result;
+					}
 				}
 				$ok = true;
 				break;
@@ -192,7 +207,12 @@ class ComicPressTagBuilder {
 				if (!isset($arguments[0])) {
 					throw new ComicPressException('Need to specify a category');
 				}
-				$this->restrictions[] = array('child_of', $arguments[0]);
+				if ($arguments[0] == 'all') {
+				  $this->restrictions[] = array('all', true);
+				} else {
+				  $this->restrictions[] = array('child_of', $arguments[0]);
+				}
+
 				$ok = true;
 				break;
 			case 'id':
@@ -209,7 +229,16 @@ class ComicPressTagBuilder {
 			case 'permalink':
 				return get_permalink($this->post->ID);
 			case 'post':
-				return $this->post;
+				if (isset($arguments[0])) {
+					if (!is_object($arguments[0]) && !is_array($arguments[0])) {
+						throw new ComicPressException('Provided post needs to be an array or object');
+					}
+					$this->post = $arguments[0];
+					$ok = true;
+				} else {
+					return $this->post;
+				}
+				break;
 			case 'media':
 				if (isset($this->post)) {
 					$comic_post = $this->_new_comicpresscomicpost($this->post);

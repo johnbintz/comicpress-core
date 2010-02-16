@@ -15,44 +15,46 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 	}
 
 	function providerTestBuilder() {
+		$p = (object)array('ID' => 1);
+
 		return array(
 			array(
 				array(
 					array('next')
 				),
-				array('get_next_post', array(1,2,3,4,5), 'current-post')
+				array('get_next_post', array(1), $p)
 			),
 			array(
 				array(
 					array('previous'),
 				),
-				array('get_previous_post', array(1,2,3,4,5), 'current-post')
+				array('get_previous_post', array(1), $p)
 			),
 			array(
 				array(
 					array('first'),
 				),
-				array('get_first_post', array(1,2,3,4,5), 'current-post')
+				array('get_first_post', array(1), $p)
 			),
 			array(
 				array(
 					array('last'),
 				),
-				array('get_last_post', array(1,2,3,4,5), 'current-post')
+				array('get_last_post', array(1), $p)
 			),
 			array(
 				array(
-					array('in', 'category-1'),
+					array('in', 'category-2'),
 					array('last')
 				),
-				array('get_last_post', array(1), 'current-post')
+				array('get_last_post', array(2,3,4), $p)
 			),
 			array(
 				array(
 					array('in', 2),
 					array('first')
 				),
-				array('get_first_post', array(2,3,4), 'current-post')
+				array('get_first_post', array(2,3,4), $p)
 			),
 			array(
 				array(
@@ -60,7 +62,7 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 					array('first'),
 					array('setup')
 				),
-				array('get_first_post', array(2,3,4), 'current-post'),
+				array('get_first_post', array(2,3,4), $p),
 				true
 			),
 			array(
@@ -71,16 +73,32 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 				),
 				array('get_first_post', array(2,3,4), (object)array('other-post' => 'post')),
 			),
+			array(
+				array(
+					array('next', 3)
+				),
+				array('get_next_post', array(1), $p, 3),
+				false,
+				true
+			),
+			array(
+				array(
+					array('in', 'all'),
+					array('first')
+				),
+				array('get_first_post', array(1,2,3,4,5), $p)
+			),
 		);
 	}
 
 	/**
 	 * @dataProvider providerTestBuilder
 	 */
-	// TODO same_category
-	function testStorylineBuilder($instructions, $expected_dbi_call, $expects_setup_postdata = false) {
+	function testStorylineBuilder($instructions, $expected_dbi_call, $expects_setup_postdata = false, $returns_array = false) {
 		global $post, $wp_test_expectations;
-		$post = 'current-post';
+		$post = (object)array('ID' => 1);
+
+		wp_set_post_categories(1, array(1));
 
 		$method = array_shift($expected_dbi_call);
 
@@ -90,6 +108,10 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 
 		if ($expects_setup_postdata) {
 			call_user_func(array($expectation, 'will'), $this->returnValue('new-post'));
+		}
+
+		if ($returns_array) {
+			call_user_func(array($expectation, 'will'), $this->returnValue(array('new-post')));
 		}
 
 		$core = new ComicPressTagBuilderFactory($dbi);
@@ -674,5 +696,28 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected_return, call_user_func_array(array($media, 'embed'), $arguments));
 
 		$comicpress = ComicPress::get_instance(true);
+	}
+
+	function providerTestSetPostExpectations() {
+		return array(
+			array('test'),
+			array(123)
+		);
+	}
+
+	/**
+	 * @expectedException ComicPressException
+	 * @dataProvider providerTestSetPostExpectations
+	 */
+	function testSetPostExceptions($input) {
+		$core = new ComicPressTagBuilderFactory();
+		$core->post($input);
+	}
+
+	function testSetPost() {
+		$core = new ComicPressTagBuilderFactory();
+		$core = $core->post((object)array('ID' => 1));
+
+		$this->assertEquals((object)array('ID' => 1), $core->post);
 	}
 }
