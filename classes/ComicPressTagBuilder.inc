@@ -110,8 +110,11 @@ class ComicPressTagBuilder {
 		$this->parent_post = $parent_post;
 	}
 
-	public function _setup_postdata($post) {
-		setup_postdata($post);
+	public function _setup_postdata($p) {
+		global $post;
+
+		$post = $p;
+		setup_postdata($p);
 	}
 
 	public function _new_comicpresscomicpost($post) {
@@ -194,9 +197,19 @@ class ComicPressTagBuilder {
 					if ($count < 2) {
 						$count = false;
 					}
+
 					$result = call_user_func(array($this->dbi, "get_${method}_post"), $this->storyline->build_from_restrictions($this->restrictions), $this->parent_post, $count);
-					if (is_array($result)) {
-						return $result;
+
+					if ($count > 1) {
+						if (is_array($result)) {
+							return $result;
+						} else {
+							if (is_object($result)) {
+								return array($result);
+							} else {
+								return array();
+							}
+						}
 					} else {
 						$this->post = $result;
 					}

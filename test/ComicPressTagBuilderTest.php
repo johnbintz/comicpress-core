@@ -79,7 +79,23 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 				),
 				array('get_next_post', array(1), $p, 3),
 				false,
-				true
+				array('test')
+			),
+			array(
+				array(
+					array('next', 3)
+				),
+				array('get_next_post', array(1), $p, 3),
+				false,
+				(object)array('test' => 'test2')
+			),
+			array(
+				array(
+					array('next', 3)
+				),
+				array('get_next_post', array(1), $p, 3),
+				false,
+				"string"
 			),
 			array(
 				array(
@@ -94,7 +110,7 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 	/**
 	 * @dataProvider providerTestBuilder
 	 */
-	function testStorylineBuilder($instructions, $expected_dbi_call, $expects_setup_postdata = false, $returns_array = false) {
+	function testStorylineBuilder($instructions, $expected_dbi_call, $expects_setup_postdata = false, $returns_override = null) {
 		global $post, $wp_test_expectations;
 		$post = (object)array('ID' => 1);
 
@@ -110,8 +126,8 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 			call_user_func(array($expectation, 'will'), $this->returnValue('new-post'));
 		}
 
-		if ($returns_array) {
-			call_user_func(array($expectation, 'will'), $this->returnValue(array('new-post')));
+		if (!empty($returns_override)) {
+			call_user_func(array($expectation, 'will'), $this->returnValue($returns_override));
 		}
 
 		$core = new ComicPressTagBuilderFactory($dbi);

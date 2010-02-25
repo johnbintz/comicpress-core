@@ -101,6 +101,7 @@ class ComicPressDBInterface {
 
 		$op = ($next ? '>' : '<');
 		$order = ($next ? 'ASC' : 'DESC');
+		$cats = implode(',', $categories);
 
 		$query = $wpdb->prepare("SELECT p.* FROM $wpdb->posts AS p
 													   INNER JOIN $wpdb->term_relationships AS tr ON p.ID = tr.object_id
@@ -109,10 +110,9 @@ class ComicPressDBInterface {
 													   AND p.post_type = 'post'
 													   AND p.post_status = 'publish'
 													   AND tt.taxonomy = 'category'
-													   AND tt.term_id IN (%s)
+													   AND tt.term_id IN (${cats})
 													   ORDER BY p.post_date ${order} LIMIT %d",
 														 $post_to_use->post_date,
-														 implode(',', $categories),
 														 $count);
 
 		$query_key = 'comicpress_adjacent_post_' . md5($query);
