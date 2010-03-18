@@ -3,7 +3,7 @@
 require_once('ComicPressStoryline.inc');
 
 class ComicPressTagBuilderFactory {
-	public $storyline, $dbi;
+	public $storyline, $dbi, $default_dbparams = array();
 
 	public function __construct($dbi = null) {
 		$this->storyline = new ComicPressStoryline();
@@ -40,13 +40,21 @@ class ComicPressTagBuilderFactory {
 		return $is_in;
 	}
 
+	public function annotations($category) {
+		return $this->dbi->get_annotations($category);
+	}
+
 	public function find_file($name, $path = '', $categories = null) {
 		$comicpress = ComicPress::get_instance();
 		return $comicpress->find_file($name, $path, $categories);
 	}
 
+	public function default_dbparams($params = array()) {
+		$this->default_dbparams = $params;
+	}
+
 	public function _new_comicpresstagbuilder($p, $s, $d) {
-		return new ComicPressTagBuilder($p, $s, $d);
+		return new ComicPressTagBuilder($p, $s, $d, $this->default_dbparams);
 	}
 
 	public function media($index = null) {
@@ -101,13 +109,14 @@ class ComicPressTagBuilderFactory {
 }
 
 class ComicPressTagBuilder {
-	public $categories, $restrictions, $storyline, $dbi, $parent_post, $post, $category;
+	public $categories, $restrictions, $storyline, $dbi, $parent_post, $post, $category, $dbparams;
 
-	public function __construct($parent_post, $storyline, $dbi) {
+	public function __construct($parent_post, $storyline, $dbi, $dbparams = array()) {
 		$this->restrictions = array();
 		$this->storyline = $storyline;
 		$this->dbi = $dbi;
 		$this->parent_post = $parent_post;
+		$this->dbparams = $dbparams;
 	}
 
 	public function _setup_postdata($p) {
@@ -121,22 +130,24 @@ class ComicPressTagBuilder {
 		return new ComicPressComicPost($post);
 	}
 
+	function setup($throw_exception_on_invalid = false) {
+		if (empty($this->post)) {
+			if ($throw_exception_on_invalid === true) {
+				throw new ComicPressException('You need to have retrieved a post for setup to work');
+			} else {
+				return false;
+			}
+		}
+		$this->_setup_postdata($this->post);
+		return $this->post;
+	}
+
 	// TODO filtered versions of template tags
 	public function __call($method, $arguments) {
 		$ok = false;
 		$return = $this;
 
 		switch ($method) {
-			case 'setup':
-				if (empty($this->post)) {
-					if (isset($arguments[0])) {
-						throw new ComicPressException('You need to have retrieved a post for setup to work');
-					} else {
-						return false;
-					}
-				}
-				$this->_setup_postdata($this->post);
-				return $this->post;
 			case 'from':
 				if (!isset($arguments[0])) {
 					throw new ComicPressException('Need to specify a post');
@@ -146,6 +157,12 @@ class ComicPressTagBuilder {
 				}
 				$this->parent_post = (object)$arguments[0];
 				$ok = true;
+				break;
+			case 'dbparams':
+				if (!is_array($arguments[0])) {
+					throw new ComicPressException('dbparams requires an array');
+				}
+				$this->dbparams = $arguments[0];
 				break;
 			case 'current':
 				if (isset($this->category)) {
@@ -172,6 +189,9 @@ class ComicPressTagBuilder {
 			case 'previous':
 			case 'first':
 			case 'last':
+			case 'all':
+			case 'count':
+			case 'index':
 				if (isset($this->category)) {
 					switch ($method) {
 						case 'next':
@@ -184,6 +204,15 @@ class ComicPressTagBuilder {
 						case 'last':
 							$id = end(array_keys($this->storyline->_structure));
 							break;
+						case 'all':
+							return array_keys($this->storyline->_structure);
+						case 'count':
+							return count(array_keys($this->storyline->_structure));
+						case 'index':
+							if (!isset($arguments[0])) {
+								throw new Exception('You need to provide an index to retrieve.');
+							}
+							return array_slice(array_keys($this->storyline->_structure), (int)$arguments[0]);
 					}
 					return isset($arguments[0]) ? get_category($id) : $id;
 				} else {
@@ -198,7 +227,22 @@ class ComicPressTagBuilder {
 						$count = false;
 					}
 
-					$result = call_user_func(array($this->dbi, "get_${method}_post"), $this->storyline->build_from_restrictions($this->restrictions), $this->parent_post, $count);
+					$restriction_categories = $this->storyline->build_from_restrictions($this->restrictions);
+
+					switch ($method) {
+						case 'all':
+							return $this->dbi->get_all_posts($restriction_categories, $this->dbparams);
+						case 'count':
+							return $this->dbi->count_all_posts($restriction_categories, $this->dbparams);
+						case 'index':
+							if (!isset($arguments[0])) {
+								throw new Exception('You need to provide an index to retrieve.');
+							}
+							return $this->dbi->get_post_by_index($restriction_categories, (int)$arguments[0], $this->dbparams);
+						default:
+							$result = call_user_func(array($this->dbi, "get_${method}_post"), $this->storyline->build_from_restrictions($this->restrictions), $this->parent_post, $count, $this->dbparams);
+							break;
+					}
 
 					if ($count > 1) {
 						if (is_array($result)) {

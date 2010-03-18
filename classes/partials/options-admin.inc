@@ -6,6 +6,8 @@
 		<input type="hidden" name="cp[_action_nonce]" value="<?php echo esc_attr($action_nonce) ?>" />
 
 		<div id="comicpress-admin-holder">
+			<?php include('_annotation-editor.inc') ?>
+
 			<?php include('_storyline-order.inc') ?>
 
 			<h3><?php _e('Category Groups', 'comicpress') ?></h3>

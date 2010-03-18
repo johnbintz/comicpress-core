@@ -80,8 +80,8 @@ class ComicPressAdmin {
 	function admin_menu() {
 		global $plugin_page, $pagenow, $post;
 
-		add_theme_page(__("ComicPress", 'comicpress'), __('ComicPress', 'comicpress'), 'edit_themes', 'comicpress/render_admin', array(&$this, 'render_admin'));
-		add_theme_page(__("ComicPress Documentation", 'comicpress'), __('ComicPress Docs', 'comicpress'), 'edit_themes', 'comicpress/comicpress_docs', array(&$this, 'render_documentation'));
+		add_menu_page(__("ComicPress Core", 'comicpress'), __('ComicPress', 'comicpress'), 'edit_themes', 'comicpress/render_admin', array(&$this, 'render_admin'));
+		add_submenu_page('comicpress/render_admin', __("ComicPress Core Documentation", 'comicpress'), __('Documentation', 'comicpress'), 'edit_themes', 'comicpress/comicpress_docs', array(&$this, 'render_documentation'));
 
 		add_action('admin_enqueue_scripts', array(&$this, 'admin_enqueue_scripts'));
 
@@ -89,6 +89,8 @@ class ComicPressAdmin {
 			case 'comicpress/render_admin':
 				wp_enqueue_style('cp-admin', plugin_dir_url(dirname(__FILE__)) . '/css/cp-admin.css');
 				wp_enqueue_script('cp-admin', plugin_dir_url(dirname(__FILE__)) . '/js/Storyline.js', array('jquery', 'jquery-ui-sortable', 'jquery-ui-tabs'));
+				wp_enqueue_script('json', plugin_dir_url(dirname(__FILE__)) . '/js/json2.js');
+				wp_enqueue_script('jquery-ui-slider', plugin_dir_url(dirname(__FILE__)) . '/js/jquery-ui-1.7.2.slider.min.js', array('jquery'));
 				add_action('admin_footer', array(&$this, 'admin_footer'));
 				break;
 			case 'comicpress/comicpress_docs':
@@ -97,12 +99,6 @@ class ComicPressAdmin {
 				wp_enqueue_style('prettify', plugin_dir_url(dirname(__FILE__)) . '/js/prettify/prettify.css');
 				wp_enqueue_script('scriptaculous-effects');
 				break;
-		}
-
-		if ($plugin_page == 'comicpress/render_admin') {
-		}
-
-		if ($plugin_page == 'comicpress/comicpress_docs') {
 		}
 	}
 
@@ -173,6 +169,7 @@ class ComicPressAdmin {
 	function render_admin() {
 		$nonce = wp_create_nonce('comicpress');
 		$action_nonce = wp_create_nonce('comicpress-comicpress-options');
+
 		$storyline = new ComicPressStoryline();
 		$storyline->normalize();
 		$storyline->read_from_options();
@@ -523,6 +520,45 @@ class ComicPressAdmin {
 		exit(0);
 	}
 	// @codeCoverageIgnoreEnd
+
+	function handle_update_retrieve_category_posts($info) {
+		$this->is_ajax = true;
+
+		$core = new ComicPressTagBuilderFactory();
+
+		$post_info = array();
+
+		$factory = new ComicPressBackendFilesystemFactory();
+
+		foreach ($core->in($info['category'])->all() as $post) {
+			$annotation = get_post_meta($post->ID, 'comicpress-annotation', true);
+
+			// a way to ensure things are cool
+			$factory->generate_from_post($post);
+
+			$comic_post = new ComicPressComicPost($post);
+			$comic_post->normalize_ordering();
+
+			$current_post = array(
+				'id' => $post->ID,
+				'title' => $post->post_title,
+				'image' => $core->post($post)->media()->url(),
+				'date'  => date('Y-m-d', strtotime($post->post_date))
+			);
+			if (is_array($annotation)) {
+				foreach ($annotation as $category => $annotation_info) {
+					if ($category == $info['category']) {
+						$current_post['annotation'] = $annotation_info;
+					}
+				}
+			}
+
+			$post_info[] = $current_post;
+		}
+
+		echo json_encode($post_info);
+		exit(0);
+	}
 
 	/**
 	 * Update the user's zoom slider metadata.

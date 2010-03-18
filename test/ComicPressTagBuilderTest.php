@@ -104,6 +104,13 @@ class ComicPressTagBuilderTest extends PHPUnit_Framework_TestCase {
 				),
 				array('get_first_post', array(1,2,3,4,5), $p)
 			),
+			array(
+				array(
+					array('in', 'all'),
+					array('all')
+				),
+				array('get_all_posts', array(1,2,3,4,5))
+			),
 		);
 	}
 

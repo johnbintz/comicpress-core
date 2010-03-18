@@ -288,3 +288,109 @@ tr.highlighted td {
 .comicpress-admin-section h3 {
 	margin-top: 0
 }
+
+#post-marks-ui {
+	overflow: hidden;
+	zoom: 1;
+	display: none;
+	padding: 10px;
+}
+
+#post-slider {
+	width: 10px;
+	border: solid #aaa 1px;
+	position: relative;
+	margin-top: 10px;
+	float: left;
+	display: inline
+}
+
+#post-marks-loader {
+	text-align: center
+}
+
+#post-marks-holder {
+	width: 60px;
+	margin-right: 10px;
+	position: relative;
+	float: left;
+	display: inline
+}
+
+#post-marks-holder a {
+	background: #622;
+	border: solid #a33 1px;
+	position: absolute;
+	width: 60px;
+	line-height: 16px;
+	font-size: 11px;
+	color: white;
+	margin-top: -5px;
+	padding: 2px;
+	text-decoration: none;
+	display: block;
+}
+
+.ui-slider-handle {
+	position: absolute;
+	z-index: 2;
+	height: 12px;
+	width: 12px;
+	left: -2px;
+	margin-bottom: -4px;
+	border: solid #888 1px;
+	border-radius: 2px;
+	-moz-border-radius: 2px;
+	-webkit-border-radius: 2px;
+	background-color: #ccc;
+}
+
+#post-info {
+	position: absolute;
+	width: 50%;
+	border: solid #aaa 1px;
+	background: #f0f0f0;
+	padding: 0.5em;
+	border-radius: 0.5em;
+	-moz-border-radius: 0.5em;
+	-webkit-border-radius: 0.5em;
+	display: none;
+	overflow: hidden;
+	zoom: 1
+}
+
+#post-info img {
+	float: left;
+	display: inline;
+	margin-right: 0.3em
+}
+
+#post-info label {
+	display: block;
+}
+
+#mark-annotation {
+	color: red;
+}
+
+#mark-annotation.marked {
+	color: green;
+}
+
+#annotation-info {
+	margin-left: 130px
+}
+
+#annotation-info input, #annotation-info textarea {
+	width: 100%
+}
+
+#annotation-info h4 {
+	margin: 0.25em 0;
+}
+
+#most-recent-post {
+	padding: 0.2em 0 0 10%;
+	border-top: solid #aaa 1px;
+	font-style: italic;
+}
